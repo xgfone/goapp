@@ -52,11 +52,12 @@ func registerOpt(conf *gconf.Config, options interface{}) {
 
 // InitConfig initliazlies the configuration options.
 //
-// iptions may be gconf.Opt, []gconf.Opt, a pointer to the struct variable,
+// options may be gconf.Opt, []gconf.Opt, a pointer to the struct variable,
 // or the list of the pointers to the struct variables. For example,
 //
 //    InitConfig("", gconf.StrOpt("optname", "HELP TEXT"))
 //    InitConfig("appname", []gconf.Opt{gconf.StrOpt("optname", "HELP TEXT")})
+//    InitConfig("", []interface{}{structPtr1, structPtr2}, "1.0.0")
 //    InitConfig("", structPtr, "1.0.0")
 //
 func InitConfig(app string, options interface{}, version ...string) {
