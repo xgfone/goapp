@@ -34,14 +34,19 @@ var DatabaseOpts = []gconf.Opt{
 	gconf.IntOpt("maxconnnum", "The maximum number of the connections.").C(false).D(100),
 }
 
-// InitLogging initializes the logging.
+// InitLogging is equal to InitLogging2(level, filepath, "100M", 100).
+func InitLogging(level, filepath string) {
+	InitLogging2(level, filepath, "100M", 100)
+}
+
+// InitLogging2 initializes the logging.
 //
 // If filepath is empty, it will use Stdout as the writer.
-func InitLogging(level, filepath string) {
+func InitLogging2(level, filepath, filesize string, filenum int) {
 	log := klog.WithLevel(klog.NameToLevel(level)).WithCtx(klog.Caller("caller"))
 	klog.SetDefaultLogger(log)
 
-	writer, err := klog.FileWriter(filepath, "100M", 100)
+	writer, err := klog.FileWriter(filepath, filesize, filenum)
 	if err != nil {
 		klog.Error(err.Error())
 		lifecycle.Exit(1)
