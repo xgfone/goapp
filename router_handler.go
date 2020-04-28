@@ -168,7 +168,7 @@ func executeShellScript(c context.Context, script string) ([]byte, []byte, error
 		return nil, nil, err
 	}
 
-	filename := fmt.Sprintf("/tmp/__run_shell_script_%s.sh", generateTmpFilename())
+	filename := fmt.Sprintf("__run_shell_script_%s.sh", generateTmpFilename())
 	if err = ioutil.WriteFile(filename, bs, 0700); err != nil {
 		return nil, nil, ship.ErrInternalServerError.NewError(err)
 	}
