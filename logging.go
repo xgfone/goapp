@@ -34,6 +34,21 @@ var DatabaseOpts = []gconf.Opt{
 	gconf.IntOpt("maxconnnum", "The maximum number of the connections.").C(false).D(100),
 }
 
+// Predefine some log functions.
+//
+// Please refer to https://godoc.org/github.com/xgfone/klog
+var (
+	Ef     = klog.Ef
+	Tracef = klog.Tracef
+	Debugf = klog.Debugf
+	Infof  = klog.Infof
+	Warnf  = klog.Warnf
+	Errorf = klog.Errorf
+	Printf = klog.Printf
+	Panicf = klog.Panicf
+	Fatalf = klog.Fatalf
+)
+
 // InitLogging is equal to InitLogging2(level, filepath, "100M", 100).
 func InitLogging(level, filepath string) {
 	InitLogging2(level, filepath, "100M", 100)
