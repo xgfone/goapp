@@ -32,6 +32,10 @@ import (
 // App is the default global router app.
 var App = InitRouter()
 
+// DefaultRuntimeRouteConfig is the default RuntimeRouteConfig
+// with DefaultShellConfig.
+var DefaultRuntimeRouteConfig = RuntimeRouteConfig{ShellConfig: DefaultShellConfig}
+
 // InitRouter returns a new ship router.
 func InitRouter() *ship.Ship {
 	app := ship.Default()
