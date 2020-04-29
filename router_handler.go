@@ -70,7 +70,7 @@ func PrometheusHandler(gatherer ...prometheus.Gatherer) Handler {
 }
 
 // DefaultShellConfig is the default ShellConfig.
-var DefaultShellConfig = ShellConfig{Shell: "/bin/bash", Timeout: time.Minute}
+var DefaultShellConfig = ShellConfig{Shell: "bash", Timeout: time.Minute}
 
 // ShellConfig is used to configure the shell execution.
 type ShellConfig struct {
