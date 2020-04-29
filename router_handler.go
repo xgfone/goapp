@@ -86,14 +86,19 @@ type ShellConfig struct {
 // The body is the command to be executed as JSON like this:
 //
 //    {
-//        "cmd": "BASE64_COMMAND",                 // Optional
-//        "script": "BASE64_SCRIPT_FILE_CONTENT",  // Optional
-//        "shell": "SHELL_COMMAND"                 // Optional
+//        "cmd":     "BASE64_COMMAND",             // Optional
+//        "script":  "BASE64_SCRIPT_FILE_CONTENT", // Optional
+//        "shell":   "SHELL_COMMAND",              // Optional
+//        "timeout": "10s"                         // Optional
 //    }
 //
 // Notice:
 //   1. The executed command or script must be encoded by base64.
-//   2. if shell is given, it will override the shell in ShellConfig.
+//   2. If shell is given, it will override the Shell in ShellConfig.
+//   3. If timeout is given, it will override the Timeout in ShellConfig.
+//
+// The returned handler is very dangerous, and should not be called
+// by the non-trusted callers.
 func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte) error,
 	config ...ShellConfig) Handler {
 	var conf ShellConfig
@@ -111,9 +116,10 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte) error,
 
 	return func(ctx *ship.Context) error {
 		type Cmd struct {
-			Cmd    string `json:"cmd"`
-			Script string `json:"script"`
-			Shell  string `json:"shell"`
+			Cmd     string `json:"cmd"`
+			Script  string `json:"script"`
+			Shell   string `json:"shell"`
+			Timeout string `json:"timeout"`
 		}
 
 		var cmd Cmd
@@ -127,10 +133,19 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte) error,
 			return ship.ErrBadRequest.NewError(err)
 		}
 
+		timeout := conf.Timeout
+		if cmd.Timeout != "" {
+			t, err := time.ParseDuration(cmd.Timeout)
+			if err != nil {
+				return ship.ErrBadRequest.NewError(err)
+			}
+			timeout = t
+		}
+
 		var cancel func()
 		c := context.Background()
-		if conf.Timeout > 0 {
-			c, cancel = context.WithTimeout(c, conf.Timeout)
+		if timeout > 0 {
+			c, cancel = context.WithTimeout(c, timeout)
 			defer cancel()
 		}
 
