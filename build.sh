@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # The Environments
+GO111MODULE=on
 GOSUMDB=sum.golang.google.cn
 GOPROXY=https://goproxy.cn,direct
 
