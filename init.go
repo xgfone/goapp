@@ -29,17 +29,23 @@ func init() {
 	execution.DefaultCmd.Timeout = time.Second * 3
 }
 
-// InitApp initializes the application.
+// InitApp initializes the application, which is equal to
+//   InitApp2(appName, version, "100M", 100, options...)
+func InitApp(appName, version string, options ...interface{}) {
+	InitApp2(appName, version, "100M", 100, options...)
+}
+
+// InitApp2 initializes the application.
 //
 //  1. Register the log options.
 //  2. Initialize configuration.
 //  3. Initialize the logging.
 //
-func InitApp(appName, version string, options ...interface{}) {
+func InitApp2(appName, version, logfilesize string, logfilenum int, options ...interface{}) {
 	gconf.RegisterOpts(LogOpts)
 	InitConfig(appName, options, version)
 
 	logfile := gconf.GetString(LogOpts[0].Name)
 	loglevel := gconf.GetString(LogOpts[1].Name)
-	InitLogging(loglevel, logfile)
+	InitLogging2(loglevel, logfile, logfilesize, logfilenum)
 }
