@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/xgfone/go-tools/v6/lifecycle"
+	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/klog/v3"
 	"github.com/xgfone/ship/v2"

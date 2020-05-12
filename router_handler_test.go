@@ -47,7 +47,7 @@ func TestExecuteShell(t *testing.T) {
 
 	// For Script
 	cmd = base64.StdEncoding.EncodeToString([]byte("echo -n abc123"))
-	buf = bytes.NewBufferString(fmt.Sprintf(`{"script": "%s", "timeout": "10s"}`, cmd))
+	buf = bytes.NewBufferString(fmt.Sprintf(`{"script": "%s", "shell": "bash", "timeout": "10s"}`, cmd))
 	req, _ = http.NewRequest(http.MethodPost, "http://127.0.0.1/shell", buf)
 	rec = httptest.NewRecorder()
 	router.ServeHTTP(rec, req)

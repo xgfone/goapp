@@ -18,7 +18,7 @@ import (
 	stdlog "log"
 
 	"github.com/xgfone/gconf/v4"
-	"github.com/xgfone/go-tools/v6/lifecycle"
+	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/klog/v3"
 )
 

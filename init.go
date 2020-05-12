@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v4"
-	"github.com/xgfone/go-tools/v6/execution"
+	"github.com/xgfone/go-tools/v7/execution"
 )
 
 func init() {
