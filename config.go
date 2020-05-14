@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/xgfone/gconf/v4"
+	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/klog/v3"
 )
 
@@ -35,7 +35,7 @@ func registerOpt(conf *gconf.Config, options interface{}) {
 	switch v.Kind() {
 	case reflect.Struct:
 		if opt, ok := options.(gconf.Opt); ok {
-			conf.RegisterOpt(opt)
+			conf.RegisterOpts(opt)
 		} else {
 			panic("the struct must be a pointer")
 		}

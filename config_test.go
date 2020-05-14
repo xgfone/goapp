@@ -17,7 +17,7 @@ package goapp
 import (
 	"testing"
 
-	"github.com/xgfone/gconf/v4"
+	"github.com/xgfone/gconf/v5"
 )
 
 func TestRegisterOpt(t *testing.T) {

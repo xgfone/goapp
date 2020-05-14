@@ -12,7 +12,8 @@ $ go get -u github.com/xgfone/goapp
 package main
 
 import (
-	"github.com/xgfone/gconf/v4"
+	"github.com/xgfone/gconf/v5"
+	"github.com/xgfone/gconf/v5/field"
 	"github.com/xgfone/goapp"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/ship/v2"
@@ -28,7 +29,7 @@ var (
 )
 
 type config struct {
-	Addr gconf.StringOptField `default:":80" help:"The address to listen to."`
+	Addr field.StringOptField `default:":80" help:"The address to listen to."`
 }
 
 func main() {

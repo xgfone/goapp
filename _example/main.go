@@ -18,7 +18,8 @@ import (
 	"fmt"
 
 	"github.com/go-stack/stack"
-	"github.com/xgfone/gconf/v4"
+	"github.com/xgfone/gconf/v5"
+	"github.com/xgfone/gconf/v5/field"
 	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/klog/v3"
@@ -28,9 +29,9 @@ import (
 
 // Config is used to configure the app.
 type Config struct {
-	Addr     gconf.StringOptField `default:":80" help:"The address to listen to."`
-	LogFile  gconf.StringOptField `default:"" help:"The path of the log file."`
-	LogLevel gconf.StringOptField `default:"info" help:"The level of the log, such as debug, info, etc."`
+	Addr     field.StringOptField `default:":80" help:"The address to listen to."`
+	LogFile  field.StringOptField `default:"" help:"The path of the log file."`
+	LogLevel field.StringOptField `default:"info" help:"The level of the log, such as debug, info, etc."`
 }
 
 // Recover is a ship middleware to recover the panic if exists.

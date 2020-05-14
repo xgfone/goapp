@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xgfone/gconf/v4"
+	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/go-tools/v7/execution"
 )
 
@@ -42,7 +42,7 @@ func InitApp(appName, version string, options ...interface{}) {
 //  3. Initialize the logging.
 //
 func InitApp2(appName, version, logfilesize string, logfilenum int, options ...interface{}) {
-	gconf.RegisterOpts(LogOpts)
+	gconf.RegisterOpts(LogOpts...)
 	InitConfig(appName, options, version)
 
 	logfile := gconf.GetString(LogOpts[0].Name)

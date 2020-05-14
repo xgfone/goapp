@@ -17,7 +17,7 @@ package goapp
 import (
 	stdlog "log"
 
-	"github.com/xgfone/gconf/v4"
+	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/klog/v3"
 )
