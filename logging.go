@@ -47,6 +47,8 @@ var (
 	Printf = klog.Printf
 	Panicf = klog.Panicf
 	Fatalf = klog.Fatalf
+
+	RegisterCallOnExit = klog.RegisterCallOnExit
 )
 
 // InitLogging is equal to InitLogging2(level, filepath, "100M", 100).
