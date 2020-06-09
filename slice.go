@@ -57,3 +57,28 @@ func InUints(v uint, vs []uint) bool {
 	}
 	return false
 }
+
+// StringsEqual reports whether the two strings is equal.
+func StringsEqual(s1, s2 []string) bool {
+	len1, len2 := len(s1), len(s2)
+	if len1 != len2 {
+		return false
+	}
+
+	for i := 0; i < len1; i++ {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+// ReverseStrings reverses the elements in the strings slice.
+func ReverseStrings(ss []string) {
+	slen := len(ss)
+	for i, j := 0, slen/2; i < j; i++ {
+		k := slen - i - 1
+		ss[i], ss[k] = ss[k], ss[i]
+	}
+}

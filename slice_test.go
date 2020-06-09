@@ -51,3 +51,19 @@ func TestInSlice(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestReverseStrings(t *testing.T) {
+	ss1 := []string{"a", "b", "c", "d"}
+	ss2 := []string{"d", "c", "b", "a"}
+	ReverseStrings(ss1)
+	if !StringsEqual(ss1, ss2) {
+		t.Error(ss1)
+	}
+
+	ss1 = []string{"a", "b", "c", "d", "e"}
+	ss2 = []string{"e", "d", "c", "b", "a"}
+	ReverseStrings(ss1)
+	if !StringsEqual(ss1, ss2) {
+		t.Error(ss1)
+	}
+}
