@@ -17,7 +17,9 @@ package goapp
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
+	"github.com/urfave/cli/v2"
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/klog/v3"
 )
@@ -79,4 +81,32 @@ func InitConfig(app string, options interface{}, version ...string) {
 	}
 	gconf.LoadSource(gconf.NewFileSource(gconf.GetString(gconf.ConfigFileOpt.Name)))
 
+}
+
+// ConvertOptsToCliFlags the config group to []cli.Flag. For example,
+//
+//   ConvertOptsToCliFlags()                   // Convert the options in the DEFAULT group
+//   ConvertOptsToCliFlags("group1")           // Convert the options in the group named "group1"
+//   ConvertOptsToCliFlags("group1.group2")    // Convert the options in the group named "group1.group2"
+//   ConvertOptsToCliFlags("group1", "group2") // The same as the last.
+//
+func ConvertOptsToCliFlags(groups ...string) []cli.Flag {
+	group := gconf.Conf.OptGroup
+	for _, gname := range groups {
+		group = group.MustGroup(gname)
+	}
+	return gconf.ConvertOptsToCliFlags(group)
+}
+
+// LoadCliSource loads the config into the groups from the CLI source.
+func LoadCliSource(ctx *cli.Context, groups ...string) {
+	if len(groups) > 0 {
+		groups = strings.Split(strings.Join(groups, "."), ".")
+	}
+
+	glen := len(groups)
+	ctxs := ctx.Lineage()
+	for i := len(ctxs) - 2; i >= 0; i-- {
+		gconf.LoadSource(gconf.NewCliSource(ctxs[i], groups[:glen-i]...))
+	}
 }
