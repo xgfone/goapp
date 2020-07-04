@@ -21,7 +21,7 @@ import (
 	"github.com/go-stack/stack"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/xgfone/ship/v2"
+	"github.com/xgfone/ship/v3"
 )
 
 // Middleware is the type alias of ship.Middleware.

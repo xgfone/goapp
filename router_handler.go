@@ -26,8 +26,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
 	"github.com/xgfone/go-tools/v7/execution"
-	"github.com/xgfone/ship/v2"
-	"github.com/xgfone/ship/v2/middleware"
+	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v3/middleware"
 )
 
 // Handler is the type alias of ship.Handler.

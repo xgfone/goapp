@@ -23,8 +23,8 @@ import (
 	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/klog/v3"
-	"github.com/xgfone/ship/v2"
-	"github.com/xgfone/ship/v2/middleware"
+	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v3/middleware"
 )
 
 // Config is used to configure the app.
