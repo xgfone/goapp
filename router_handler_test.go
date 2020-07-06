@@ -26,7 +26,7 @@ import (
 )
 
 func TestExecuteShell(t *testing.T) {
-	handler := ExecuteShell(func(ctx *ship.Context, stdout, stderr []byte) error {
+	handler := ExecuteShell(func(ctx *ship.Context, stdout, stderr []byte, err error) error {
 		return ctx.Text(200, string(stdout)+"|"+string(stderr))
 	})
 

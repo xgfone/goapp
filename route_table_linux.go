@@ -52,7 +52,7 @@ func GetIPv4Routes() (Routes, error) {
 	return getRoutes(0, nl.FAMILY_V4, rtnUNICAST)
 }
 
-// GetIPv6Routes returns the ipv4 routes.
+// GetIPv6Routes returns the ipv6 routes.
 func GetIPv6Routes() (Routes, error) {
 	return getRoutes(0, nl.FAMILY_V6, rtnUNICAST)
 }

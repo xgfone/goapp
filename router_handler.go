@@ -78,12 +78,15 @@ type ShellConfig struct {
 	Timeout time.Duration // The timeout to execute the shell command.
 }
 
+type shellResult struct {
+	Stdout string `json:"stdout,omitempty"`
+	Stderr string `json:"stderr,omitempty"`
+	Error  error  `json:"error,omitempty"`
+}
+
 // ExecuteShell returns a handler to execute a SHELL command or script.
 //
-// If handle is nil, it will use the default that does nothing
-// and only returns nil.
-//
-// The body is the command to be executed as JSON like this:
+// The request body is the command to be executed as JSON like this:
 //
 //    {
 //        "cmd":     "BASE64_COMMAND",             // Optional
@@ -92,6 +95,15 @@ type ShellConfig struct {
 //        "timeout": "10s"                         // Optional
 //    }
 //
+// handle is used to handle the result of the command or script. If nil,
+// it will use the default that returns a JSON as the response body like this,
+//
+//   {
+//       "stdout": "BASE64_STD_OUTPUT",
+//       "stderr": "BASE64_STD_ERR_OUTPUT",
+//       "error": "failure reason. If successfully, it is empty."
+//   }
+//
 // Notice:
 //   1. The executed command or script must be encoded by base64.
 //   2. If shell is given, it will override the Shell in ShellConfig.
@@ -99,7 +111,7 @@ type ShellConfig struct {
 //
 // The returned handler is very dangerous, and should not be called
 // by the non-trusted callers.
-func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte) error,
+func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err error) error,
 	config ...ShellConfig) Handler {
 	var conf ShellConfig
 	if len(config) > 0 {
@@ -111,7 +123,13 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte) error,
 	}
 
 	if handle == nil {
-		handle = func(*ship.Context, []byte, []byte) error { return nil }
+		handle = func(c *ship.Context, stdout []byte, stderr []byte, err error) error {
+			return c.JSON(200, shellResult{
+				Stdout: base64.StdEncoding.EncodeToString(stdout),
+				Stderr: base64.StdEncoding.EncodeToString(stderr),
+				Error:  err,
+			})
+		}
 	}
 
 	return func(ctx *ship.Context) error {
@@ -161,10 +179,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte) error,
 			stdout, stderr, err = executeShellScript(c, shell, cmd.Script)
 		}
 
-		if err == nil {
-			err = handle(ctx, stdout, stderr)
-		}
-		return err
+		return handle(ctx, stdout, stderr, err)
 	}
 }
 

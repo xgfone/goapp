@@ -15,8 +15,6 @@
 package goapp
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"expvar"
 	"runtime"
 	"time"
@@ -85,7 +83,7 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 	group.AddRoutes(ship.HTTPPprofToRouteInfo()...)
 
 	if conf.ShellConfig.Shell != "" {
-		group.R("/shell").POST(ExecuteShell(handleShellResult, conf.ShellConfig))
+		group.R("/shell").POST(ExecuteShell(nil, conf.ShellConfig))
 	}
 }
 
@@ -103,16 +101,4 @@ func getVersion(ctx *ship.Context) error {
 		"start":   gover.StartTime.Format(time.RFC3339Nano),
 		"elapsed": gover.GetElapsedTime().String(),
 	})
-}
-
-func handleShellResult(ctx *ship.Context, stdout, stderr []byte) error {
-	type shellResult struct {
-		Stdout string `json:"stdout,omitempty"`
-		Stderr string `json:"stderr,omitempty"`
-	}
-	r := shellResult{
-		Stdout: base64.StdEncoding.EncodeToString(stdout),
-		Stderr: base64.StdEncoding.EncodeToString(stderr),
-	}
-	return json.NewEncoder(ctx).Encode(r)
 }
