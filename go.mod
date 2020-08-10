@@ -12,7 +12,7 @@ require (
 	github.com/xgfone/gover v0.3.0
 	github.com/xgfone/klog/v3 v3.2.0
 	github.com/xgfone/netaddr v0.5.0
-	github.com/xgfone/ship/v3 v3.2.0
+	github.com/xgfone/ship/v3 v3.3.0
 )
 
 go 1.11
