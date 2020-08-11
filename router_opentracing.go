@@ -142,7 +142,7 @@ func (rt *OpenTracingRoundTripper) RoundTrip(req *http.Request) (*http.Response,
 	}
 
 	ctx := req.Context()
-	var opts []opentracing.StartSpanOption
+	opts := []opentracing.StartSpanOption{ext.SpanKindRPCClient}
 	if pspan := opentracing.SpanFromContext(ctx); pspan != nil {
 		opts = []opentracing.StartSpanOption{opentracing.ChildOf(pspan.Context())}
 	}
