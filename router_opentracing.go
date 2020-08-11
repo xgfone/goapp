@@ -101,7 +101,9 @@ func (o *OpenTracingOption) GetTracer() opentracing.Tracer {
 	return o.Tracer
 }
 
-// OpenTracingRoundTripper is a RoundTripper to support OpenTracing.
+// OpenTracingRoundTripper is a RoundTripper to support OpenTracing,
+// which extracts the parent span from the context of the sent http.Request,
+// then creates a new span by the context of the parent span for http.Request.
 type OpenTracingRoundTripper struct {
 	http.RoundTripper
 	OpenTracingOption
@@ -129,12 +131,6 @@ func (rt *OpenTracingRoundTripper) roundTrip(req *http.Request) (*http.Response,
 	return rt.RoundTripper.RoundTrip(req)
 }
 
-var noopSC opentracing.SpanContext = noopSpanContext{}
-
-type noopSpanContext struct{}
-
-func (sc noopSpanContext) ForeachBaggageItem(handler func(k, v string) bool) {}
-
 // RoundTrip implements the interface http.RounderTripper.
 func (rt *OpenTracingRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if rt.SpanFilter(req) {
@@ -161,7 +157,9 @@ func (rt *OpenTracingRoundTripper) RoundTrip(req *http.Request) (*http.Response,
 	return rt.roundTrip(req.WithContext(opentracing.ContextWithSpan(ctx, sp)))
 }
 
-// OpenTracing is a middleware to support the OpenTracing.
+// OpenTracing is a middleware to support OpenTracing, which extracts the span
+// context from the http request header, creates a new span as the server span
+// from the span context, and put it into the request context.
 func OpenTracing(opt *OpenTracingOption) Middleware {
 	var o OpenTracingOption
 	if opt != nil {
