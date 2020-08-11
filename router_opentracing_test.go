@@ -74,11 +74,13 @@ func ExampleOpenTracing() { // Main function
 }
 
 func request(ctx context.Context, url string) (data string, err error) {
-	// Pass the parent span to the new Request.
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return
 	}
+
+	// Pass the parent span to the new http.Request.
+	req = req.WithContext(ctx)
 
 	// http.DefaultTransport will extract the parent span from ctx,
 	// then create a child span for the current request.
