@@ -21,6 +21,7 @@ import (
 
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/go-tools/v7/execution"
+	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/gover"
 )
 
@@ -28,6 +29,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 	http.DefaultClient.Timeout = time.Second * 3
 	execution.DefaultCmd.Timeout = time.Second * 3
+	RegisterCallOnExit(lifecycle.Stop)
 }
 
 // Init is equal to InitApp(appName, gover.Text(), configOptions...).
