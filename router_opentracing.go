@@ -24,7 +24,8 @@ import (
 	"github.com/xgfone/ship/v3"
 )
 
-// OpenTracingOption is used to configure the OpenTracingServer.
+// OpenTracingOption is used to configure the OpenTracing middleware
+// and RoundTripper.
 type OpenTracingOption struct {
 	Tracer        opentracing.Tracer // Default: opentracing.GlobalTracer()
 	ComponentName string             // Default: use ComponentNameFunc(req)
