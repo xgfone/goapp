@@ -48,6 +48,14 @@ var (
 	Panicf = klog.Panicf
 	Fatalf = klog.Fatalf
 
+	Trace = klog.Trace
+	Debug = klog.Debug
+	Info  = klog.Info
+	Warn  = klog.Warn
+	Error = klog.Error
+	Panic = klog.Panic
+	Fatal = klog.Fatal
+
 	RegisterCallOnExit = klog.RegisterCallOnExit
 )
 
