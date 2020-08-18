@@ -18,11 +18,83 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"plugin"
+	"strings"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/xgfone/ship/v3"
 )
+
+func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
+	for _, env := range os.Environ() {
+		if index := strings.IndexByte(env, '='); index > 0 {
+			switch key := strings.ToUpper(strings.TrimSpace(env[:index])); key {
+			case "OPENTRACING_PLUGIN_PATH":
+				p = strings.TrimSpace(env[index+1:])
+			case "OPENTRACING_PLUGIN_CONFIG":
+				c = strings.TrimSpace(env[index+1:])
+			}
+		}
+	}
+	return
+}
+
+func getOpenTracingPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
+	_p, _c := getOpenTracingPluginPathAndConfigFromEnv()
+	if p == "" {
+		p = _p
+	}
+	if c == nil {
+		c = _c
+	}
+
+	return p, c
+}
+
+// MustInitOpenTracingFromPlugin is the same as InitOpenTracing,
+// but logs the error and exits the program when an error occurs.
+func MustInitOpenTracingFromPlugin(pluginPath string, config interface{}) {
+	pluginPath, config = getOpenTracingPluginPathAndConfig(pluginPath, config)
+	if err := InitOpenTracingFromPlugin(pluginPath, config); err != nil {
+		Fatal("fail to initialize the opentracing implementation",
+			F("plugin", pluginPath), F("config", config), E(err))
+	}
+}
+
+// InitOpenTracingFromPlugin initializes the OpenTracing implementation, which will load
+// the implementation plugin and call the function InitOpenTracing with config.
+//
+// The plugin must contain the function
+//   func InitOpenTracing(config interface{}) error
+//
+// Notice:
+//   1. If config is empty, retry the env variable "OPENTRACING_PLUGIN_CONFIG".
+//   2. If pluginPath is empty, retry the env variable "OPENTRACING_PLUGIN_PATH".
+//   3. If pluginPath is empty, it returns nil and does nothing.
+func InitOpenTracingFromPlugin(pluginPath string, config interface{}) (err error) {
+	pluginPath, config = getOpenTracingPluginPathAndConfig(pluginPath, config)
+	if pluginPath == "" {
+		return
+	}
+
+	p, err := plugin.Open(pluginPath)
+	if err != nil {
+		return
+	}
+
+	trf, err := p.Lookup("InitOpenTracing")
+	if err != nil {
+		return
+	}
+
+	if f, ok := trf.(func(interface{}) error); ok {
+		return f(config)
+	}
+
+	panic(fmt.Errorf("invalid the function InitOpenTracing: %T", trf))
+}
 
 // OpenTracingOption is used to configure the OpenTracing middleware
 // and RoundTripper.
