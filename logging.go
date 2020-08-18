@@ -38,6 +38,8 @@ var DatabaseOpts = []gconf.Opt{
 //
 // Please refer to https://godoc.org/github.com/xgfone/klog
 var (
+	E      = klog.E
+	F      = klog.F
 	Ef     = klog.Ef
 	Tracef = klog.Tracef
 	Debugf = klog.Debugf
