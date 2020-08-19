@@ -24,8 +24,18 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/ship/v3"
 )
+
+// OpenTracingPluginOpts collects the options of the OpenTracing Plugin.
+var OpenTracingPluginOpts = []gconf.Opt{
+	gconf.StrOpt("path", "The path of the plugin implementing the OpenTracing tracer."),
+	gconf.StrOpt("config", "The configuration information of the plugin."),
+}
+
+// OpenTracingPluginOptGroup is the group of the OpenTracing plugin config options.
+var OpenTracingPluginOptGroup = gconf.NewGroup("opentracing.plugin")
 
 func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
 	for _, env := range os.Environ() {
@@ -37,6 +47,13 @@ func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
 				c = strings.TrimSpace(env[index+1:])
 			}
 		}
+	}
+
+	if path := OpenTracingPluginOptGroup.GetString("pluginpath"); path != "" {
+		p = path
+	}
+	if conf := OpenTracingPluginOptGroup.GetString("pluginconfig"); conf != "" {
+		c = conf
 	}
 	return
 }
