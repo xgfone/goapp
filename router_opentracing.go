@@ -38,6 +38,9 @@ var OpenTracingPluginOpts = []gconf.Opt{
 var OpenTracingPluginOptGroup = gconf.NewGroup("opentracing.plugin")
 
 func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
+	p = OpenTracingPluginOptGroup.GetString("path")
+	c = OpenTracingPluginOptGroup.GetString("config")
+
 	for _, env := range os.Environ() {
 		if index := strings.IndexByte(env, '='); index > 0 {
 			switch key := strings.ToUpper(strings.TrimSpace(env[:index])); key {
@@ -49,21 +52,15 @@ func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
 		}
 	}
 
-	if path := OpenTracingPluginOptGroup.GetString("pluginpath"); path != "" {
-		p = path
-	}
-	if conf := OpenTracingPluginOptGroup.GetString("pluginconfig"); conf != "" {
-		c = conf
-	}
 	return
 }
 
 func getOpenTracingPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
 	_p, _c := getOpenTracingPluginPathAndConfigFromEnv()
-	if p == "" {
+	if _p != "" {
 		p = _p
 	}
-	if c == nil {
+	if _c != nil {
 		c = _c
 	}
 
