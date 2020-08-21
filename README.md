@@ -15,8 +15,8 @@ import (
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/gconf/v5/field"
 	"github.com/xgfone/goapp"
-	"github.com/xgfone/gover"
-	"github.com/xgfone/ship/v2"
+	"github.com/xgfone/goapp/router"
+	"github.com/xgfone/ship/v3"
 )
 
 // Define some options.
@@ -34,10 +34,10 @@ type config struct {
 
 func main() {
 	// Initialize the app configuration
-	goapp.InitApp("app", gover.Text(), &conf, opts)
+	goapp.Init("app", &conf, opts)
 
 	// Initialize and start the app router.
-	app := goapp.InitRouter()
+	app := router.InitRouter()
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })
 	app.Start(conf.Addr.Get()).Wait()

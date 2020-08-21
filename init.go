@@ -21,15 +21,19 @@ import (
 
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/go-tools/v7/execution"
-	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/goapp/config"
+	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/goapp/router"
 	"github.com/xgfone/gover"
 )
+
+// AppRouter is the default app router.
+var AppRouter = router.App
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	http.DefaultClient.Timeout = time.Second * 3
 	execution.DefaultCmd.Timeout = time.Second * 3
-	RegisterCallOnExit(lifecycle.Stop)
 }
 
 // Init is equal to InitApp(appName, gover.Text(), configOptions...).
@@ -50,10 +54,10 @@ func InitApp(appName, version string, options ...interface{}) {
 //  3. Initialize the logging.
 //
 func InitApp2(appName, version, logfilesize string, logfilenum int, options ...interface{}) {
-	gconf.RegisterOpts(LogOpts...)
-	InitConfig(appName, options, version)
+	gconf.RegisterOpts(log.LogOpts...)
+	config.InitConfig(appName, options, version)
 
-	logfile := gconf.GetString(LogOpts[0].Name)
-	loglevel := gconf.GetString(LogOpts[1].Name)
-	InitLogging2(loglevel, logfile, logfilesize, logfilenum)
+	logfile := gconf.GetString(log.LogOpts[0].Name)
+	loglevel := gconf.GetString(log.LogOpts[1].Name)
+	log.InitLogging2(loglevel, logfile, logfilesize, logfilenum)
 }

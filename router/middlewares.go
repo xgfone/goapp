@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package goapp
+package router
 
 import (
 	"fmt"
@@ -113,7 +113,14 @@ func Prometheus(namespaceAndSubsystem ...string) Middleware {
 					err = fmt.Errorf("%v", e)
 					code = 500
 				} else {
-					code = ctx.StatusCode()
+					switch e := err.(type) {
+					case nil:
+						code = ctx.StatusCode()
+					case ship.HTTPError:
+						code = e.Code
+					default:
+						code = 500
+					}
 				}
 
 				labels := prometheus.Labels{

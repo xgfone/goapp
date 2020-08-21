@@ -14,7 +14,7 @@
 
 // +build !linux
 
-package goapp
+package net
 
 // GetIPv4Routes returns the ipv4 routes.
 func GetIPv4Routes() (Routes, error) {

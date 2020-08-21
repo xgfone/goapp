@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package goapp
+package db
 
 import (
 	"context"
@@ -49,14 +49,14 @@ type DB interface {
 	Stats() sql.DBStats
 }
 
-// DBWrapper is a wrapper of the read and write db.
-type DBWrapper struct {
+// Wrapper is a wrapper of the read and write db.
+type Wrapper struct {
 	Index  int
 	Writer DB
 	Reader DB
 }
 
-type dbPool []DBWrapper
+type dbPool []Wrapper
 
 func (p dbPool) Len() int {
 	return len(p)
@@ -72,15 +72,15 @@ func (p dbPool) Swap(i, j int) {
 	p[j] = db
 }
 
-// DBPool is a read-write DB pool.
-type DBPool struct {
+// Pool is a read-write DB pool.
+type Pool struct {
 	dbs   dbPool
 	index func(string) int
 }
 
-// NewDBPool returns a new DB pool.
-func NewDBPool() *DBPool {
-	return &DBPool{dbs: make(dbPool, 0, 32), index: getDBIndexByDefault}
+// NewPool returns a new DB pool.
+func NewPool() *Pool {
+	return &Pool{dbs: make(dbPool, 0, 32), index: getDBIndexByDefault}
 }
 
 func getDBIndexByDefault(key string) (index int) {
@@ -107,14 +107,14 @@ func getDBIndexByDefault(key string) (index int) {
 //
 // The default indexer only converts the key ending with any character of
 // "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".
-func (p *DBPool) SetIndexer(index func(key string) int) {
+func (p *Pool) SetIndexer(index func(key string) int) {
 	if index == nil {
 		panic(errors.New("the index is nil"))
 	}
 	p.index = index
 }
 
-func (p *DBPool) addDB(index int, writer, reader DB) {
+func (p *Pool) addDB(index int, writer, reader DB) {
 	if writer == nil && reader == nil {
 		panic(fmt.Errorf("the writer and reader are nil with the index '%d'", index))
 	}
@@ -134,7 +134,7 @@ func (p *DBPool) addDB(index int, writer, reader DB) {
 		}
 	}
 
-	p.dbs = append(p.dbs, DBWrapper{Index: index, Writer: writer, Reader: reader})
+	p.dbs = append(p.dbs, Wrapper{Index: index, Writer: writer, Reader: reader})
 	sort.Sort(p.dbs)
 }
 
@@ -143,7 +143,7 @@ func (p *DBPool) addDB(index int, writer, reader DB) {
 // If reader is nil, the reader DB is the same as writer by default.
 //
 // Noitce: the index is only used to sort and identify whether two DBs are equal.
-func (p *DBPool) AddDB(index int, writer DB, reader ...DB) {
+func (p *Pool) AddDB(index int, writer DB, reader ...DB) {
 	if len(reader) > 0 {
 		p.addDB(index, writer, reader[0])
 	} else {
@@ -154,11 +154,11 @@ func (p *DBPool) AddDB(index int, writer DB, reader ...DB) {
 // AddReaderDB adds a reader db into the pool.
 //
 // Noitce: the index is only used to sort and identify whether two DBs are equal.
-func (p *DBPool) AddReaderDB(index int, reader DB) {
+func (p *Pool) AddReaderDB(index int, reader DB) {
 	p.addDB(index, nil, reader)
 }
 
-func (p *DBPool) getDB(key string) (db DBWrapper) {
+func (p *Pool) getDB(key string) (db Wrapper) {
 	if key == "" {
 		db = p.dbs[0]
 	} else {
@@ -169,21 +169,21 @@ func (p *DBPool) getDB(key string) (db DBWrapper) {
 }
 
 // GetDB is short for GetWriterDB.
-func (p *DBPool) GetDB(key string) DB {
+func (p *Pool) GetDB(key string) DB {
 	return p.GetWriterDB(key)
 }
 
 // GetWriterDB returns the writer DB by the key.
 //
 // If no DB, return nil.
-func (p *DBPool) GetWriterDB(key string) DB {
+func (p *Pool) GetWriterDB(key string) DB {
 	return p.getDB(key).Writer
 }
 
 // GetReaderDB returns the reader DB by the key.
 //
 // If no reader, return the writer.
-func (p *DBPool) GetReaderDB(key string) DB {
+func (p *Pool) GetReaderDB(key string) DB {
 	db := p.getDB(key)
 	if db.Reader != nil {
 		return db.Reader
@@ -192,6 +192,6 @@ func (p *DBPool) GetReaderDB(key string) DB {
 }
 
 // GetAllDBs returns all the dbs.
-func (p *DBPool) GetAllDBs() []DBWrapper {
-	return []DBWrapper(p.dbs)
+func (p *Pool) GetAllDBs() []Wrapper {
+	return []Wrapper(p.dbs)
 }

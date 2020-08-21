@@ -12,18 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build go1.15
-
-package goapp
-
-import "bufio"
-
-func init() {
-	scannerHandleRead = func(s *Scanner, n int) bool {
-		if n < 0 || len(s.buf)-s.end < n {
-			s.setErr(bufio.ErrBadReadCount)
-			return true
-		}
-		return false
-	}
-}
+// Package net supplies some assistant functions about net, such as the gateway
+// ip and routes.
+package net

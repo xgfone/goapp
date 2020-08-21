@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package goapp
+// Package router suppies some router assistant functions, such as the router
+// Handlers and Middlewares.
+package router
 
 import (
 	"expvar"

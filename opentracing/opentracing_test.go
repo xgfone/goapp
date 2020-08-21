@@ -12,36 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package goapp_test
+package opentracing_test
 
 import (
 	"context"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
-	"github.com/uber/jaeger-client-go/config"
-	"github.com/xgfone/goapp"
+	// tr "github.com/opentracing/opentracing-go"
+	// "github.com/uber/jaeger-client-go/config"
+	"github.com/xgfone/goapp/opentracing"
 	"github.com/xgfone/ship/v3"
 )
 
+func initOpenTracing() {
+	// cfg, err := config.FromEnv()
+	// if err != nil {
+	//     panic(err)
+	// }
+	// cfg.ServiceName = "app1"
+	// tracer, _, err := cfg.NewTracer()
+	// if err != nil {
+	//     panic(err)
+	// }
+	// tr.SetGlobalTracer(tracer)
+}
+
 func init() {
 	// Initialize the Jaeger Tracer implementation.
-	cfg, err := config.FromEnv()
-	if err != nil {
-		panic(err)
-	}
-	cfg.ServiceName = "app1"
-	tracer, _, err := cfg.NewTracer()
-	if err != nil {
-		panic(err)
-	}
-	// defer closer.Close()
-	opentracing.SetGlobalTracer(tracer)
+	initOpenTracing()
 
-	// OpenTracingRoundTripper will extract the parent span from the context
+	// HTTPRoundTripper will extract the parent span from the context
 	// of the sent http.Request, then create a new span for the current request.
-	http.DefaultTransport = goapp.NewOpenTracingRoundTripper(http.DefaultTransport, nil)
+	http.DefaultTransport = opentracing.NewHTTPRoundTripper(http.DefaultTransport, nil)
 }
 
 func ExampleOpenTracing() { // Main function
@@ -50,7 +53,7 @@ func ExampleOpenTracing() { // Main function
 	// OpenTracing middleware extracts the span context from the http request
 	// header, creates a new span as the server parent span from span context
 	// and put it into the request context.
-	app.Use(goapp.OpenTracing(nil))
+	app.Use(opentracing.OpenTracing(nil))
 
 	app.Route("/app1").GET(func(c *ship.Context) (err error) {
 		// ctx contains the parent span, which is extracted by OpenTracing middleware

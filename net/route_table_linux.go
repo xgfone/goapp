@@ -14,7 +14,7 @@
 
 // +build linux
 
-package goapp
+package net
 
 import (
 	"github.com/vishvananda/netlink"

@@ -12,107 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package goapp
+// Package opentracing is used to initialize the opentracing from the plugin,
+// and supplies the OpenTracing http.RoundTripper and router middleware.
+package opentracing
 
 import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
-	"plugin"
-	"strings"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/ship/v3"
 )
 
-// OpenTracingPluginOpts collects the options of the OpenTracing Plugin.
-var OpenTracingPluginOpts = []gconf.Opt{
-	gconf.StrOpt("path", "The path of the plugin implementing the OpenTracing tracer."),
-	gconf.StrOpt("config", "The configuration information of the plugin."),
-}
-
-// OpenTracingPluginOptGroup is the group of the OpenTracing plugin config options.
-var OpenTracingPluginOptGroup = gconf.NewGroup("opentracing.plugin")
-
-func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
-	p = OpenTracingPluginOptGroup.GetString("path")
-	c = OpenTracingPluginOptGroup.GetString("config")
-
-	for _, env := range os.Environ() {
-		if index := strings.IndexByte(env, '='); index > 0 {
-			switch key := strings.ToUpper(strings.TrimSpace(env[:index])); key {
-			case "OPENTRACING_PLUGIN_PATH":
-				p = strings.TrimSpace(env[index+1:])
-			case "OPENTRACING_PLUGIN_CONFIG":
-				c = strings.TrimSpace(env[index+1:])
-			}
-		}
-	}
-
-	return
-}
-
-func getOpenTracingPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
-	_p, _c := getOpenTracingPluginPathAndConfigFromEnv()
-	if _p != "" {
-		p = _p
-	}
-	if _c != nil {
-		c = _c
-	}
-
-	return p, c
-}
-
-// MustInitOpenTracingFromPlugin is the same as InitOpenTracing,
-// but logs the error and exits the program when an error occurs.
-func MustInitOpenTracingFromPlugin(pluginPath string, config interface{}) {
-	pluginPath, config = getOpenTracingPluginPathAndConfig(pluginPath, config)
-	if err := InitOpenTracingFromPlugin(pluginPath, config); err != nil {
-		Fatal("fail to initialize the opentracing implementation",
-			F("plugin", pluginPath), F("config", config), E(err))
-	}
-}
-
-// InitOpenTracingFromPlugin initializes the OpenTracing implementation, which will load
-// the implementation plugin and call the function InitOpenTracing with config.
-//
-// The plugin must contain the function
-//   func InitOpenTracing(config interface{}) error
-//
-// Notice:
-//   1. If config is empty, retry the env variable "OPENTRACING_PLUGIN_CONFIG".
-//   2. If pluginPath is empty, retry the env variable "OPENTRACING_PLUGIN_PATH".
-//   3. If pluginPath is empty, it returns nil and does nothing.
-func InitOpenTracingFromPlugin(pluginPath string, config interface{}) (err error) {
-	pluginPath, config = getOpenTracingPluginPathAndConfig(pluginPath, config)
-	if pluginPath == "" {
-		return
-	}
-
-	p, err := plugin.Open(pluginPath)
-	if err != nil {
-		return
-	}
-
-	trf, err := p.Lookup("InitOpenTracing")
-	if err != nil {
-		return
-	}
-
-	if f, ok := trf.(func(interface{}) error); ok {
-		return f(config)
-	}
-
-	panic(fmt.Errorf("invalid the function InitOpenTracing: %T", trf))
-}
-
-// OpenTracingOption is used to configure the OpenTracing middleware
-// and RoundTripper.
-type OpenTracingOption struct {
+// Option is used to configure the OpenTracing middleware and RoundTripper.
+type Option struct {
 	Tracer        opentracing.Tracer // Default: opentracing.GlobalTracer()
 	ComponentName string             // Default: use ComponentNameFunc(req)
 
@@ -151,7 +66,7 @@ type OpenTracingOption struct {
 }
 
 // Init initializes the OpenTracingOption.
-func (o *OpenTracingOption) Init() {
+func (o *Option) Init() {
 	if o.ComponentNameFunc == nil {
 		o.ComponentNameFunc = func(*http.Request) string { return "net/http" }
 	}
@@ -173,7 +88,7 @@ func (o *OpenTracingOption) Init() {
 
 // GetComponentName returns ComponentName if it is not empty.
 // Or ComponentNameFunc(req) instead.
-func (o *OpenTracingOption) GetComponentName(req *http.Request) string {
+func (o *Option) GetComponentName(req *http.Request) string {
 	if o.ComponentName == "" {
 		return o.ComponentNameFunc(req)
 	}
@@ -181,37 +96,37 @@ func (o *OpenTracingOption) GetComponentName(req *http.Request) string {
 }
 
 // GetTracer returns the OpenTracing tracker.
-func (o *OpenTracingOption) GetTracer() opentracing.Tracer {
+func (o *Option) GetTracer() opentracing.Tracer {
 	if o.Tracer == nil {
 		return opentracing.GlobalTracer()
 	}
 	return o.Tracer
 }
 
-// OpenTracingRoundTripper is a RoundTripper to support OpenTracing,
+// HTTPRoundTripper is a RoundTripper to support OpenTracing,
 // which extracts the parent span from the context of the sent http.Request,
 // then creates a new span by the context of the parent span for http.Request.
-type OpenTracingRoundTripper struct {
+type HTTPRoundTripper struct {
 	http.RoundTripper
-	OpenTracingOption
+	Option
 }
 
-// NewOpenTracingRoundTripper returns a new OpenTracingRoundTripper.
-func NewOpenTracingRoundTripper(rt http.RoundTripper, opt *OpenTracingOption) *OpenTracingRoundTripper {
-	var o OpenTracingOption
+// NewHTTPRoundTripper returns a new HTTPRoundTripper.
+func NewHTTPRoundTripper(rt http.RoundTripper, opt *Option) *HTTPRoundTripper {
+	var o Option
 	if opt != nil {
 		o = *opt
 	}
 	o.Init()
-	return &OpenTracingRoundTripper{RoundTripper: rt, OpenTracingOption: o}
+	return &HTTPRoundTripper{RoundTripper: rt, Option: o}
 }
 
 // WrappedRoundTripper returns the wrapped http.RoundTripper.
-func (rt *OpenTracingRoundTripper) WrappedRoundTripper() http.RoundTripper {
+func (rt *HTTPRoundTripper) WrappedRoundTripper() http.RoundTripper {
 	return rt.RoundTripper
 }
 
-func (rt *OpenTracingRoundTripper) roundTrip(req *http.Request) (*http.Response, error) {
+func (rt *HTTPRoundTripper) roundTrip(req *http.Request) (*http.Response, error) {
 	if rt.RoundTripper == nil {
 		return http.DefaultTransport.RoundTrip(req)
 	}
@@ -219,7 +134,7 @@ func (rt *OpenTracingRoundTripper) roundTrip(req *http.Request) (*http.Response,
 }
 
 // RoundTrip implements the interface http.RounderTripper.
-func (rt *OpenTracingRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+func (rt *HTTPRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if rt.SpanFilter(req) {
 		return rt.roundTrip(req)
 	}
@@ -247,8 +162,8 @@ func (rt *OpenTracingRoundTripper) RoundTrip(req *http.Request) (*http.Response,
 // OpenTracing is a middleware to support OpenTracing, which extracts the span
 // context from the http request header, creates a new span as the server span
 // from the span context, and put it into the request context.
-func OpenTracing(opt *OpenTracingOption) Middleware {
-	var o OpenTracingOption
+func OpenTracing(opt *Option) ship.Middleware {
+	var o Option
 	if opt != nil {
 		o = *opt
 	}
