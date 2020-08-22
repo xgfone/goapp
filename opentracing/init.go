@@ -24,23 +24,23 @@ import (
 	"github.com/xgfone/goapp/log"
 )
 
-// OpenTracingPluginOpts collects the options of the OpenTracing Plugin.
-var OpenTracingPluginOpts = []gconf.Opt{
+// PluginOpts collects the options of the OpenTracing Plugin.
+var PluginOpts = []gconf.Opt{
 	gconf.StrOpt("path", "The path of the plugin implementing the OpenTracing tracer."),
 	gconf.StrOpt("config", "The configuration information of the plugin."),
 }
 
-// OpenTracingPluginOptGroup is the group of the OpenTracing plugin config options.
-var OpenTracingPluginOptGroup = gconf.NewGroup("opentracing.plugin")
+// PluginOptGroup is the group of the OpenTracing plugin config options.
+var PluginOptGroup = gconf.NewGroup("opentracing.plugin")
 
-// RegisterOpenTracingPluginOpts registers the options of opentracing plugin.
-func RegisterOpenTracingPluginOpts() {
-	OpenTracingPluginOptGroup.RegisterOpts(OpenTracingPluginOpts...)
+// RegisterPluginOpts registers the options of opentracing plugin.
+func RegisterPluginOpts() {
+	PluginOptGroup.RegisterOpts(PluginOpts...)
 }
 
-func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
-	p = OpenTracingPluginOptGroup.GetString("path")
-	c = OpenTracingPluginOptGroup.GetString("config")
+func getPluginPathAndConfigFromEnv() (p string, c interface{}) {
+	p = PluginOptGroup.GetString("path")
+	c = PluginOptGroup.GetString("config")
 
 	for _, env := range os.Environ() {
 		if index := strings.IndexByte(env, '='); index > 0 {
@@ -56,8 +56,8 @@ func getOpenTracingPluginPathAndConfigFromEnv() (p string, c interface{}) {
 	return
 }
 
-func getOpenTracingPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
-	_p, _c := getOpenTracingPluginPathAndConfigFromEnv()
+func getPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
+	_p, _c := getPluginPathAndConfigFromEnv()
 	if _p != "" {
 		p = _p
 	}
@@ -71,7 +71,7 @@ func getOpenTracingPluginPathAndConfig(p string, c interface{}) (string, interfa
 // MustInitOpenTracingFromPlugin is the same as InitOpenTracing,
 // but logs the error and exits the program when an error occurs.
 func MustInitOpenTracingFromPlugin(pluginPath string, config interface{}) {
-	pluginPath, config = getOpenTracingPluginPathAndConfig(pluginPath, config)
+	pluginPath, config = getPluginPathAndConfig(pluginPath, config)
 	if err := InitOpenTracingFromPlugin(pluginPath, config); err != nil {
 		log.Fatal("fail to initialize the opentracing implementation",
 			log.F("plugin", pluginPath), log.F("config", config), log.E(err))
@@ -89,7 +89,7 @@ func MustInitOpenTracingFromPlugin(pluginPath string, config interface{}) {
 //   2. If pluginPath is empty, retry the env variable "OPENTRACING_PLUGIN_PATH".
 //   3. If pluginPath is empty, it returns nil and does nothing.
 func InitOpenTracingFromPlugin(pluginPath string, config interface{}) (err error) {
-	pluginPath, config = getOpenTracingPluginPathAndConfig(pluginPath, config)
+	pluginPath, config = getPluginPathAndConfig(pluginPath, config)
 	if pluginPath == "" {
 		return
 	}
