@@ -21,6 +21,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/xgfone/goapp/validate"
+
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/xgfone/go-tools/v7/lifecycle"
 	"github.com/xgfone/gover"
@@ -39,9 +41,10 @@ var DefaultRuntimeRouteConfig = RuntimeRouteConfig{ShellConfig: DefaultShellConf
 // InitRouter returns a new ship router.
 func InitRouter() *ship.Ship {
 	app := ship.Default()
+	app.Use(middleware.Logger(), Recover)
 	app.RegisterOnShutdown(lifecycle.Stop)
 	app.SetLogger(klog.ToFmtLogger(klog.GetDefaultLogger()))
-	app.Use(middleware.Logger(), Recover)
+	app.Validator = validate.StructValidator(nil)
 	return app
 }
 

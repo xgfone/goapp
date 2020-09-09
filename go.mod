@@ -1,6 +1,7 @@
 module github.com/xgfone/goapp
 
 require (
+	github.com/go-playground/validator/v10 v10.3.0
 	github.com/go-stack/stack v1.8.0
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.6.0
