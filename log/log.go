@@ -26,8 +26,8 @@ import (
 
 // LogOpts collects the options about the log.
 var LogOpts = []gconf.Opt{
-	gconf.StrOpt("logfile", "The file path of the log. The default is stdout.").As("log_file"),
-	gconf.StrOpt("loglevel", "The level of the log, such as debug, info").D("info").As("log_level"),
+	gconf.StrOpt("logfile", "The file path of the log. The default is stdout."),
+	gconf.StrOpt("loglevel", "The level of the log, such as debug, info").D("info"),
 }
 
 // Predefine some log functions.
