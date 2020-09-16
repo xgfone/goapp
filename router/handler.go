@@ -119,7 +119,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 	}
 
 	if conf.Shell == "" {
-		conf.Shell = "sh"
+		conf.Shell = execution.DefaultShell
 	}
 
 	if handle == nil {

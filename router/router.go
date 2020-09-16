@@ -64,12 +64,6 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 		conf = config[0]
 	}
 
-	group := app.Group("")
-	if conf.Prefix != "" {
-		group = group.Group(conf.Prefix)
-	}
-	group = group.Group("/runtime")
-
 	boolHandler := func(f func() bool) ship.Handler {
 		return func(ctx *ship.Context) error {
 			if f == nil && f() {
@@ -79,6 +73,7 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 		}
 	}
 
+	group := app.Group(conf.Prefix).Group("/runtime")
 	group.R("/version").GET(getVersion)
 	group.R("/routes").GET(getAllRoutes(app))
 	group.R("/ready").GET(boolHandler(conf.IsReady))
