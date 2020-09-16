@@ -23,26 +23,22 @@ import (
 )
 
 func fatalError(name string, args []string, err error) {
-	if ce, ok := err.(execution.CmdError); ok {
-		fields := make([]log.Field, 2, 5)
-		fields[0] = log.F("cmd", ce.Name)
-		fields[1] = log.F("args", ce.Args)
+	ce := err.(execution.CmdError)
+	fields := make([]log.Field, 2, 5)
+	fields[0] = log.F("cmd", ce.Name)
+	fields[1] = log.F("args", ce.Args)
 
-		if len(ce.Stdout) != 0 {
-			fields = append(fields, log.F("stdout", string(ce.Stdout)))
-		}
-		if len(ce.Stderr) != 0 {
-			fields = append(fields, log.F("stderr", string(ce.Stderr)))
-		}
-		if ce.Err != nil {
-			fields = append(fields, log.E(ce.Err))
-		}
-
-		log.Fatal("fail to execute the command", fields...)
+	if len(ce.Stdout) != 0 {
+		fields = append(fields, log.F("stdout", string(ce.Stdout)))
+	}
+	if len(ce.Stderr) != 0 {
+		fields = append(fields, log.F("stderr", string(ce.Stderr)))
+	}
+	if ce.Err != nil {
+		fields = append(fields, log.E(ce.Err))
 	}
 
-	log.Fatal("fail to execute the command", log.F("cmd", name),
-		log.F("args", args), log.E(err))
+	log.Fatal("fail to execute the command", fields...)
 }
 
 // Execute executes a command name with args.
