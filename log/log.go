@@ -57,6 +57,11 @@ var (
 	RegisterCallOnExit = klog.RegisterCallOnExit
 )
 
+// Field is the alias of klog.Field.
+//
+// Please refer to https://godoc.org/github.com/xgfone/klog
+type Field = klog.Field
+
 func init() {
 	RegisterCallOnExit(lifecycle.Stop)
 }
