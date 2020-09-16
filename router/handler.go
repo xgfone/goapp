@@ -83,7 +83,7 @@ type ShellConfig struct {
 type shellResult struct {
 	Stdout string `json:"stdout,omitempty"`
 	Stderr string `json:"stderr,omitempty"`
-	Error  error  `json:"error,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 // ExecuteShell returns a handler to execute a SHELL command or script.
@@ -126,10 +126,22 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 
 	if handle == nil {
 		handle = func(c *ship.Context, stdout []byte, stderr []byte, err error) error {
+			var errmsg string
+			if err != nil {
+				he := err.(ship.HTTPError)
+				if he.Err == nil {
+					errmsg = he.Msg
+				} else if ce, ok := he.Err.(execution.CmdError); ok {
+					errmsg = ce.Err.Error()
+				} else {
+					errmsg = he.Err.Error()
+				}
+			}
+
 			return c.JSON(200, shellResult{
 				Stdout: base64.StdEncoding.EncodeToString(stdout),
 				Stderr: base64.StdEncoding.EncodeToString(stderr),
-				Error:  err,
+				Error:  errmsg,
 			})
 		}
 	}
