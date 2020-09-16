@@ -35,7 +35,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 	echo.RemoveTrailingSlash = true
 	http.DefaultClient.Timeout = time.Second * 3
-	execution.DefaultCmd.Timeout = time.Second * 3
+	execution.DefaultTimeout = time.Second * 3
 }
 
 // Init is equal to InitApp(appName, gover.Text(), configOptions...).
