@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -74,6 +75,7 @@ var DefaultShellConfig = ShellConfig{Shell: "bash", Timeout: time.Minute}
 
 // ShellConfig is used to configure the shell execution.
 type ShellConfig struct {
+	Dir     string        // The directory to save and run the shell script.
 	Shell   string        // The shell name or path, which is "sh" by default.
 	Timeout time.Duration // The timeout to execute the shell command.
 }
@@ -176,7 +178,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 		if cmd.Cmd != "" {
 			stdout, stderr, err = executeShellCommand(c, shell, cmd.Cmd)
 		} else if cmd.Script != "" {
-			stdout, stderr, err = executeShellScript(c, shell, cmd.Script)
+			stdout, stderr, err = executeShellScript(c, shell, conf.Dir, cmd.Script)
 		}
 
 		return handle(ctx, stdout, stderr, err)
@@ -200,7 +202,7 @@ func executeShellCommand(c context.Context, shell, cmd string) ([]byte, []byte, 
 
 var generateTmpFilename = middleware.GenerateToken(16)
 
-func executeShellScript(c context.Context, shell, script string) ([]byte, []byte, error) {
+func executeShellScript(c context.Context, shell, dir, script string) ([]byte, []byte, error) {
 	bs, err := base64.StdEncoding.DecodeString(script)
 	if err != nil {
 		err = ship.ErrBadRequest.NewMsg("failed to decode base64 '%s': %v", script, err)
@@ -208,6 +210,10 @@ func executeShellScript(c context.Context, shell, script string) ([]byte, []byte
 	}
 
 	filename := fmt.Sprintf("__run_shell_script_%s.sh", generateTmpFilename())
+	if dir != "" {
+		filename = filepath.Join(dir, filename)
+	}
+
 	if err = ioutil.WriteFile(filename, bs, 0700); err != nil {
 		return nil, nil, ship.ErrInternalServerError.NewError(err)
 	}
