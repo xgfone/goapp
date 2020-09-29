@@ -22,11 +22,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/klog/v3"
+	"github.com/xgfone/goapp/log"
 )
 
 func init() {
-	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { klog.Errorf(err.Error()) }))
+	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { log.Errorf(err.Error()) }))
 }
 
 func registerOpt(conf *gconf.Config, options interface{}) {

@@ -23,7 +23,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/xgfone/klog/v3"
+	"github.com/xgfone/goapp/log"
 )
 
 // DB is an interface to stands for the general sql.DB.
@@ -164,7 +164,7 @@ func (p *Pool) getDB(key string) (db Wrapper) {
 	} else {
 		db = p.dbs[p.index(key)%len(p.dbs)]
 	}
-	klog.Debug("calculating the index by key", klog.F("key", key), klog.F("index", db.Index))
+	log.Debug("calculating the index by key", log.F("key", key), log.F("index", db.Index))
 	return
 }
 
