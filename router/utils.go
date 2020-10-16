@@ -22,10 +22,10 @@ import (
 	"github.com/xgfone/ship/v3"
 )
 
-// ExecCmdByHTTP executes the shell command or script by HTTP.
+// ExecShellByHTTP executes the shell command or script by HTTP.
 //
 // Notice: it uses the default interface implementation of ExecuteShell.
-func ExecCmdByHTTP(url, cmd, script string) (stdout, stderr string, err error) {
+func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error) {
 	var req shellRequest
 	var resp shellResult
 
