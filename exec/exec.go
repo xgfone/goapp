@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/xgfone/go-tools/v7/execution"
 	"github.com/xgfone/goapp/log"
@@ -190,6 +191,9 @@ func PanicExecutes(cmds ...string) { MustExecute(cmds[0], cmds[1:]...) }
 func PanicOutputs(cmds ...string) string { return MustOutput(cmds[0], cmds[1:]...) }
 
 //////////////////////////////////////////////////////////////////////////////
+
+// SetDefaultCmdLock sets the lock of the default command executor to lock.
+func SetDefaultCmdLock(lock *sync.Mutex) { execution.DefaultCmd.Lock = lock }
 
 // SetDefaultCmdLogHook sets the log hook for the default command executor.
 func SetDefaultCmdLogHook() {
