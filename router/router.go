@@ -21,10 +21,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/xgfone/goapp/validate"
-
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/klog/v3"
 	"github.com/xgfone/ship/v3"

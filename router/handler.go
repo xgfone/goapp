@@ -80,6 +80,13 @@ type ShellConfig struct {
 	Timeout time.Duration // The timeout to execute the shell command.
 }
 
+type shellRequest struct {
+	Cmd     string `json:"cmd,omitempty"`
+	Script  string `json:"script,omitempty"`
+	Shell   string `json:"shell,omitempty"`
+	Timeout string `json:"timeout,omitempty"`
+}
+
 type shellResult struct {
 	Stdout string `json:"stdout,omitempty"`
 	Stderr string `json:"stderr,omitempty"`
@@ -147,14 +154,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 	}
 
 	return func(ctx *ship.Context) error {
-		type Cmd struct {
-			Cmd     string `json:"cmd"`
-			Script  string `json:"script"`
-			Shell   string `json:"shell"`
-			Timeout string `json:"timeout"`
-		}
-
-		var cmd Cmd
+		var cmd shellRequest
 		buf, err := ctx.GetBodyReader()
 		if err != nil {
 			return ship.ErrBadRequest.NewError(err)
