@@ -23,9 +23,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
-	"github.com/xgfone/klog/v3"
 	"github.com/xgfone/ship/v3"
 	"github.com/xgfone/ship/v3/middleware"
 )
@@ -42,7 +42,7 @@ func InitRouter() *ship.Ship {
 	app := ship.Default()
 	app.Use(middleware.Logger(), Recover)
 	app.RegisterOnShutdown(lifecycle.Stop)
-	app.SetLogger(klog.ToFmtLogger(klog.GetDefaultLogger()))
+	app.SetLogger(log.GetDefaultLogger())
 	app.Validator = validate.StructValidator(nil)
 	return app
 }

@@ -21,7 +21,7 @@ import (
 
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/go-tools/v7/lifecycle"
-	"github.com/xgfone/klog/v3"
+	"github.com/xgfone/klog/v4"
 )
 
 // LogOpts collects the options about the log.
@@ -34,24 +34,24 @@ var LogOpts = []gconf.Opt{
 //
 // Please refer to https://godoc.org/github.com/xgfone/klog
 var (
-	E      = klog.E
-	F      = klog.F
-	Ef     = klog.Ef
+	E         = klog.E
+	F         = klog.F
+	Ef        = klog.Ef
+	FieldFunc = klog.FieldFunc
+
 	Tracef = klog.Tracef
 	Debugf = klog.Debugf
 	Infof  = klog.Infof
 	Warnf  = klog.Warnf
 	Errorf = klog.Errorf
-	Printf = klog.Printf
-	Panicf = klog.Panicf
 	Fatalf = klog.Fatalf
+	Printf = klog.Printf
 
 	Trace = klog.Trace
 	Debug = klog.Debug
 	Info  = klog.Info
 	Warn  = klog.Warn
 	Error = klog.Error
-	Panic = klog.Panic
 	Fatal = klog.Fatal
 
 	RegisterCallOnExit = klog.RegisterCallOnExit
@@ -62,9 +62,10 @@ var (
 // Please refer to https://godoc.org/github.com/xgfone/klog
 type Field = klog.Field
 
-func init() {
-	RegisterCallOnExit(lifecycle.Stop)
-}
+func init() { RegisterCallOnExit(lifecycle.Stop) }
+
+// GetDefaultLogger returns the default logger.
+func GetDefaultLogger() *klog.ExtLogger { return klog.DefalutLogger }
 
 // InitLogging is equal to InitLogging2(level, filepath, "100M", 100).
 func InitLogging(level, filepath string) {
@@ -76,15 +77,14 @@ func InitLogging(level, filepath string) {
 // If filepath is empty, it will use Stdout as the writer.
 func InitLogging2(level, filepath, filesize string, filenum int) {
 	log := klog.WithLevel(klog.NameToLevel(level)).WithCtx(klog.Caller("caller"))
-	klog.SetDefaultLogger(log)
+	klog.DefalutLogger = log
 
 	writer, err := klog.FileWriter(filepath, filesize, filenum)
 	if err != nil {
-		klog.Error(err.Error())
-		lifecycle.Exit(1)
+		Fatal("fail to initialize the file writer", E(err))
 	}
 
-	log.Encoder().SetWriter(writer)
+	log.Encoder.SetWriter(writer)
 	stdlog.SetOutput(klog.ToIOWriter(writer))
 	lifecycle.Register(func() { writer.Close() })
 }
