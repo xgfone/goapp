@@ -18,6 +18,7 @@ package log
 
 import (
 	stdlog "log"
+	"time"
 
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/go-tools/v7/lifecycle"
@@ -84,7 +85,8 @@ func InitLogging2(level, filepath, filesize string, filenum int) {
 		Fatal("fail to initialize the file writer", E(err))
 	}
 
-	log.Encoder.SetWriter(writer)
+	log.Encoder = klog.JSONEncoder(writer, klog.EncodeLogger("logger"),
+		klog.EncodeTime("t", time.RFC3339Nano), klog.EncodeLevel("lvl"))
 	stdlog.SetOutput(klog.ToIOWriter(writer))
 	lifecycle.Register(func() { writer.Close() })
 }
