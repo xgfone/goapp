@@ -77,7 +77,7 @@ func InitLogging(level, filepath string) {
 //
 // If filepath is empty, it will use Stdout as the writer.
 func InitLogging2(level, filepath, filesize string, filenum int) {
-	log := klog.WithLevel(klog.NameToLevel(level)).WithCtx(klog.Caller("caller"))
+	log := klog.WithLevel(klog.NameToLevel(level)).WithCtx(klog.Caller("caller", true))
 	klog.DefalutLogger = log
 
 	writer, err := klog.FileWriter(filepath, filesize, filenum)
