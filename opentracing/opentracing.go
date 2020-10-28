@@ -218,3 +218,52 @@ func OpenTracing(opt *Option) ship.Middleware {
 		}
 	}
 }
+
+// HTTPHandler is the same as OpenTracing, but returns a http.Handler.
+func HTTPHandler(handler http.Handler, opt *Option) http.Handler {
+	var o Option
+	if opt != nil {
+		o = *opt
+	}
+	o.Init()
+
+	const format = opentracing.HTTPHeaders
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if o.SpanFilter(req) {
+			handler.ServeHTTP(w, req)
+			return
+		}
+
+		tracer := o.GetTracer()
+		sc, _ := tracer.Extract(format, opentracing.HTTPHeadersCarrier(req.Header))
+		sp := tracer.StartSpan(o.OperationNameFunc(req), ext.RPCServerOption(sc))
+		ext.HTTPMethod.Set(sp, req.Method)
+		ext.Component.Set(sp, o.GetComponentName(req))
+		ext.HTTPUrl.Set(sp, o.URLTagFunc(req.URL))
+		o.SpanObserver(req, sp)
+
+		req = req.WithContext(opentracing.ContextWithSpan(req.Context(), sp))
+		resp := ship.GetResponseFromPool(w)
+
+		defer func() {
+			if e := recover(); e != nil {
+				ext.Error.Set(sp, true)
+				sp.Finish()
+				panic(e)
+			}
+
+			statusCode := resp.Status
+			if !resp.Wrote {
+				statusCode = 200
+			}
+
+			ext.HTTPStatusCode.Set(sp, uint16(statusCode))
+			if statusCode >= 500 {
+				ext.Error.Set(sp, true)
+			}
+			sp.Finish()
+		}()
+
+		handler.ServeHTTP(resp, req)
+	})
+}
