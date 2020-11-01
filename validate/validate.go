@@ -18,6 +18,7 @@ package validate
 import (
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"strings"
 
@@ -92,6 +93,15 @@ func StructValidator(validate *validator.Validate) func(interface{}) error {
 
 func init() {
 	SetValidateTagName(Validate, "json", "query")
+	Validate.RegisterValidation("addr", func(fl validator.FieldLevel) bool {
+		host, port, err := net.SplitHostPort(fl.Field().String())
+		return host != "" && port != "" && err == nil
+	})
+
+	// Addr
+	RegisterValidateErrorFormatter("addr", func(fe validator.FieldError) error {
+		return fmt.Errorf("invalid addr value '%v' of '%s'", fe.Value(), fe.Field())
+	})
 
 	// One Of
 	RegisterValidateErrorFormatter("oneof", func(fe validator.FieldError) error {
