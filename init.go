@@ -62,4 +62,7 @@ func InitApp2(appName, version, logfilesize string, logfilenum int, options ...i
 	logfile := gconf.GetString(log.LogOpts[0].Name)
 	loglevel := gconf.GetString(log.LogOpts[1].Name)
 	log.InitLogging2(loglevel, logfile, logfilesize, logfilenum)
+	if appName != "" {
+		log.GetDefaultLogger().Name = appName
+	}
 }
