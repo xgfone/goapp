@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/xgfone/cast"
 )
 
 // Validate is the default global validator.
@@ -96,6 +97,22 @@ func init() {
 	Validate.RegisterValidation("addr", func(fl validator.FieldLevel) bool {
 		host, port, err := net.SplitHostPort(fl.Field().String())
 		return host != "" && port != "" && err == nil
+	})
+	Validate.RegisterValidation("zero", func(fl validator.FieldLevel) bool {
+		return cast.IsZero(fl.Field().Interface())
+	})
+	Validate.RegisterValidation("notzero", func(fl validator.FieldLevel) bool {
+		return !cast.IsZero(fl.Field().Interface())
+	})
+
+	// Zero
+	RegisterValidateErrorFormatter("zero", func(fe validator.FieldError) error {
+		return fmt.Errorf("'%s' is not zero", fe.Field())
+	})
+
+	// NotZero
+	RegisterValidateErrorFormatter("notzero", func(fe validator.FieldError) error {
+		return fmt.Errorf("'%s' is zero", fe.Field())
 	})
 
 	// Addr
