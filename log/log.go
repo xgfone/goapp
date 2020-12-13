@@ -38,6 +38,8 @@ var (
 	E         = klog.E
 	F         = klog.F
 	Ef        = klog.Ef
+	FE        = klog.FE
+	FB        = klog.FB
 	FieldFunc = klog.FieldFunc
 
 	Tracef = klog.Tracef
