@@ -65,7 +65,7 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 
 	boolHandler := func(f func() bool) ship.Handler {
 		return func(ctx *ship.Context) error {
-			if f == nil && f() {
+			if f == nil || f() {
 				return nil
 			}
 			return ship.ErrServiceUnavailable
