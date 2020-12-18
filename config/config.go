@@ -25,6 +25,9 @@ import (
 	"github.com/xgfone/goapp/log"
 )
 
+// Config is the alias of gconf.Config.
+type Config = gconf.Config
+
 func init() {
 	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { log.Errorf(err.Error()) }))
 }
@@ -110,4 +113,23 @@ func LoadCliSource(ctx *cli.Context, groups ...string) {
 	for i := len(ctxs) - 2; i >= 0; i-- {
 		gconf.LoadSource(gconf.NewCliSource(ctxs[i], groups[:glen-i]...))
 	}
+}
+
+// GetAllConfigs returns all the registered configuration options.
+//
+// If conf is equal to nil, it uses gconf.Conf as the default.
+func GetAllConfigs(conf *Config) (opts map[string]interface{}) {
+	if conf == nil {
+		conf = gconf.Conf
+	}
+
+	opts = make(map[string]interface{}, 32)
+	conf.Traverse(func(group string, opt string, value interface{}) {
+		if group == "" {
+			opts[opt] = value
+		} else {
+			opts[fmt.Sprintf("%s.%s", group, opt)] = value
+		}
+	})
+	return
 }
