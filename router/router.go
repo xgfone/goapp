@@ -23,6 +23,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
@@ -54,6 +55,8 @@ type RuntimeRouteConfig struct {
 	Prefix    string
 	IsReady   func() bool
 	IsHealthy func() bool
+
+	Config *config.Config
 }
 
 // AddRuntimeRoutes adds the runtime routes.
@@ -74,6 +77,7 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 
 	group := app.Group(conf.Prefix).Group("/runtime")
 	group.R("/version").GET(getVersion)
+	group.R("/configs").GET(getAllConfigs(conf.Config))
 	group.R("/routes").GET(getAllRoutes(app))
 	group.R("/ready").GET(boolHandler(conf.IsReady))
 	group.R("/healthy").GET(boolHandler((conf.IsHealthy)))
@@ -88,6 +92,12 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 
 func getAllRoutes(s *ship.Ship) ship.Handler {
 	return func(c *ship.Context) error { return c.JSON(200, s.Routes()) }
+}
+
+func getAllConfigs(conf *config.Config) ship.Handler {
+	return func(c *ship.Context) error {
+		return c.JSON(200, config.GetAllConfigs(conf))
+	}
 }
 
 func getVersion(ctx *ship.Context) error {
