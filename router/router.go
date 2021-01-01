@@ -38,10 +38,20 @@ var App = InitRouter()
 // with DefaultShellConfig.
 var DefaultRuntimeRouteConfig = RuntimeRouteConfig{ShellConfig: DefaultShellConfig}
 
+// Config is used to configure the app router.
+type Config struct {
+	middleware.LoggerConfig
+}
+
 // InitRouter returns a new ship router.
-func InitRouter() *ship.Ship {
+func InitRouter(config ...Config) *ship.Ship {
+	var rconf Config
+	if len(config) > 0 {
+		rconf = config[0]
+	}
+
 	app := ship.Default()
-	app.Use(middleware.Logger(), Recover)
+	app.Use(middleware.Logger(rconf.LoggerConfig), Recover)
 	app.RegisterOnShutdown(lifecycle.Stop)
 	app.SetLogger(log.GetDefaultLogger())
 	app.Validator = validate.StructValidator(nil)
