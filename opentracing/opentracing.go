@@ -21,6 +21,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/xgfone/goapp/router"
+
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/xgfone/ship/v3"
@@ -192,7 +194,7 @@ func OpenTracing(opt *Option) ship.Middleware {
 				if e := recover(); e != nil {
 					ext.Error.Set(sp, true)
 					sp.Finish()
-					err = fmt.Errorf("panic: stacks=%v", e)
+					err = router.NewPanicError(e, 0)
 					return
 				}
 
