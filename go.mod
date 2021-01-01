@@ -10,12 +10,12 @@ require (
 	github.com/vishvananda/netlink v1.1.0
 	github.com/xgfone/cast v0.5.0
 	github.com/xgfone/gconf/v5 v5.0.0
-	github.com/xgfone/go-tools/v7 v7.4.0
+	github.com/xgfone/go-tools/v7 v7.5.0
 	github.com/xgfone/gover v0.3.0
 	github.com/xgfone/klog/v4 v4.1.0
 	github.com/xgfone/netaddr v0.5.1
-	github.com/xgfone/ship/v3 v3.7.0
-	github.com/xgfone/sqlx v0.10.0
+	github.com/xgfone/ship/v3 v3.8.0
+	github.com/xgfone/sqlx v0.11.0
 )
 
 go 1.11
