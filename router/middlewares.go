@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-stack/stack"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/xgfone/ship/v3"
@@ -31,15 +30,8 @@ type Middleware = ship.Middleware
 func Recover(next Handler) Handler {
 	return func(ctx *ship.Context) (err error) {
 		defer func() {
-			switch e := recover().(type) {
-			case nil:
-			default:
-				s := stack.Trace().TrimBelow(stack.Caller(1)).TrimRuntime()
-				if len(s) == 0 {
-					err = fmt.Errorf("panic: %v", e)
-				} else {
-					err = fmt.Errorf("panic: %v, stack=%v", e, s)
-				}
+			if e := recover(); e != nil {
+				err = NewPanicError(e, 0)
 			}
 		}()
 
@@ -110,7 +102,7 @@ func Prometheus(namespaceAndSubsystem ...string) Middleware {
 
 			defer func() {
 				if e := recover(); e != nil {
-					err = fmt.Errorf("%v", e)
+					err = NewPanicError(e, 0)
 					code = 500
 				} else {
 					switch e := err.(type) {

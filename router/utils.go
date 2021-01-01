@@ -17,8 +17,10 @@ package router
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 
+	"github.com/go-stack/stack"
 	"github.com/xgfone/ship/v3"
 )
 
@@ -58,4 +60,27 @@ func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error)
 	}
 
 	return string(sout), string(serr), nil
+}
+
+// GetCallStack returns the stacks of the caller.
+func GetCallStack(depth int) stack.CallStack {
+	return stack.Trace().TrimBelow(stack.Caller(depth + 2)).TrimRuntime()
+}
+
+// PanicError is used to represent the panic error.
+type PanicError struct {
+	Panic interface{}
+	Stack stack.CallStack
+}
+
+// NewPanicError returns a new PanicError.
+func NewPanicError(panic interface{}, depth int) PanicError {
+	return PanicError{Panic: panic, Stack: GetCallStack(depth + 1)}
+}
+
+func (pe PanicError) Error() string {
+	if len(pe.Stack) == 0 {
+		return fmt.Sprintf("panic: %v", pe.Panic)
+	}
+	return fmt.Sprintf("panic: %v, stacks=%v", pe.Panic, pe.Stack)
 }
