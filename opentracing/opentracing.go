@@ -192,7 +192,8 @@ func OpenTracing(opt *Option) ship.Middleware {
 				if e := recover(); e != nil {
 					ext.Error.Set(sp, true)
 					sp.Finish()
-					panic(e)
+					err = fmt.Errorf("panic: stacks=%v", e)
+					return
 				}
 
 				statusCode := ctx.StatusCode()
