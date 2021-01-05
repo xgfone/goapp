@@ -15,7 +15,7 @@ require (
 	github.com/xgfone/klog/v4 v4.1.0
 	github.com/xgfone/netaddr v0.5.1
 	github.com/xgfone/ship/v3 v3.8.0
-	github.com/xgfone/sqlx v0.11.0
+	github.com/xgfone/sqlx v0.11.1
 )
 
 go 1.11
