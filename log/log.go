@@ -78,25 +78,22 @@ func InitLogging(level, filepath string) {
 // InitLogging2 initializes the logging.
 //
 // If filepath is empty, it will use Stdout as the writer.
-// If filepath is equal to "none", it will set the writer to klog.DiscardWriter
-// to discard all the logs.
+// If filepath is equal to "none", it will discard all the logs.
 func InitLogging2(level, filepath, filesize string, filenum int) {
 	log := klog.WithLevel(klog.NameToLevel(level)).WithCtx(klog.Caller("caller", true))
+	log.Encoder = klog.NothingEncoder()
 	klog.DefalutLogger = log
 
-	writer := klog.DiscardWriter()
-	if filepath != "none" {
-		var err error
-		writer, err = klog.FileWriter(filepath, filesize, filenum)
-		if err != nil {
-			Fatal("fail to initialize the file writer", E(err))
-		}
+	if filepath == "none" {
+		stdlog.SetOutput(klog.ToIOWriter(klog.DiscardWriter()))
+	} else if writer, err := klog.FileWriter(filepath, filesize, filenum); err != nil {
+		Fatal("fail to initialize the file writer", E(err))
+	} else {
+		log.Encoder = klog.JSONEncoder(writer, klog.EncodeLogger("logger"),
+			klog.EncodeTime("t", time.RFC3339Nano), klog.EncodeLevel("lvl"))
+		lifecycle.Register(func() { writer.Close() })
+		stdlog.SetOutput(klog.ToIOWriter(writer))
 	}
-
-	log.Encoder = klog.JSONEncoder(writer, klog.EncodeLogger("logger"),
-		klog.EncodeTime("t", time.RFC3339Nano), klog.EncodeLevel("lvl"))
-	stdlog.SetOutput(klog.ToIOWriter(writer))
-	lifecycle.Register(func() { writer.Close() })
 }
 
 // LogPanic wrapps and logs the panic.
