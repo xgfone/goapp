@@ -36,6 +36,11 @@ func init() {
 	echo.RemoveTrailingSlash = true
 	http.DefaultClient.Timeout = time.Second * 3
 	execution.DefaultTimeout = time.Second * 3
+
+	tp := http.DefaultTransport.(*http.Transport)
+	tp.IdleConnTimeout = time.Second * 30
+	tp.MaxIdleConnsPerHost = 100
+	tp.MaxIdleConns = 0
 }
 
 // Init is equal to InitApp(appName, gover.Text(), configOptions...).
