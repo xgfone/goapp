@@ -18,6 +18,7 @@ package router
 
 import (
 	"expvar"
+	"net/http"
 	"runtime"
 	"time"
 
@@ -51,11 +52,23 @@ func InitRouter(config ...Config) *ship.Ship {
 	}
 
 	app := ship.Default()
+	app.HandleError = handleError
 	app.Use(middleware.Logger(rconf.LoggerConfig), Recover)
 	app.RegisterOnShutdown(lifecycle.Stop)
 	app.SetLogger(log.GetDefaultLogger())
 	app.Validator = validate.StructValidator(nil)
 	return app
+}
+
+func handleError(ctx *ship.Context, err error) {
+	if !ctx.IsResponded() {
+		switch e := err.(type) {
+		case ship.HTTPError:
+			ctx.BlobText(e.Code, e.CT, e.Error())
+		default:
+			ctx.Text(http.StatusInternalServerError, err.Error())
+		}
+	}
 }
 
 // RuntimeRouteConfig is used to configure the runtime routes.
