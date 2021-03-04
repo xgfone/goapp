@@ -10,7 +10,7 @@ require (
 	github.com/vishvananda/netlink v1.1.0
 	github.com/xgfone/cast v0.5.0
 	github.com/xgfone/gconf/v5 v5.1.0
-	github.com/xgfone/go-tools/v7 v7.5.1
+	github.com/xgfone/go-tools/v7 v7.6.0
 	github.com/xgfone/gover v0.3.0
 	github.com/xgfone/klog/v4 v4.1.0
 	github.com/xgfone/netaddr v0.5.1
