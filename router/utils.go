@@ -82,5 +82,5 @@ func (pe PanicError) Error() string {
 	if len(pe.Stack) == 0 {
 		return fmt.Sprintf("panic: %v", pe.Panic)
 	}
-	return fmt.Sprintf("panic: %v, stacks=%v", pe.Panic, pe.Stack)
+	return fmt.Sprintf("panic: %v, stacks=%+v", pe.Panic, pe.Stack)
 }
