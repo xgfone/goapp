@@ -53,10 +53,12 @@ func InitRouter(config ...Config) *ship.Ship {
 
 	app := ship.Default()
 	app.HandleError = handleError
-	app.Use(middleware.Logger(rconf.LoggerConfig), Recover)
-	app.RegisterOnShutdown(lifecycle.Stop)
-	app.SetLogger(log.GetDefaultLogger())
 	app.Validator = validate.StructValidator(nil)
+	app.Use(middleware.Logger(rconf.LoggerConfig), Recover)
+	app.SetLogger(log.GetDefaultLogger())
+	app.RegisterOnShutdown(lifecycle.Stop)
+	lifecycle.Register(app.Stop)
+
 	return app
 }
 
