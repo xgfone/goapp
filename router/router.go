@@ -28,8 +28,8 @@ import (
 	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
-	"github.com/xgfone/ship/v3"
-	"github.com/xgfone/ship/v3/middleware"
+	"github.com/xgfone/ship/v4"
+	"github.com/xgfone/ship/v4/middleware"
 )
 
 // App is the default global router app.
@@ -54,7 +54,7 @@ func InitRouter(config ...Config) *ship.Ship {
 	app := ship.Default()
 	app.HandleError = handleError
 	app.Validator = validate.StructValidator(nil)
-	app.Use(middleware.Logger(rconf.LoggerConfig), Recover)
+	app.Use(middleware.Logger(&rconf.LoggerConfig), Recover)
 	app.SetLogger(log.GetDefaultLogger())
 	app.RegisterOnShutdown(lifecycle.Stop)
 	lifecycle.Register(app.Stop)
@@ -65,7 +65,7 @@ func InitRouter(config ...Config) *ship.Ship {
 func handleError(ctx *ship.Context, err error) {
 	if !ctx.IsResponded() {
 		switch e := err.(type) {
-		case ship.HTTPError:
+		case ship.HTTPServerError:
 			ctx.BlobText(e.Code, e.CT, e.Error())
 		default:
 			ctx.Text(http.StatusInternalServerError, err.Error())
@@ -101,17 +101,16 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 	}
 
 	group := app.Group(conf.Prefix).Group("/runtime")
-	group.R("/version").GET(getVersion)
-	group.R("/configs").GET(getAllConfigs(conf.Config))
-	group.R("/routes").GET(getAllRoutes(app))
-	group.R("/ready").GET(boolHandler(conf.IsReady))
-	group.R("/healthy").GET(boolHandler((conf.IsHealthy)))
-	group.R("/metrics").GET(ship.FromHTTPHandler(promhttp.Handler()))
-	group.R("/debug/vars").GET(ship.FromHTTPHandler(expvar.Handler()))
-	group.AddRoutes(ship.HTTPPprofToRouteInfo()...)
+	group.Route("/version").GET(getVersion)
+	group.Route("/configs").GET(getAllConfigs(conf.Config))
+	group.Route("/routes").GET(getAllRoutes(app))
+	group.Route("/ready").GET(boolHandler(conf.IsReady))
+	group.Route("/healthy").GET(boolHandler((conf.IsHealthy)))
+	group.Route("/metrics").GET(ship.FromHTTPHandler(promhttp.Handler()))
+	group.Route("/debug/vars").GET(ship.FromHTTPHandler(expvar.Handler()))
 
 	if conf.ShellConfig.Shell != "" {
-		group.R("/shell").POST(ExecuteShell(nil, conf.ShellConfig))
+		group.Route("/shell").POST(ExecuteShell(nil, conf.ShellConfig))
 	}
 }
 

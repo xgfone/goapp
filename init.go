@@ -25,7 +25,6 @@ import (
 	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/goapp/router"
 	"github.com/xgfone/gover"
-	"github.com/xgfone/ship/v3/router/echo"
 )
 
 // AppRouter is the default app router.
@@ -33,7 +32,6 @@ var AppRouter = router.App
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	echo.RemoveTrailingSlash = true
 	http.DefaultClient.Timeout = time.Second * 3
 	execution.DefaultTimeout = time.Second * 3
 

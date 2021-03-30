@@ -20,7 +20,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v4"
 )
 
 // Middleware is the type alias of ship.Middleware.
@@ -108,7 +108,7 @@ func Prometheus(namespaceAndSubsystem ...string) Middleware {
 					switch e := err.(type) {
 					case nil:
 						code = ctx.StatusCode()
-					case ship.HTTPError:
+					case ship.HTTPServerError:
 						code = e.Code
 					default:
 						code = 500
@@ -122,7 +122,7 @@ func Prometheus(namespaceAndSubsystem ...string) Middleware {
 				}
 
 				requestTotal.With(labels).Inc()
-				requestDurations.With(labels).Observe(time.Now().Sub(start).Seconds())
+				requestDurations.With(labels).Observe(time.Since(start).Seconds())
 				requestNumberGuage.Dec()
 			}()
 

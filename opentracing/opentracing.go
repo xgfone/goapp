@@ -25,7 +25,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v4"
 )
 
 // Option is used to configure the OpenTracing middleware and RoundTripper.
@@ -202,7 +202,7 @@ func OpenTracing(opt *Option) ship.Middleware {
 				if !ctx.IsResponded() {
 					switch e := err.(type) {
 					case nil:
-					case ship.HTTPError:
+					case ship.HTTPServerError:
 						statusCode = e.Code
 					default:
 						statusCode = 500

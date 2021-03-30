@@ -27,8 +27,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
 	"github.com/xgfone/go-tools/v7/execution"
-	"github.com/xgfone/ship/v3"
-	"github.com/xgfone/ship/v3/middleware"
+	"github.com/xgfone/ship/v4"
+	"github.com/xgfone/ship/v4/middleware"
 )
 
 // Handler is the type alias of ship.Handler.
@@ -135,10 +135,8 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 		handle = func(c *ship.Context, stdout []byte, stderr []byte, err error) error {
 			var errmsg string
 			if err != nil {
-				he := err.(ship.HTTPError)
-				if he.Err == nil {
-					errmsg = he.Msg
-				} else if ce, ok := he.Err.(execution.CmdError); ok {
+				he := err.(ship.HTTPServerError)
+				if ce, ok := he.Err.(execution.CmdError); ok {
 					errmsg = ce.Err.Error()
 				} else {
 					errmsg = he.Err.Error()
@@ -157,19 +155,19 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 		var cmd shellRequest
 		buf, err := ctx.GetBodyReader()
 		if err != nil {
-			return ship.ErrBadRequest.NewError(err)
+			return ship.ErrBadRequest.New(err)
 		}
 		defer ctx.ReleaseBuffer(buf)
 
 		if err := json.NewDecoder(buf).Decode(&cmd); err != nil {
-			return ship.ErrBadRequest.NewError(err)
+			return ship.ErrBadRequest.New(err)
 		}
 
 		timeout := conf.Timeout
 		if cmd.Timeout != "" {
 			t, err := time.ParseDuration(cmd.Timeout)
 			if err != nil {
-				return ship.ErrBadRequest.NewError(err)
+				return ship.ErrBadRequest.New(err)
 			}
 			timeout = t
 		}
@@ -200,13 +198,13 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 func executeShellCommand(c context.Context, shell, cmd string) ([]byte, []byte, error) {
 	bs, err := base64.StdEncoding.DecodeString(cmd)
 	if err != nil {
-		err = ship.ErrBadRequest.NewMsg("failed to decode base64 '%s': %v", cmd, err)
+		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", cmd, err)
 		return nil, nil, err
 	}
 
 	stdout, stderr, err := execution.Run(c, shell, "-c", string(bs))
 	if err != nil {
-		return nil, nil, ship.ErrInternalServerError.NewError(err)
+		return nil, nil, ship.ErrInternalServerError.New(err)
 	}
 
 	return stdout, stderr, nil
@@ -217,7 +215,7 @@ var generateTmpFilename = middleware.GenerateToken(16)
 func executeShellScript(c context.Context, shell, dir, script string) ([]byte, []byte, error) {
 	bs, err := base64.StdEncoding.DecodeString(script)
 	if err != nil {
-		err = ship.ErrBadRequest.NewMsg("failed to decode base64 '%s': %v", script, err)
+		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", script, err)
 		return nil, nil, err
 	}
 
@@ -227,13 +225,13 @@ func executeShellScript(c context.Context, shell, dir, script string) ([]byte, [
 	}
 
 	if err = ioutil.WriteFile(filename, bs, 0700); err != nil {
-		return nil, nil, ship.ErrInternalServerError.NewError(err)
+		return nil, nil, ship.ErrInternalServerError.New(err)
 	}
 	defer os.Remove(filename)
 
 	stdout, stderr, err := execution.Run(c, shell, filename)
 	if err != nil {
-		return nil, nil, ship.ErrInternalServerError.NewError(err)
+		return nil, nil, ship.ErrInternalServerError.New(err)
 	}
 	return stdout, stderr, nil
 }

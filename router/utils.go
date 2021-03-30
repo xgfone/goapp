@@ -21,7 +21,7 @@ import (
 	"net/http"
 
 	"github.com/go-stack/stack"
-	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v4"
 )
 
 // ExecShellByHTTP executes the shell command or script by HTTP.

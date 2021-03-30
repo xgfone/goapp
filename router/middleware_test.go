@@ -17,7 +17,7 @@ package router
 import (
 	"testing"
 
-	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v4"
 )
 
 func TestRecover(t *testing.T) {

@@ -22,7 +22,7 @@ import (
 	// tr "github.com/opentracing/opentracing-go"
 	// "github.com/uber/jaeger-client-go/config"
 	"github.com/xgfone/goapp/opentracing"
-	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v4"
 )
 
 func initOpenTracing() {
