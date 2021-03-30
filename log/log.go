@@ -57,6 +57,9 @@ var (
 	Error = klog.Error
 	Fatal = klog.Fatal
 
+	Caller      = klog.Caller
+	CallerStack = klog.CallerStack
+
 	RegisterCallOnExit = klog.RegisterCallOnExit
 )
 
@@ -100,9 +103,9 @@ func InitLogging2(level, filepath, filesize string, filenum int) {
 func LogPanic(name ...string) {
 	if err := recover(); err != nil {
 		if len(name) == 0 || name[0] == "" {
-			klog.Error("panic", klog.CallerStack("stack"), klog.F("err", err))
+			klog.Error("panic", CallerStack("stack", true), klog.F("err", err))
 		} else {
-			klog.Error("panic", klog.F("name", name[0]), klog.CallerStack("stack"), klog.F("err", err))
+			klog.Error("panic", klog.F("name", name[0]), CallerStack("stack", true), klog.F("err", err))
 		}
 	}
 }
