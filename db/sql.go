@@ -15,6 +15,7 @@
 package db
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/xgfone/go-tools/v7/lifecycle"
@@ -37,7 +38,12 @@ func MaxIdleConns(n int) Config {
 }
 
 // MaxOpenConns returns a Config to set the maximum number of the open connection.
+//
+// If maxnum is equal to or less than 0, it is runtime.NumCPU()*2 by default.
 func MaxOpenConns(maxnum int) Config {
+	if maxnum <= 0 {
+		maxnum = runtime.NumCPU() * 2
+	}
 	return func(db *sqlx.DB) { db.SetMaxOpenConns(maxnum) }
 }
 

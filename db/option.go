@@ -19,7 +19,7 @@ import "github.com/xgfone/gconf/v5"
 // SQLDBOpts collects the options of the SQL database.
 var SQLDBOpts = []gconf.Opt{
 	gconf.StrOpt("connection", "The URL connection to the alarm database, user:password@tcp(127.0.0.1:3306)/db").C(false),
-	gconf.IntOpt("maxconnnum", "The maximum number of the connections.").C(false).D(100),
+	gconf.IntOpt("maxconnnum", "The maximum number of the connections.").C(false).D(0),
 	gconf.BoolOpt("logsqlstmt", "Log the sql statement when executing it.").C(false),
 	gconf.BoolOpt("logsqlargs", "Log the arguments of sql statement when executing it.").C(false),
 }
