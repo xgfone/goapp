@@ -19,6 +19,7 @@ package router
 import (
 	"expvar"
 	"net/http"
+	"net/http/pprof"
 	"runtime"
 	"time"
 
@@ -114,6 +115,7 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 	group.Route("/healthy").GET(boolHandler((conf.IsHealthy)))
 	group.Route("/metrics").GET(ship.FromHTTPHandler(promhttp.Handler()))
 	group.Route("/debug/vars").GET(ship.FromHTTPHandler(expvar.Handler()))
+	group.Route("/debug/pprof/profile").GET(ship.FromHTTPHandlerFunc(pprof.Profile))
 
 	if conf.ShellConfig.Shell != "" {
 		group.Route("/shell").POST(ExecuteShell(nil, conf.ShellConfig))
