@@ -30,6 +30,7 @@ import (
 	"github.com/xgfone/gover"
 	"github.com/xgfone/ship/v4"
 	"github.com/xgfone/ship/v4/middleware"
+	"github.com/xgfone/ship/v4/router/echo"
 )
 
 // App is the default global router app.
@@ -55,10 +56,13 @@ func InitRouter(config ...Config) *ship.Ship {
 	app.HandleError = handleError
 	app.Validator = validate.StructValidator(nil)
 	app.Use(middleware.Logger(&rconf.LoggerConfig), Recover)
-	app.SetLogger(log.GetDefaultLogger())
 	app.RegisterOnShutdown(lifecycle.Stop)
-	lifecycle.Register(app.Stop)
+	app.SetLogger(log.GetDefaultLogger())
+	app.SetNewRouter(func() ship.Router {
+		return echo.NewRouter(&echo.Config{RemoveTrailingSlash: true})
+	})
 
+	lifecycle.Register(app.Stop)
 	return app
 }
 
