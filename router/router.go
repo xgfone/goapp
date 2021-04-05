@@ -67,13 +67,15 @@ func InitRouter(config ...Config) *ship.Ship {
 }
 
 func handleError(ctx *ship.Context, err error) {
-	if !ctx.IsResponded() {
-		switch e := err.(type) {
-		case ship.HTTPServerError:
-			ctx.BlobText(e.Code, e.CT, e.Error())
-		default:
-			ctx.Text(http.StatusInternalServerError, err.Error())
-		}
+	if ctx.IsResponded() {
+		ctx.Logger().Errorf("unknown error: method=%s, url=%s, err=%s",
+			ctx.Method(), ctx.RequestURI(), err)
+	} else if se, ok := err.(ship.HTTPServerError); !ok {
+		ctx.NoContent(http.StatusInternalServerError)
+	} else if se.CT == "" {
+		ctx.BlobText(se.Code, ship.MIMETextPlain, se.Error())
+	} else {
+		ctx.BlobText(se.Code, se.CT, se.Error())
 	}
 }
 
