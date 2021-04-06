@@ -16,7 +16,7 @@ import (
 	"github.com/xgfone/gconf/v5/field"
 	"github.com/xgfone/goapp"
 	"github.com/xgfone/goapp/router"
-	"github.com/xgfone/ship/v3"
+	"github.com/xgfone/ship/v4"
 )
 
 // Define some options.
