@@ -291,8 +291,8 @@ github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17
 github.com/xgfone/cast v0.1.0/go.mod h1:T+gPbsD/fD72zz9wy/XaLTv236sPHaf6TcT7uvIhV/k=
 github.com/xgfone/cast v0.5.0 h1:5nROCXsIKvdD+zxNeiiPT1BqnLM8sDm4elTYd5KR50c=
 github.com/xgfone/cast v0.5.0/go.mod h1:T+gPbsD/fD72zz9wy/XaLTv236sPHaf6TcT7uvIhV/k=
-github.com/xgfone/gconf/v5 v5.1.0 h1:XbdrgR3zuWYDQApn7wtsDX2JaTd3/OjqJgxQ2ti24X8=
-github.com/xgfone/gconf/v5 v5.1.0/go.mod h1:7V0K5Dg4qe1FYqXryunEpopIVdBS3YbI2HioO72IbBI=
+github.com/xgfone/gconf/v5 v5.2.0 h1:QNFdKuHlWIVSvauraV78mrNvp+Rud9mQrlAWry5wp50=
+github.com/xgfone/gconf/v5 v5.2.0/go.mod h1:7V0K5Dg4qe1FYqXryunEpopIVdBS3YbI2HioO72IbBI=
 github.com/xgfone/go-tools/v7 v7.6.0 h1:demHLGS9VNeuM7Jl0o/SSAVxZfGKw2mt816d9ntbT1M=
 github.com/xgfone/go-tools/v7 v7.6.0/go.mod h1:s6pywc3sUjRuGcW7lI9dgoOBFfte44qrc6K1i++V8BI=
 github.com/xgfone/gover v0.3.0 h1:sr6xTy1cOipC9ZhpFDuJvk7VXjEs96poW6c1XEgE7H0=
