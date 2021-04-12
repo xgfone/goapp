@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 	"runtime"
+	rpprof "runtime/pprof"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -116,6 +117,10 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 	group.Route("/metrics").GET(ship.FromHTTPHandler(promhttp.Handler()))
 	group.Route("/debug/vars").GET(ship.FromHTTPHandler(expvar.Handler()))
 	group.Route("/debug/pprof/profile").GET(ship.FromHTTPHandlerFunc(pprof.Profile))
+	group.Route("/debug/pprof/cmdline").GET(ship.FromHTTPHandlerFunc(pprof.Cmdline))
+	for _, p := range rpprof.Profiles() {
+		group.Route("/debug/pprof/" + p.Name()).GET(ship.FromHTTPHandler(pprof.Handler(p.Name())))
+	}
 
 	if conf.ShellConfig.Shell != "" {
 		group.Route("/shell").POST(ExecuteShell(nil, conf.ShellConfig))
