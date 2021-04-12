@@ -18,7 +18,6 @@ package router
 
 import (
 	"expvar"
-	"net/http"
 	"net/http/pprof"
 	"runtime"
 	rpprof "runtime/pprof"
@@ -55,7 +54,6 @@ func InitRouter(config ...Config) *ship.Ship {
 	}
 
 	app := ship.Default()
-	app.HandleError = handleError
 	app.Validator = validate.StructValidator(nil)
 	app.Use(middleware.Logger(&rconf.LoggerConfig), Recover)
 	app.RegisterOnShutdown(lifecycle.Stop)
@@ -66,19 +64,6 @@ func InitRouter(config ...Config) *ship.Ship {
 
 	lifecycle.Register(app.Stop)
 	return app
-}
-
-func handleError(ctx *ship.Context, err error) {
-	if ctx.IsResponded() {
-		ctx.Logger().Errorf("unknown error: method=%s, url=%s, err=%s",
-			ctx.Method(), ctx.RequestURI(), err)
-	} else if se, ok := err.(ship.HTTPServerError); !ok {
-		ctx.NoContent(http.StatusInternalServerError)
-	} else if se.CT == "" {
-		ctx.BlobText(se.Code, ship.MIMETextPlain, se.Error())
-	} else {
-		ctx.BlobText(se.Code, se.CT, se.Error())
-	}
 }
 
 // RuntimeRouteConfig is used to configure the runtime routes.
