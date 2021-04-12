@@ -18,6 +18,7 @@ package router
 
 import (
 	"expvar"
+	"net/http"
 	"net/http/pprof"
 	"runtime"
 	rpprof "runtime/pprof"
@@ -52,6 +53,9 @@ func InitRouter(config ...Config) *ship.Ship {
 	if len(config) > 0 {
 		rconf = config[0]
 	}
+	if rconf.LoggerConfig.Log == nil {
+		rconf.LoggerConfig.Log = logRequest
+	}
 
 	app := ship.Default()
 	app.Validator = validate.StructValidator(nil)
@@ -64,6 +68,31 @@ func InitRouter(config ...Config) *ship.Ship {
 
 	lifecycle.Register(app.Stop)
 	return app
+}
+
+func logRequest(req *http.Request, hasReqBody bool, reqBody string, code int,
+	startTime time.Time, cost time.Duration, err error) {
+	fields := make([]log.Field, 6, 8)
+	fields[0] = log.F("addr", req.RemoteAddr)
+	fields[1] = log.F("method", req.Method)
+	fields[2] = log.F("uri", req.RequestURI)
+	fields[3] = log.F("code", code)
+	fields[4] = log.F("start", startTime.Unix())
+	fields[5] = log.F("cost", cost.String())
+	if hasReqBody {
+		fields = append(fields, log.F("reqbody", reqBody))
+	}
+	if err != nil {
+		fields = append(fields, log.E(err))
+	}
+
+	if code < 400 {
+		log.Info("request", fields...)
+	} else if code < 500 {
+		log.Warn("request", fields...)
+	} else {
+		log.Error("request", fields...)
+	}
 }
 
 // RuntimeRouteConfig is used to configure the runtime routes.

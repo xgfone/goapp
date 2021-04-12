@@ -14,7 +14,7 @@ require (
 	github.com/xgfone/gover v0.3.0
 	github.com/xgfone/klog/v4 v4.1.0
 	github.com/xgfone/netaddr v0.5.1
-	github.com/xgfone/ship/v4 v4.1.0
+	github.com/xgfone/ship/v4 v4.2.0
 	github.com/xgfone/sqlx v0.11.1
 )
 
