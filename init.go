@@ -27,6 +27,8 @@ import (
 	"github.com/xgfone/gover"
 )
 
+var inits []func() error
+
 // AppRouter is the default app router.
 var AppRouter = router.App
 
@@ -39,6 +41,21 @@ func init() {
 	tp.IdleConnTimeout = time.Second * 30
 	tp.MaxIdleConnsPerHost = 100
 	tp.MaxIdleConns = 0
+}
+
+// RegisterInit registers the initialization functions.
+func RegisterInit(initfuncs ...func() error) {
+	inits = append(inits, initfuncs...)
+}
+
+// CallInit calls the registered initialization functions.
+func CallInit() (err error) {
+	for _, f := range inits {
+		if err = f(); err != nil {
+			return
+		}
+	}
+	return
 }
 
 // Init is equal to InitApp(appName, gover.Text(), configOptions...).
@@ -57,6 +74,7 @@ func InitApp(appName, version string, options ...interface{}) {
 //  1. Register the log options.
 //  2. Initialize configuration.
 //  3. Initialize the logging.
+//  4. Call the registered initialization functions.
 //
 func InitApp2(appName, version, logfilesize string, logfilenum int, options ...interface{}) {
 	gconf.RegisterOpts(log.LogOpts...)
@@ -67,5 +85,9 @@ func InitApp2(appName, version, logfilesize string, logfilenum int, options ...i
 	log.InitLogging2(loglevel, logfile, logfilesize, logfilenum)
 	if appName != "" {
 		log.GetDefaultLogger().Name = appName
+	}
+
+	if err := CallInit(); err != nil {
+		log.Error("failed to init", log.E(err))
 	}
 }
