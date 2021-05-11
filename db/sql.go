@@ -27,7 +27,7 @@ import (
 var Location = time.UTC
 
 // DefaultConfig is the default config.
-var DefaultConfig = []Config{Ping(), OnExit(), MaxOpenConns(100)}
+var DefaultConfig = []Config{Ping(), OnExit(), MaxOpenConns(0)}
 
 // Config is used to set the sqlx.DB.
 type Config func(*sqlx.DB)
