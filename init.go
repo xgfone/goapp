@@ -88,6 +88,6 @@ func InitApp2(appName, version, logfilesize string, logfilenum int, options ...i
 	}
 
 	if err := CallInit(); err != nil {
-		log.Error("failed to init", log.E(err))
+		log.Fatal("failed to init", log.E(err))
 	}
 }
