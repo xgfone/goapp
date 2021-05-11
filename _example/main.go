@@ -20,7 +20,7 @@ import (
 	"github.com/go-stack/stack"
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/gconf/v5/field"
-	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/go-tools/v7/atexit"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/klog/v4"
 	"github.com/xgfone/ship/v4"
@@ -71,19 +71,19 @@ func main() {
 	klog.DefalutLogger.Level = klog.NameToLevel(conf.LogLevel.Get())
 	if writer, err := klog.FileWriter(conf.LogFile.Get(), "100M", 100); err != nil {
 		fmt.Println(err)
-		lifecycle.Exit(1)
+		atexit.Exit(1)
 	} else {
 		klog.DefalutLogger.Encoder.SetWriter(writer)
-		lifecycle.Register(func() { writer.Close() })
+		atexit.PushBack(func() { writer.Close() })
 	}
 
 	// TODO ...
 
 	// Initialize and start the app.
 	app := ship.Default()
-	app.RegisterOnShutdown(lifecycle.Stop)
+	app.RegisterOnShutdown(atexit.Stop)
 	app.SetLogger(klog.DefalutLogger)
-	app.Use(middleware.Logger(), Recover)
+	app.Use(middleware.Logger(nil), Recover)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })
 	app.Start(conf.Addr.Get()).Wait()

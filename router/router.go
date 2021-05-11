@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/go-tools/v7/atexit"
 	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/goapp/validate"
@@ -60,13 +60,13 @@ func InitRouter(config ...Config) *ship.Ship {
 	app := ship.Default()
 	app.Validator = validate.StructValidator(nil)
 	app.Use(middleware.Logger(&rconf.LoggerConfig), Recover)
-	app.RegisterOnShutdown(lifecycle.Stop)
+	app.RegisterOnShutdown(atexit.Stop)
 	app.SetLogger(log.GetDefaultLogger())
 	app.SetNewRouter(func() ship.Router {
 		return echo.NewRouter(&echo.Config{RemoveTrailingSlash: true})
 	})
 
-	lifecycle.Register(app.Stop)
+	atexit.PushBack(app.Stop)
 	return app
 }
 

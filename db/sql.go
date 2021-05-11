@@ -18,7 +18,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/go-tools/v7/atexit"
 	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/sqlx"
 )
@@ -73,7 +73,7 @@ func Ping() Config {
 	}
 }
 
-// OnExit returns a Config to register a close callback into lifecycle.Manager.
+// OnExit returns a Config to register a close callback into atexit.Manager.
 func OnExit() Config {
-	return func(db *sqlx.DB) { lifecycle.Register(func() { db.Close() }) }
+	return func(db *sqlx.DB) { atexit.PushBack(func() { db.Close() }) }
 }

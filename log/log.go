@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/go-tools/v7/lifecycle"
+	"github.com/xgfone/go-tools/v7/atexit"
 	"github.com/xgfone/klog/v4"
 )
 
@@ -68,7 +68,7 @@ var (
 // Please refer to https://godoc.org/github.com/xgfone/klog
 type Field = klog.Field
 
-func init() { RegisterCallOnExit(lifecycle.Stop) }
+func init() { RegisterCallOnExit(atexit.Stop) }
 
 // GetDefaultLogger returns the default logger.
 func GetDefaultLogger() *klog.ExtLogger { return klog.DefalutLogger }
@@ -94,7 +94,7 @@ func InitLogging2(level, filepath, filesize string, filenum int) {
 	} else {
 		log.Encoder = klog.JSONEncoder(writer, klog.EncodeLogger("logger"),
 			klog.EncodeTime("t", time.RFC3339Nano), klog.EncodeLevel("lvl"))
-		lifecycle.Register(func() { writer.Close() })
+		atexit.PushBack(func() { writer.Close() })
 		stdlog.SetOutput(klog.ToIOWriter(writer))
 	}
 }
