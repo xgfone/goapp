@@ -16,13 +16,14 @@ package main
 
 import (
 	"fmt"
+	stdlog "log"
 
 	"github.com/go-stack/stack"
 	"github.com/xgfone/gconf/v5"
 	"github.com/xgfone/gconf/v5/field"
-	"github.com/xgfone/go-tools/v7/atexit"
+	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-log"
 	"github.com/xgfone/gover"
-	"github.com/xgfone/klog/v4"
 	"github.com/xgfone/ship/v4"
 	"github.com/xgfone/ship/v4/middleware"
 )
@@ -58,7 +59,7 @@ func main() {
 	var conf Config
 
 	// Initialize the config
-	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { klog.Errorf(err.Error()) }))
+	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { log.Errorf(err.Error()) }))
 	gconf.RegisterStruct(&conf)
 	gconf.SetStringVersion(gover.Text())
 	gconf.AddAndParseOptFlag(gconf.Conf)
@@ -67,22 +68,18 @@ func main() {
 	gconf.LoadSource(gconf.NewFileSource(gconf.GetString(gconf.ConfigFileOpt.Name)))
 
 	// Initialize the log
-	klog.DefalutLogger = klog.WithCtx(klog.Caller("caller"))
-	klog.DefalutLogger.Level = klog.NameToLevel(conf.LogLevel.Get())
-	if writer, err := klog.FileWriter(conf.LogFile.Get(), "100M", 100); err != nil {
-		fmt.Println(err)
-		atexit.Exit(1)
-	} else {
-		klog.DefalutLogger.Encoder.SetWriter(writer)
-		atexit.PushBack(func() { writer.Close() })
-	}
+	log.DefalutLogger.Level = log.NameToLevel(conf.LogLevel.Get())
+	writer := log.FileWriter(conf.LogFile.Get(), "100M", 100)
+	log.DefalutLogger.Encoder.SetWriter(log.SafeWriter(writer))
+	stdlog.SetOutput(log.NewIOWriter(writer, log.LvlTrace))
+	atexit.Register(func() { writer.Close() })
 
 	// TODO ...
 
 	// Initialize and start the app.
 	app := ship.Default()
-	app.RegisterOnShutdown(atexit.Stop)
-	app.SetLogger(klog.DefalutLogger)
+	app.SetLogger(log.DefalutLogger)
+	app.RegisterOnShutdown(atexit.Execute)
 	app.Use(middleware.Logger(nil), Recover)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })

@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/go-log"
 )
 
 // PluginOpts collects the options of the OpenTracing Plugin.
@@ -34,9 +34,7 @@ var PluginOpts = []gconf.Opt{
 var PluginOptGroup = gconf.NewGroup("opentracing.plugin")
 
 // RegisterPluginOpts registers the options of opentracing plugin.
-func RegisterPluginOpts() {
-	PluginOptGroup.RegisterOpts(PluginOpts...)
-}
+func RegisterPluginOpts() { PluginOptGroup.RegisterOpts(PluginOpts...) }
 
 func getPluginPathAndConfigFromEnv() (p string, c interface{}) {
 	p = PluginOptGroup.GetString("path")
@@ -73,7 +71,7 @@ func getPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
 func MustInitOpenTracingFromPlugin(pluginPath string, config interface{}) {
 	pluginPath, config = getPluginPathAndConfig(pluginPath, config)
 	if err := InitOpenTracingFromPlugin(pluginPath, config); err != nil {
-		log.Fatal("fail to initialize the opentracing implementation",
+		log.Fatal("failed to initialize the opentracing implementation",
 			log.F("plugin", pluginPath), log.F("config", config), log.E(err))
 	}
 }

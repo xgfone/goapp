@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/go-log"
 	"github.com/xgfone/sqlx"
 )
 

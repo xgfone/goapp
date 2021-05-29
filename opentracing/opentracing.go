@@ -21,10 +21,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/xgfone/goapp/router"
-
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
+	"github.com/xgfone/goapp/router"
 	"github.com/xgfone/ship/v4"
 )
 

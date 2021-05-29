@@ -23,7 +23,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/go-log"
 )
 
 // DB is an interface to stands for the general sql.DB.

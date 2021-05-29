@@ -17,8 +17,32 @@ package goapp
 import (
 	"fmt"
 
-	"github.com/xgfone/goapp/log"
+	"github.com/go-stack/stack"
+	"github.com/xgfone/go-log"
 )
+
+// PanicError is used to represent the panic error.
+type PanicError struct {
+	Panic interface{}
+	Stack stack.CallStack
+}
+
+// NewPanicError returns a new PanicError.
+func NewPanicError(panic interface{}, depth int) PanicError {
+	return PanicError{Panic: panic, Stack: GetCallStack(depth + 1)}
+}
+
+func (pe PanicError) Error() string {
+	if len(pe.Stack) == 0 {
+		return fmt.Sprintf("panic: %v", pe.Panic)
+	}
+	return fmt.Sprintf("panic: %v, stacks=%+v", pe.Panic, pe.Stack)
+}
+
+// GetCallStack returns the stacks of the caller.
+func GetCallStack(depth int) stack.CallStack {
+	return stack.Trace().TrimBelow(stack.Caller(depth + 2)).TrimRuntime()
+}
 
 // Panic panics with the msg if err is not nil. Or do nothing.
 func Panic(err error, msg string, args ...interface{}) {

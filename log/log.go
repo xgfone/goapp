@@ -18,11 +18,10 @@ package log
 
 import (
 	stdlog "log"
-	"time"
 
 	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/go-tools/v7/atexit"
-	"github.com/xgfone/klog/v4"
+	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-log"
 )
 
 // LogOpts collects the options about the log.
@@ -30,48 +29,6 @@ var LogOpts = []gconf.Opt{
 	gconf.StrOpt("logfile", "The file path of the log. The default is stdout."),
 	gconf.StrOpt("loglevel", "The level of the log, such as debug, info").D("info"),
 }
-
-// Predefine some log functions.
-//
-// Please refer to https://godoc.org/github.com/xgfone/klog
-var (
-	E         = klog.E
-	F         = klog.F
-	Ef        = klog.Ef
-	FE        = klog.FE
-	FB        = klog.FB
-	FieldFunc = klog.FieldFunc
-
-	Tracef = klog.Tracef
-	Debugf = klog.Debugf
-	Infof  = klog.Infof
-	Warnf  = klog.Warnf
-	Errorf = klog.Errorf
-	Fatalf = klog.Fatalf
-	Printf = klog.Printf
-
-	Trace = klog.Trace
-	Debug = klog.Debug
-	Info  = klog.Info
-	Warn  = klog.Warn
-	Error = klog.Error
-	Fatal = klog.Fatal
-
-	Caller      = klog.Caller
-	CallerStack = klog.CallerStack
-
-	RegisterCallOnExit = klog.RegisterCallOnExit
-)
-
-// Field is the alias of klog.Field.
-//
-// Please refer to https://godoc.org/github.com/xgfone/klog
-type Field = klog.Field
-
-func init() { RegisterCallOnExit(atexit.Stop) }
-
-// GetDefaultLogger returns the default logger.
-func GetDefaultLogger() *klog.ExtLogger { return klog.DefalutLogger }
 
 // InitLogging is equal to InitLogging2(level, filepath, "100M", 100).
 func InitLogging(level, filepath string) {
@@ -81,31 +38,15 @@ func InitLogging(level, filepath string) {
 // InitLogging2 initializes the logging.
 //
 // If filepath is empty, it will use Stdout as the writer.
-// If filepath is equal to "none", it will discard all the logs.
 func InitLogging2(level, filepath, filesize string, filenum int) {
-	log := klog.WithLevel(klog.NameToLevel(level)).WithCtx(klog.Caller("caller", true))
-	log.Encoder = klog.NothingEncoder()
-	klog.DefalutLogger = log
-
-	if filepath == "none" {
-		stdlog.SetOutput(klog.ToIOWriter(klog.DiscardWriter()))
-	} else if writer, err := klog.FileWriter(filepath, filesize, filenum); err != nil {
-		Fatal("fail to initialize the file writer", E(err))
-	} else {
-		log.Encoder = klog.JSONEncoder(writer, klog.EncodeLogger("logger"),
-			klog.EncodeTime("t", time.RFC3339Nano), klog.EncodeLevel("lvl"))
-		atexit.PushBack(func() { writer.Close() })
-		stdlog.SetOutput(klog.ToIOWriter(writer))
+	if level != "" {
+		log.DefalutLogger.Level = log.NameToLevel(level)
 	}
-}
 
-// LogPanic wrapps and logs the panic.
-func LogPanic(name ...string) {
-	if err := recover(); err != nil {
-		if len(name) == 0 || name[0] == "" {
-			klog.Error("panic", CallerStack("stack", true), klog.F("err", err))
-		} else {
-			klog.Error("panic", klog.F("name", name[0]), CallerStack("stack", true), klog.F("err", err))
-		}
+	if filepath != "" {
+		writer := log.FileWriter(filepath, filesize, filenum)
+		log.DefalutLogger.Encoder.SetWriter(log.SafeWriter(writer))
+		stdlog.SetOutput(log.NewIOWriter(writer, log.LvlTrace))
+		atexit.Register(func() { writer.Close() })
 	}
 }

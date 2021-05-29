@@ -20,6 +20,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/xgfone/goapp"
 	"github.com/xgfone/ship/v4"
 )
 
@@ -31,7 +32,7 @@ func Recover(next Handler) Handler {
 	return func(ctx *ship.Context) (err error) {
 		defer func() {
 			if e := recover(); e != nil {
-				err = NewPanicError(e, 0)
+				err = goapp.NewPanicError(e, 0)
 			}
 		}()
 

@@ -22,14 +22,16 @@ import (
 
 	"github.com/urfave/cli/v2"
 	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/go-log"
 )
 
 // Config is the alias of gconf.Config.
 type Config = gconf.Config
 
 func init() {
-	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { log.Errorf(err.Error()) }))
+	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) {
+		log.Error("config error", log.E(err))
+	}))
 }
 
 func registerOpt(conf *gconf.Config, options interface{}) {
@@ -84,7 +86,6 @@ func InitConfig(app string, options interface{}, version ...string) {
 		gconf.LoadSource(gconf.NewEnvSource(app))
 	}
 	gconf.LoadSource(gconf.NewFileSource(gconf.GetString(gconf.ConfigFileOpt.Name)))
-
 }
 
 // ConvertOptsToCliFlags the config group to []cli.Flag. For example,
@@ -131,5 +132,6 @@ func GetAllConfigs(conf *Config) (opts map[string]interface{}) {
 			opts[fmt.Sprintf("%s.%s", group, opt)] = value
 		}
 	})
+
 	return
 }

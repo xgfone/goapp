@@ -18,8 +18,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/xgfone/go-tools/v7/atexit"
-	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-log"
 	"github.com/xgfone/sqlx"
 )
 
@@ -27,7 +27,7 @@ import (
 var Location = time.UTC
 
 // DefaultConfig is the default config.
-var DefaultConfig = []Config{Ping(), OnExit(), MaxOpenConns(0)}
+var DefaultConfig = []Config{OnExit(), Ping(), MaxOpenConns(0)}
 
 // Config is used to set the sqlx.DB.
 type Config func(*sqlx.DB)
@@ -73,7 +73,8 @@ func Ping() Config {
 	}
 }
 
-// OnExit returns a Config to register a close callback into atexit.Manager.
+// OnExit returns a Config to register a close callback which will be called
+// when the program exits.
 func OnExit() Config {
-	return func(db *sqlx.DB) { atexit.PushBack(func() { db.Close() }) }
+	return func(db *sqlx.DB) { atexit.Register(func() { db.Close() }) }
 }

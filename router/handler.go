@@ -26,7 +26,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
-	"github.com/xgfone/go-tools/v7/execution"
+	"github.com/xgfone/go-exec"
 	"github.com/xgfone/ship/v4"
 	"github.com/xgfone/ship/v4/middleware"
 )
@@ -128,7 +128,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 	}
 
 	if conf.Shell == "" {
-		conf.Shell = execution.DefaultShell
+		conf.Shell = exec.DefaultShell
 	}
 
 	if handle == nil {
@@ -136,7 +136,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 			var errmsg string
 			if err != nil {
 				he := err.(ship.HTTPServerError)
-				if ce, ok := he.Err.(execution.CmdError); ok {
+				if ce, ok := he.Err.(exec.CmdError); ok {
 					errmsg = ce.Err.Error()
 				} else {
 					errmsg = he.Err.Error()
@@ -202,7 +202,7 @@ func executeShellCommand(c context.Context, shell, cmd string) ([]byte, []byte, 
 		return nil, nil, err
 	}
 
-	stdout, stderr, err := execution.Run(c, shell, "-c", string(bs))
+	stdout, stderr, err := exec.Run(c, shell, "-c", string(bs))
 	if err != nil {
 		return nil, nil, ship.ErrInternalServerError.New(err)
 	}
@@ -229,7 +229,7 @@ func executeShellScript(c context.Context, shell, dir, script string) ([]byte, [
 	}
 	defer os.Remove(filename)
 
-	stdout, stderr, err := execution.Run(c, shell, filename)
+	stdout, stderr, err := exec.Run(c, shell, filename)
 	if err != nil {
 		return nil, nil, ship.ErrInternalServerError.New(err)
 	}
