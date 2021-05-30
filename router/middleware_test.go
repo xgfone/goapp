@@ -17,6 +17,7 @@ package router
 import (
 	"testing"
 
+	"github.com/xgfone/goapp"
 	"github.com/xgfone/ship/v4"
 )
 
@@ -26,12 +27,12 @@ func TestRecover(t *testing.T) {
 		t.Error(err)
 	}
 
-	panicStack := "middleware_test.go:30"
+	panicStack := "middleware_test.go:31"
 	err = Recover(func(ctx *ship.Context) (err error) { panic("testpanic") })(nil)
 	switch e := err.(type) {
 	case nil:
 		t.Error(err)
-	case PanicError:
+	case goapp.PanicError:
 		if e.Panic.(string) != "testpanic" {
 			t.Error(e.Panic)
 		} else if _len := len(e.Stack); _len == 0 {

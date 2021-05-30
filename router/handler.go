@@ -132,22 +132,24 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 	}
 
 	if handle == nil {
-		handle = func(c *ship.Context, stdout []byte, stderr []byte, err error) error {
-			var errmsg string
+		handle = func(c *ship.Context, stdout, stderr []byte, err error) error {
+			var result shellResult
+			if len(stdout) > 0 {
+				result.Stdout = base64.StdEncoding.EncodeToString(stdout)
+			}
+			if len(stderr) > 0 {
+				result.Stderr = base64.StdEncoding.EncodeToString(stderr)
+			}
 			if err != nil {
 				he := err.(ship.HTTPServerError)
 				if ce, ok := he.Err.(exec.CmdError); ok {
-					errmsg = ce.Err.Error()
+					result.Error = ce.Err.Error()
 				} else {
-					errmsg = he.Err.Error()
+					result.Error = he.Err.Error()
 				}
 			}
 
-			return c.JSON(200, shellResult{
-				Stdout: base64.StdEncoding.EncodeToString(stdout),
-				Stderr: base64.StdEncoding.EncodeToString(stderr),
-				Error:  errmsg,
-			})
+			return c.JSON(200, result)
 		}
 	}
 
@@ -184,27 +186,27 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 			shell = conf.Shell
 		}
 
-		var stdout, stderr []byte
+		var stdout, stderr string
 		if cmd.Cmd != "" {
 			stdout, stderr, err = executeShellCommand(c, shell, cmd.Cmd)
 		} else if cmd.Script != "" {
 			stdout, stderr, err = executeShellScript(c, shell, conf.Dir, cmd.Script)
 		}
 
-		return handle(ctx, stdout, stderr, err)
+		return handle(ctx, []byte(stdout), []byte(stderr), err)
 	}
 }
 
-func executeShellCommand(c context.Context, shell, cmd string) ([]byte, []byte, error) {
+func executeShellCommand(c context.Context, shell, cmd string) (string, string, error) {
 	bs, err := base64.StdEncoding.DecodeString(cmd)
 	if err != nil {
 		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", cmd, err)
-		return nil, nil, err
+		return "", "", err
 	}
 
 	stdout, stderr, err := exec.Run(c, shell, "-c", string(bs))
 	if err != nil {
-		return nil, nil, ship.ErrInternalServerError.New(err)
+		return "", "", ship.ErrInternalServerError.New(err)
 	}
 
 	return stdout, stderr, nil
@@ -212,11 +214,11 @@ func executeShellCommand(c context.Context, shell, cmd string) ([]byte, []byte, 
 
 var generateTmpFilename = middleware.GenerateToken(16)
 
-func executeShellScript(c context.Context, shell, dir, script string) ([]byte, []byte, error) {
+func executeShellScript(c context.Context, shell, dir, script string) (string, string, error) {
 	bs, err := base64.StdEncoding.DecodeString(script)
 	if err != nil {
 		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", script, err)
-		return nil, nil, err
+		return "", "", err
 	}
 
 	filename := fmt.Sprintf("__run_shell_script_%s.sh", generateTmpFilename())
@@ -225,13 +227,13 @@ func executeShellScript(c context.Context, shell, dir, script string) ([]byte, [
 	}
 
 	if err = ioutil.WriteFile(filename, bs, 0700); err != nil {
-		return nil, nil, ship.ErrInternalServerError.New(err)
+		return "", "", ship.ErrInternalServerError.New(err)
 	}
 	defer os.Remove(filename)
 
 	stdout, stderr, err := exec.Run(c, shell, filename)
 	if err != nil {
-		return nil, nil, ship.ErrInternalServerError.New(err)
+		return "", "", ship.ErrInternalServerError.New(err)
 	}
 	return stdout, stderr, nil
 }

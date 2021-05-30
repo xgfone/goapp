@@ -103,7 +103,7 @@ func Prometheus(namespaceAndSubsystem ...string) Middleware {
 
 			defer func() {
 				if e := recover(); e != nil {
-					err = NewPanicError(e, 0)
+					err = goapp.NewPanicError(e, 0)
 					code = 500
 				} else {
 					switch e := err.(type) {

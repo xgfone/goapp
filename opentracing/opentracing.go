@@ -23,7 +23,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/xgfone/goapp/router"
+	"github.com/xgfone/goapp"
 	"github.com/xgfone/ship/v4"
 )
 
@@ -193,7 +193,7 @@ func OpenTracing(opt *Option) ship.Middleware {
 				if e := recover(); e != nil {
 					ext.Error.Set(sp, true)
 					sp.Finish()
-					err = router.NewPanicError(e, 0)
+					err = goapp.NewPanicError(e, 0)
 					return
 				}
 
