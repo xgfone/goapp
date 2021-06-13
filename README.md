@@ -1,4 +1,4 @@
-# goapp [![Build Status](https://travis-ci.org/xgfone/goapp.svg?branch=master)](https://travis-ci.org/xgfone/goapp) [![GoDoc](https://godoc.org/github.com/xgfone/goapp?status.svg)](http://godoc.org/github.com/xgfone/goapp) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/xgfone/goapp/master/LICENSE)
+# goapp [![Build Status](https://api.travis-ci.com/xgfone/goapp.svg?branch=master)](https://travis-ci.com/github/xgfone/goapp) [![GoDoc](https://pkg.go.dev/badge/github.com/xgfone/goapp)](https://pkg.go.dev/github.com/xgfone/goapp) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/xgfone/goapp/master/LICENSE)
 
 The package is used to initialize an application to simply the creation.
 
