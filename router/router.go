@@ -30,13 +30,11 @@ import (
 	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
-	"github.com/xgfone/ship/v4"
-	"github.com/xgfone/ship/v4/middleware"
-	"github.com/xgfone/ship/v4/router/echo"
+	"github.com/xgfone/ship/v5"
 )
 
 // App is the default global router app.
-var App = InitRouter()
+var App = InitRouter(nil)
 
 // DefaultRuntimeRouteConfig is the default RuntimeRouteConfig
 // with DefaultShellConfig.
@@ -44,55 +42,28 @@ var DefaultRuntimeRouteConfig = RuntimeRouteConfig{ShellConfig: DefaultShellConf
 
 // Config is used to configure the app router.
 type Config struct {
-	middleware.LoggerConfig
+	LogReqBody bool
 }
 
 // InitRouter returns a new ship router.
-func InitRouter(config ...Config) *ship.Ship {
-	var rconf Config
-	if len(config) > 0 {
-		rconf = config[0]
+func InitRouter(c *Config) *ship.Ship {
+	var config Config
+	if c != nil {
+		config = *c
 	}
-	if rconf.LoggerConfig.Log == nil {
-		rconf.LoggerConfig.Log = logRequest
-	}
-
 	app := ship.Default()
-	app.Validator = validate.StructValidator(nil)
-	app.Use(middleware.Logger(&rconf.LoggerConfig), Recover)
-	app.RegisterOnShutdown(atexit.Execute)
-	app.SetLogger(log.DefalutLogger)
-	app.SetNewRouter(func() ship.Router {
-		return echo.NewRouter(&echo.Config{RemoveTrailingSlash: true})
-	})
-
-	atexit.Register(app.Stop)
+	app.Validator = ship.ValidatorFunc(validate.StructValidator(nil))
+	app.Use(Logger(config.LogReqBody), Recover)
+	app.Logger = log.DefalutLogger
 	return app
 }
 
-func logRequest(req *http.Request, hasReqBody bool, reqBody string, code int,
-	startTime time.Time, cost time.Duration, err error) {
-	fields := make([]log.Field, 6, 8)
-	fields[0] = log.F("addr", req.RemoteAddr)
-	fields[1] = log.F("method", req.Method)
-	fields[2] = log.F("uri", req.RequestURI)
-	fields[3] = log.F("code", code)
-	fields[4] = log.F("start", startTime.Unix())
-	fields[5] = log.F("cost", cost.String())
-	if hasReqBody {
-		fields = append(fields, log.F("reqbody", reqBody))
-	}
-	if err != nil {
-		fields = append(fields, log.E(err))
-	}
-
-	if code < 400 {
-		log.Info("request", fields...)
-	} else if code < 500 {
-		log.Warn("request", fields...)
-	} else {
-		log.Error("request", fields...)
-	}
+// StartServer starts the HTTP server.
+func StartServer(addr string, handler http.Handler) {
+	runner := ship.NewRunner(handler)
+	runner.RegisterOnShutdown(atexit.Execute)
+	atexit.Register(runner.Stop)
+	runner.Start(addr)
 }
 
 // RuntimeRouteConfig is used to configure the runtime routes.

@@ -15,13 +15,17 @@
 package router
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/xgfone/go-log"
 	"github.com/xgfone/goapp"
-	"github.com/xgfone/ship/v4"
+	"github.com/xgfone/ship/v5"
 )
 
 // Middleware is the type alias of ship.Middleware.
@@ -37,6 +41,70 @@ func Recover(next Handler) Handler {
 		}()
 
 		return next(ctx)
+	}
+}
+
+type reqBodyWrapper struct {
+	io.Closer
+	*bytes.Buffer
+}
+
+// Logger returns a logger middleware to log the request.
+func Logger(logReqBody bool) Middleware {
+	return func(next ship.Handler) ship.Handler {
+		return func(c *ship.Context) (err error) {
+			req := c.Request()
+			var reqbody string
+			if logReqBody {
+				buf := c.AcquireBuffer()
+				defer c.ReleaseBuffer(buf)
+
+				_, err = io.CopyBuffer(buf, req.Body, make([]byte, 1024))
+				if err != nil {
+					return err
+				}
+
+				reqbody = buf.String()
+				req.Body = reqBodyWrapper{Closer: req.Body, Buffer: buf}
+			}
+
+			start := time.Now()
+			err = next(c)
+			cost := time.Since(start)
+
+			code := c.StatusCode()
+			if err != nil && !c.IsResponded() {
+				if hse, ok := err.(ship.HTTPServerError); ok {
+					code = hse.Code
+				} else {
+					code = http.StatusInternalServerError
+				}
+			}
+
+			fields := make([]log.Field, 6, 8)
+			fields[0] = log.F("addr", req.RemoteAddr)
+			fields[1] = log.F("method", req.Method)
+			fields[2] = log.F("uri", req.RequestURI)
+			fields[3] = log.F("code", code)
+			fields[4] = log.F("start", start.Unix())
+			fields[5] = log.F("cost", cost.String())
+			if logReqBody {
+				fields = append(fields, log.F("reqbody", reqbody))
+			}
+			if err != nil {
+				fields = append(fields, log.E(err))
+			}
+
+			if code < 400 {
+				log.Info("request", fields...)
+			} else if code < 500 {
+				log.Warn("request", fields...)
+			} else {
+				log.Error("request", fields...)
+			}
+
+			return
+		}
 	}
 }
 

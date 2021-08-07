@@ -15,11 +15,13 @@
 package router
 
 import (
+	"context"
 	"encoding/base64"
 	"errors"
 	"net/http"
 
-	"github.com/xgfone/ship/v4"
+	httpclient "github.com/xgfone/go-http-client"
+	"github.com/xgfone/ship/v5"
 )
 
 // ExecShellByHTTP executes the shell command or script by HTTP.
@@ -36,7 +38,14 @@ func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error)
 		req.Script = base64.StdEncoding.EncodeToString([]byte(script))
 	}
 
-	if err = ship.PostJSON(url, req, &resp); err != nil {
+	err = httpclient.Post(url).
+		SetContentType("application/json; charset=UTF-8").
+		SetAccepts("application/json").
+		SetBody(req).
+		Do(context.Background(), &resp).
+		Close().
+		Unwrap()
+	if err != nil {
 		return
 	} else if resp.Error != "" {
 		err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Error))

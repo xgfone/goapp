@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/xgfone/goapp"
-	"github.com/xgfone/ship/v4"
+	"github.com/xgfone/ship/v5"
 )
 
 func TestRecover(t *testing.T) {

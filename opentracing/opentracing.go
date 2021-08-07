@@ -24,7 +24,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/xgfone/goapp"
-	"github.com/xgfone/ship/v4"
+	"github.com/xgfone/ship/v5"
 )
 
 // Option is used to configure the OpenTracing middleware and RoundTripper.

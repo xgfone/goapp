@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package validate supp
+// Package validate supplies a struct validator to validate whether the field
+// value of the struct is valid or not.
 package validate
 
 import (

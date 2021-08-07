@@ -19,6 +19,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -27,8 +28,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
 	"github.com/xgfone/go-exec"
-	"github.com/xgfone/ship/v4"
-	"github.com/xgfone/ship/v4/middleware"
+	"github.com/xgfone/ship/v5"
+	"github.com/xgfone/ship/v5/middleware"
 )
 
 // Handler is the type alias of ship.Handler.
@@ -62,7 +63,7 @@ func PrometheusHandler(gatherer ...prometheus.Gatherer) Handler {
 
 		for _, mf := range mfs {
 			if err = enc.Encode(mf); err != nil {
-				ctx.Logger().Errorf("failed to encode prometheus metric: %s", err)
+				ctx.Errorf("failed to encode prometheus metric: %s", err)
 			}
 		}
 
@@ -155,11 +156,12 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 
 	return func(ctx *ship.Context) error {
 		var cmd shellRequest
-		buf, err := ctx.GetBodyReader()
+		buf := ctx.AcquireBuffer()
+		_, err := io.CopyBuffer(buf, ctx.Body(), make([]byte, 1024))
+		defer ctx.ReleaseBuffer(buf)
 		if err != nil {
 			return ship.ErrBadRequest.New(err)
 		}
-		defer ctx.ReleaseBuffer(buf)
 
 		if err := json.NewDecoder(buf).Decode(&cmd); err != nil {
 			return ship.ErrBadRequest.New(err)

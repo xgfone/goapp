@@ -22,7 +22,7 @@ import (
 	// tr "github.com/opentracing/opentracing-go"
 	// "github.com/uber/jaeger-client-go/config"
 	"github.com/xgfone/goapp/opentracing"
-	"github.com/xgfone/ship/v4"
+	"github.com/xgfone/ship/v5"
 )
 
 func initOpenTracing() {
@@ -73,7 +73,7 @@ func ExampleOpenTracing() { // Main function
 		return c.Text(200, "app1:%s,%s", data1, data2)
 	})
 
-	app.Start(":8001").Wait()
+	ship.StartServer(":8001", app)
 }
 
 func request(ctx context.Context, url string) (data string, err error) {
