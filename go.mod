@@ -13,10 +13,10 @@ require (
 	github.com/xgfone/go-atexit v0.2.0
 	github.com/xgfone/go-exec v0.1.1
 	github.com/xgfone/go-http-client v0.2.0
-	github.com/xgfone/go-log v0.3.0
+	github.com/xgfone/go-log v0.5.0
 	github.com/xgfone/gover v0.3.0
 	github.com/xgfone/netaddr v0.5.1
-	github.com/xgfone/ship/v5 v5.0.0
+	github.com/xgfone/ship/v5 v5.0.1
 	github.com/xgfone/sqlx v0.11.1
 )
 

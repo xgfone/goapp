@@ -40,7 +40,7 @@ func InitLogging(level, filepath string) {
 // If filepath is empty, it will use Stdout as the writer.
 func InitLogging2(level, filepath, filesize string, filenum int) {
 	if level != "" {
-		log.DefalutLogger.Level = log.NameToLevel(level)
+		log.SetLevel(log.NameToLevel(level))
 	}
 
 	if filepath != "" {
