@@ -18,14 +18,14 @@ import "github.com/xgfone/gconf/v6"
 
 // SQLDBOpts collects the options of the SQL database.
 var SQLDBOpts = []gconf.Opt{
-	gconf.StrOpt("connection", "The URL connection to the alarm database, user:password@tcp(127.0.0.1:3306)/db").C(false),
-	gconf.IntOpt("maxconnnum", "The maximum number of the connections.").C(false).D(0),
-	gconf.BoolOpt("logsqlstmt", "Log the sql statement when executing it.").C(false),
-	gconf.BoolOpt("logsqlargs", "Log the arguments of sql statement when executing it.").C(false),
+	gconf.StrOpt("connection", "The URL connection to the alarm database, user:password@tcp(127.0.0.1:3306)/db").Cli(false),
+	gconf.IntOpt("maxconnnum", "The maximum number of the connections.").Cli(false).D(0),
+	gconf.BoolOpt("logsqlstmt", "Log the sql statement when executing it.").Cli(false),
+	gconf.BoolOpt("logsqlargs", "Log the arguments of sql statement when executing it.").Cli(false),
 }
 
 // SQLDBOptGroup is the group of the sql database config options.
-var SQLDBOptGroup = gconf.NewGroup("database.sql")
+var SQLDBOptGroup = gconf.Group("database.sql")
 
 // RegisterSQLDBOpts registers the default options of the sql database.
 func RegisterSQLDBOpts() {
