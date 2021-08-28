@@ -20,7 +20,7 @@ import (
 	"plugin"
 	"strings"
 
-	"github.com/xgfone/gconf/v5"
+	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-log"
 )
 
@@ -31,7 +31,7 @@ var PluginOpts = []gconf.Opt{
 }
 
 // PluginOptGroup is the group of the OpenTracing plugin config options.
-var PluginOptGroup = gconf.NewGroup("opentracing.plugin")
+var PluginOptGroup = gconf.Group("opentracing.plugin")
 
 // RegisterPluginOpts registers the options of opentracing plugin.
 func RegisterPluginOpts() { PluginOptGroup.RegisterOpts(PluginOpts...) }

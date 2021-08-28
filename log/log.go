@@ -19,7 +19,7 @@ package log
 import (
 	stdlog "log"
 
-	"github.com/xgfone/gconf/v5"
+	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 )

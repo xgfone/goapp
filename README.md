@@ -1,6 +1,6 @@
 # goapp [![Build Status](https://api.travis-ci.com/xgfone/goapp.svg?branch=master)](https://travis-ci.com/github/xgfone/goapp) [![GoDoc](https://pkg.go.dev/badge/github.com/xgfone/goapp)](https://pkg.go.dev/github.com/xgfone/goapp) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://raw.githubusercontent.com/xgfone/goapp/master/LICENSE)
 
-The package is used to initialize an application to simply the creation. Support `Go1.13`.
+The package is used to initialize an application to simply the creation. Support `Go1.11+`.
 
 ## Install
 ```shell
@@ -12,37 +12,34 @@ $ go get -u github.com/xgfone/goapp
 package main
 
 import (
-	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/gconf/v5/field"
+	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-log"
 	"github.com/xgfone/goapp"
 	"github.com/xgfone/goapp/router"
 	"github.com/xgfone/ship/v5"
 )
 
-// Define some options.
-var (
-	conf config
-	opts = []gconf.Opt{
-		gconf.StrOpt("opt1", "help doc"),
-		gconf.IntOpt("opt2", "help doc"),
-	}
-)
-
-type config struct {
-	Addr field.StringOptField `default:":80" help:"The address to listen to."`
+var opts = []gconf.Opt{
+	gconf.StrOpt("opt1", "help doc"),
+	gconf.IntOpt("opt2", "help doc"),
 }
 
 func main() {
-	// Initialize the app configuration
-	goapp.Init("app", &conf, opts)
+	addr := gconf.NewString("addr", ":80", "The address to listen to.")
+	goapp.Init("app", opts...)
 
-	// Initialize and start the app router.
+	// Initialize the app router.
 	app := router.InitRouter(nil)
+	app.Logger = log.DefalutLogger
+	app.Use(router.Logger(true), router.Recover)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })
 
 	// Start the HTTP server.
-	ship.StartServer(conf.Addr.Get(), app)
+	runner := ship.NewRunner(app)
+	runner.RegisterOnShutdown(atexit.Execute)
+	runner.Start(addr.Get())
 }
 ```
 

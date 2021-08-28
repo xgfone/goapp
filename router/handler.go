@@ -74,10 +74,16 @@ func PrometheusHandler(gatherer ...prometheus.Gatherer) Handler {
 // DefaultShellConfig is the default ShellConfig.
 var DefaultShellConfig = ShellConfig{Shell: "bash", Timeout: time.Minute}
 
+func init() {
+	if os.PathSeparator == '/' {
+		DefaultShellConfig.Dir = "/tmp"
+	}
+}
+
 // ShellConfig is used to configure the shell execution.
 type ShellConfig struct {
 	Dir     string        // The directory to save and run the shell script.
-	Shell   string        // The shell name or path, which is "sh" by default.
+	Shell   string        // The shell name or path, which is "bash" by default.
 	Timeout time.Duration // The timeout to execute the shell command.
 }
 
@@ -130,6 +136,9 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 
 	if conf.Shell == "" {
 		conf.Shell = exec.DefaultShell
+		if conf.Shell == "" {
+			conf.Shell = "bash"
+		}
 	}
 
 	if handle == nil {

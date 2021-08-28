@@ -19,20 +19,17 @@ import (
 	stdlog "log"
 
 	"github.com/go-stack/stack"
-	"github.com/xgfone/gconf/v5"
-	"github.com/xgfone/gconf/v5/field"
+	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/gover"
-	"github.com/xgfone/ship/v4"
-	"github.com/xgfone/ship/v4/middleware"
+	"github.com/xgfone/ship/v5"
+	"github.com/xgfone/ship/v5/middleware"
 )
 
-// Config is used to configure the app.
-type Config struct {
-	Addr     field.StringOptField `default:":80" help:"The address to listen to."`
-	LogFile  field.StringOptField `default:"" help:"The path of the log file."`
-	LogLevel field.StringOptField `default:"info" help:"The level of the log, such as debug, info, etc."`
+var logopts = []gconf.Opt{
+	gconf.StrOpt("file", "The path of the log file.").D("/var/log/appName.log"),
+	gconf.StrOpt("level", "The level of the log, such as debug, info, etc.").D("info"),
 }
 
 // Recover is a ship middleware to recover the panic if exists.
@@ -56,32 +53,38 @@ func Recover(next ship.Handler) ship.Handler {
 }
 
 func main() {
-	var conf Config
+	// Register the options.
+	addr := gconf.NewString("addr", ":80", "The address to listen to.")
+	loggroups := gconf.Group("log")
+	loggroups.RegisterOpts(logopts...)
 
 	// Initialize the config
-	gconf.SetErrHandler(gconf.ErrorHandler(func(err error) { log.Errorf(err.Error()) }))
-	gconf.RegisterStruct(&conf)
-	gconf.SetStringVersion(gover.Text())
+	gconf.Conf.Errorf = log.Errorf
+	gconf.SetVersion(gover.Text())
 	gconf.AddAndParseOptFlag(gconf.Conf)
 	gconf.LoadSource(gconf.NewFlagSource())
-	gconf.LoadSource(gconf.NewEnvSource("PREFIX"))
-	gconf.LoadSource(gconf.NewFileSource(gconf.GetString(gconf.ConfigFileOpt.Name)))
+	gconf.LoadSource(gconf.NewEnvSource("appName"))
+	configFile := gconf.GetString(gconf.ConfigFileOpt.Name)
+	gconf.LoadAndWatchSource(gconf.NewFileSource(configFile))
 
-	// Initialize the log
-	log.DefalutLogger.Level = log.NameToLevel(conf.LogLevel.Get())
-	writer := log.FileWriter(conf.LogFile.Get(), "100M", 100)
+	// Initialize the logging.
+	log.SetLevel(log.NameToLevel(loggroups.GetString("level")))
+	writer := log.FileWriter(loggroups.GetString("file"), "100M", 100)
 	log.DefalutLogger.Encoder.SetWriter(log.SafeWriter(writer))
 	stdlog.SetOutput(log.NewIOWriter(writer, log.LvlTrace))
 	atexit.Register(func() { writer.Close() })
 
 	// TODO ...
 
-	// Initialize and start the app.
+	// Initialize the app router.
 	app := ship.Default()
-	app.SetLogger(log.DefalutLogger)
-	app.RegisterOnShutdown(atexit.Execute)
-	app.Use(middleware.Logger(nil), Recover)
+	app.Logger = log.DefalutLogger
+	app.Use(middleware.Logger(), Recover)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })
-	app.Start(conf.Addr.Get()).Wait()
+
+	// Start the HTTP server.
+	runner := ship.NewRunner(app)
+	runner.RegisterOnShutdown(atexit.Execute)
+	runner.Start(addr.Get())
 }

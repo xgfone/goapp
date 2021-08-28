@@ -14,7 +14,7 @@
 
 package db
 
-import "github.com/xgfone/gconf/v5"
+import "github.com/xgfone/gconf/v6"
 
 // SQLDBOpts collects the options of the SQL database.
 var SQLDBOpts = []gconf.Opt{

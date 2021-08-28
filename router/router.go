@@ -25,16 +25,13 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
-	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/ship/v5"
 )
-
-// App is the default global router app.
-var App = InitRouter(nil)
 
 // DefaultRuntimeRouteConfig is the default RuntimeRouteConfig
 // with DefaultShellConfig.
@@ -51,6 +48,7 @@ func InitRouter(c *Config) *ship.Ship {
 	if c != nil {
 		config = *c
 	}
+
 	app := ship.Default()
 	app.Validator = ship.ValidatorFunc(validate.StructValidator(nil))
 	app.Use(Logger(config.LogReqBody), Recover)
@@ -74,7 +72,7 @@ type RuntimeRouteConfig struct {
 	IsReady   func() bool
 	IsHealthy func() bool
 
-	Config *config.Config
+	Config *gconf.Config
 }
 
 // AddRuntimeRoutes adds the runtime routes.
@@ -116,9 +114,14 @@ func getAllRoutes(s *ship.Ship) ship.Handler {
 	return func(c *ship.Context) error { return c.JSON(200, s.Routes()) }
 }
 
-func getAllConfigs(conf *config.Config) ship.Handler {
+func getAllConfigs(conf *gconf.Config) ship.Handler {
+	if conf == nil {
+		conf = gconf.Conf
+	}
+
 	return func(c *ship.Context) error {
-		return c.JSON(200, config.GetAllConfigs(conf))
+		_, snap := conf.Snapshot()
+		return c.JSON(200, snap)
 	}
 }
 
