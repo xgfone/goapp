@@ -8,7 +8,7 @@ require (
 	github.com/prometheus/common v0.30.0
 	github.com/vishvananda/netlink v1.1.0
 	github.com/xgfone/cast v0.5.0
-	github.com/xgfone/gconf/v6 v6.0.0-beta.1
+	github.com/xgfone/gconf/v6 v6.0.0
 	github.com/xgfone/go-atexit v0.2.0
 	github.com/xgfone/go-exec v0.1.1
 	github.com/xgfone/go-http-client v0.2.0
