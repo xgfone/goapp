@@ -204,8 +204,8 @@ github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df h1:OviZH7qLw/7Zo
 github.com/vishvananda/netns v0.0.0-20191106174202-0a2b9b5464df/go.mod h1:JP3t17pCcGlemwknint6hfoeCVQrEMVwxRLRjXpq+BU=
 github.com/xgfone/cast v0.5.0 h1:5nROCXsIKvdD+zxNeiiPT1BqnLM8sDm4elTYd5KR50c=
 github.com/xgfone/cast v0.5.0/go.mod h1:T+gPbsD/fD72zz9wy/XaLTv236sPHaf6TcT7uvIhV/k=
-github.com/xgfone/gconf/v6 v6.0.0 h1:QdmkBbYvt//bgLAr02VxHb7XHS2V3ZM26zlHlgPQtFA=
-github.com/xgfone/gconf/v6 v6.0.0/go.mod h1:9V51NN2SxinGLUQxn0iuQWCHjsZwkMj6JA3u/UZqUZ8=
+github.com/xgfone/gconf/v6 v6.0.1 h1:kr368SJxxCOr07InHadvmYv/G1FaSMWorfC/usQUyjo=
+github.com/xgfone/gconf/v6 v6.0.1/go.mod h1:9V51NN2SxinGLUQxn0iuQWCHjsZwkMj6JA3u/UZqUZ8=
 github.com/xgfone/go-atexit v0.2.0 h1:pyoryNn60srlyHTJdEdDeR5ASJ/ebgEAxjoOG2mhHNQ=
 github.com/xgfone/go-atexit v0.2.0/go.mod h1:yN4Hf2wE06X4kJLL2qxBNKuJHTRdDRoifivfFoKdC8o=
 github.com/xgfone/go-exec v0.1.1 h1:KunXzKNuseDL0MZURx5wCN4vpGAfX40eWDTyNu5pooc=
