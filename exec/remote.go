@@ -33,30 +33,33 @@ var SSHUser = "root"
 // SSHOptions is the options of ssh/scp command.
 var SSHOptions = "-o StrictHostKeyChecking=no"
 
-// ExecuteCmdBySSH executes the shell command by SSH.
-func ExecuteCmdBySSH(host, cmd string) (stdout, stderr string, err error) {
+// ExecuteCmdBySSHContext executes the shell command by SSH.
+func ExecuteCmdBySSHContext(ctx context.Context, host, cmd string) (
+	stdout, stderr string, err error) {
 	cmd = fmt.Sprintf(`ssh %s %s@%s "%s"`, SSHOptions, SSHUser, host, cmd)
-	_stdout, _stderr, err := exec.RunShellCmd(context.Background(), cmd)
+	_stdout, _stderr, err := exec.RunShellCmd(ctx, cmd)
 	if err == nil {
 		stdout, stderr = string(_stdout), string(_stderr)
 	}
 	return
 }
 
-// CopyFilesToRemoteBySSH copies the files from the local to the remote.
-func CopyFilesToRemoteBySSH(remoteHost, remoteDirOrFile string, localFiles ...string) error {
+// CopyFilesToRemoteBySSHContext copies the files from the local to the remote.
+func CopyFilesToRemoteBySSHContext(ctx context.Context, remoteHost,
+	remoteDirOrFile string, localFiles ...string) error {
 	if len(localFiles) == 0 {
 		return nil
 	}
 
 	files := strings.Join(localFiles, " ")
 	cmd := fmt.Sprintf("scp %s %s %s@%s:%s", SSHOptions, files, SSHUser, remoteHost, remoteDirOrFile)
-	_, _, err := exec.RunShellCmd(context.Background(), cmd)
+	_, _, err := exec.RunShellCmd(ctx, cmd)
 	return err
 }
 
-// CopyFilesFromRemoteBySSH copies the files from the remote to the local.
-func CopyFilesFromRemoteBySSH(remoteHost, localDirOrFile string, remoteFiles ...string) error {
+// CopyFilesFromRemoteBySSHContext copies the files from the remote to the local.
+func CopyFilesFromRemoteBySSHContext(ctx context.Context, remoteHost,
+	localDirOrFile string, remoteFiles ...string) error {
 	if len(remoteFiles) == 0 {
 		return nil
 	}
@@ -67,12 +70,49 @@ func CopyFilesFromRemoteBySSH(remoteHost, localDirOrFile string, remoteFiles ...
 
 	files := strings.Join(remoteFiles, " ")
 	cmd := fmt.Sprintf("scp %s %s %s", SSHOptions, files, localDirOrFile)
-	_, _, err := exec.RunShellCmd(context.Background(), cmd)
+	_, _, err := exec.RunShellCmd(ctx, cmd)
 	return err
 }
 
-// ExecuteScriptBySSH executes the shell script by SSH.
+// ExecuteCmdBySSH is equal to
+//
+//   ExecuteCmdBySSHContext(context.Background(), host, cmd)
+//
+func ExecuteCmdBySSH(host, cmd string) (stdout, stderr string, err error) {
+	return ExecuteCmdBySSHContext(context.Background(), host, cmd)
+}
+
+// CopyFilesToRemoteBySSH is equal to
+//
+//   CopyFilesToRemoteBySSHContext(context.Background(), remoteHost,
+//                                 remoteDirOrFile, localFiles...)
+//
+func CopyFilesToRemoteBySSH(remoteHost, remoteDirOrFile string, localFiles ...string) error {
+	return CopyFilesToRemoteBySSHContext(context.Background(), remoteHost,
+		remoteDirOrFile, localFiles...)
+}
+
+// CopyFilesFromRemoteBySSH is equal to
+//
+//    CopyFilesFromRemoteBySSHContext(context.Background(), remoteHost,
+//                                    localDirOrFile, remoteFiles...)
+//
+func CopyFilesFromRemoteBySSH(remoteHost, localDirOrFile string, remoteFiles ...string) error {
+	return CopyFilesFromRemoteBySSHContext(context.Background(), remoteHost,
+		localDirOrFile, remoteFiles...)
+}
+
+// ExecuteScriptBySSH is equal to
+//
+//   ExecuteScriptBySSHContext(context.Background(), host, script)
+//
 func ExecuteScriptBySSH(host, script string) (stdout, stderr string, err error) {
+	return ExecuteScriptBySSHContext(context.Background(), host, script)
+}
+
+// ExecuteScriptBySSHContext executes the shell script by SSH.
+func ExecuteScriptBySSHContext(ctx context.Context, host, script string) (
+	stdout, stderr string, err error) {
 	filename1 := getScriptFile(script)
 	filename2 := filename1
 	if exec.ShellScriptDir != "" {
@@ -87,10 +127,11 @@ func ExecuteScriptBySSH(host, script string) (stdout, stderr string, err error) 
 	}
 	defer os.Remove(filename1)
 
-	if err = CopyFilesToRemoteBySSH(host, filename2, filename1); err != nil {
+	err = CopyFilesToRemoteBySSHContext(ctx, host, filename2, filename1)
+	if err != nil {
 		return
 	}
-	defer ExecuteCmdBySSH(host, fmt.Sprintf("rm -f %s", filename2))
+	defer ExecuteCmdBySSHContext(ctx, host, fmt.Sprintf("rm -f %s", filename2))
 
 	shell := exec.DefaultCmd.Shell
 	if shell == "" {
@@ -98,7 +139,7 @@ func ExecuteScriptBySSH(host, script string) (stdout, stderr string, err error) 
 			shell = "sh"
 		}
 	}
-	return ExecuteCmdBySSH(host, fmt.Sprintf("%s %s", shell, filename2))
+	return ExecuteCmdBySSHContext(ctx, host, fmt.Sprintf("%s %s", shell, filename2))
 }
 
 func getScriptFile(script string) (filename string) {
