@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-exec"
 	"github.com/xgfone/go-log"
 	glog "github.com/xgfone/goapp/log"
 	"github.com/xgfone/gover"
@@ -28,11 +27,9 @@ import (
 
 func init() {
 	gconf.Conf.Errorf = log.Errorf
-
 	rand.Seed(time.Now().UnixNano())
-	http.DefaultClient.Timeout = time.Second * 3
-	exec.DefaultTimeout = time.Second * 3
 
+	// http.DefaultClient.Timeout = time.Second * 3
 	tp := http.DefaultTransport.(*http.Transport)
 	tp.IdleConnTimeout = time.Second * 30
 	tp.MaxIdleConnsPerHost = 100

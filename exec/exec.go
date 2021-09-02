@@ -18,10 +18,13 @@ package exec
 import (
 	"context"
 	"sync"
+	"time"
 
 	"github.com/xgfone/go-exec"
 	"github.com/xgfone/go-log"
 )
+
+func init() { exec.DefaultTimeout = time.Second * 3 }
 
 func fatalError(name string, args []string, err error) {
 	ce := err.(exec.CmdError)
