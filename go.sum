@@ -208,10 +208,10 @@ github.com/xgfone/gconf/v6 v6.0.1 h1:kr368SJxxCOr07InHadvmYv/G1FaSMWorfC/usQUyjo
 github.com/xgfone/gconf/v6 v6.0.1/go.mod h1:9V51NN2SxinGLUQxn0iuQWCHjsZwkMj6JA3u/UZqUZ8=
 github.com/xgfone/go-atexit v0.2.0 h1:pyoryNn60srlyHTJdEdDeR5ASJ/ebgEAxjoOG2mhHNQ=
 github.com/xgfone/go-atexit v0.2.0/go.mod h1:yN4Hf2wE06X4kJLL2qxBNKuJHTRdDRoifivfFoKdC8o=
-github.com/xgfone/go-exec v0.1.1 h1:KunXzKNuseDL0MZURx5wCN4vpGAfX40eWDTyNu5pooc=
-github.com/xgfone/go-exec v0.1.1/go.mod h1:uyASdRqXjtI9NvhLeSXZcKSEL6uJw4SaBxGjh0me0kw=
-github.com/xgfone/go-http-client v0.2.0 h1:PUIKSYC/rllMw7xi22KxeUJp69XC8IjWLZm4iJtr57I=
-github.com/xgfone/go-http-client v0.2.0/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
+github.com/xgfone/go-exec v0.2.0 h1:Y5OxgcpXrSUvXjBcmNSVZ1Pfg0Z6AdG4aScdH+ls0Gc=
+github.com/xgfone/go-exec v0.2.0/go.mod h1:uyASdRqXjtI9NvhLeSXZcKSEL6uJw4SaBxGjh0me0kw=
+github.com/xgfone/go-http-client v0.4.0 h1:rmwwuOdFIt+Wb+sh3iNqL41dmG6MgbdoRKDFUP9C5AU=
+github.com/xgfone/go-http-client v0.4.0/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
 github.com/xgfone/go-log v0.5.0 h1:xpgN09ASl7H1CANtifEfaPywv7F0hkTlkMkoOkXNll0=
 github.com/xgfone/go-log v0.5.0/go.mod h1:4FrE2c7QRvQ74OH8X0s/AYFQOdXyAX45TYdSXSsv/7w=
 github.com/xgfone/gover v0.3.0 h1:sr6xTy1cOipC9ZhpFDuJvk7VXjEs96poW6c1XEgE7H0=

@@ -152,7 +152,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 			}
 			if err != nil {
 				he := err.(ship.HTTPServerError)
-				if ce, ok := he.Err.(exec.CmdError); ok {
+				if ce, ok := he.Err.(exec.Result); ok {
 					result.Error = ce.Err.Error()
 				} else {
 					result.Error = he.Err.Error()

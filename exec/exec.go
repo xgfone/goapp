@@ -27,7 +27,7 @@ import (
 func init() { exec.DefaultTimeout = time.Second * 3 }
 
 func fatalError(name string, args []string, err error) {
-	ce := err.(exec.CmdError)
+	ce := err.(exec.Result)
 	fields := make([]log.Field, 2, 5)
 	fields[0] = log.F("cmd", ce.Name)
 	fields[1] = log.F("args", ce.Args)
@@ -111,17 +111,18 @@ func PanicOutputs(cmds ...string) string { return PanicOutput(cmds[0], cmds[1:].
 func SetDefaultCmdLock(lock *sync.Mutex) { exec.DefaultCmd.Lock = lock }
 
 // SetDefaultCmdLogHook sets the log hook for the default command executor.
-func SetDefaultCmdLogHook() { exec.DefaultCmd.AppendResultHooks(LogExecutedCmdResultHook) }
+func SetDefaultCmdLogHook() { exec.DefaultCmd.ResultHook = LogExecutedCmdResultHook }
 
 // LogExecutedCmdResultHook returns a hook to log the executed command.
-func LogExecutedCmdResultHook(name string, args []string, stdout, stderr string, err error) {
-	if err == nil {
-		log.Info("successfully execute the command", log.F("cmd", name), log.F("args", args))
+func LogExecutedCmdResultHook(r exec.Result) {
+	if r.Err == nil {
+		log.Info("successfully execute the command", log.F("cmd", r.Name),
+			log.F("args", r.Args))
 		return
 	}
 
 	fields := make([]log.Field, 2, 5)
-	if e, ok := err.(exec.CmdError); ok {
+	if e, ok := r.Err.(exec.Result); ok {
 		fields[0] = log.F("cmd", e.Name)
 		fields[1] = log.F("args", e.Args)
 
@@ -135,15 +136,15 @@ func LogExecutedCmdResultHook(name string, args []string, stdout, stderr string,
 			fields = append(fields, log.E(e.Err))
 		}
 	} else {
-		fields[0] = log.F("cmd", name)
-		fields[1] = log.F("args", args)
-		if len(stdout) != 0 {
-			fields = append(fields, log.F("stdout", string(stdout)))
+		fields[0] = log.F("cmd", r.Name)
+		fields[1] = log.F("args", r.Args)
+		if len(r.Stdout) != 0 {
+			fields = append(fields, log.F("stdout", string(r.Stdout)))
 		}
-		if len(stderr) != 0 {
-			fields = append(fields, log.F("stderr", string(stderr)))
+		if len(r.Stderr) != 0 {
+			fields = append(fields, log.F("stderr", string(r.Stderr)))
 		}
-		fields = append(fields, log.E(err))
+		fields = append(fields, log.E(r.Err))
 	}
 
 	log.Error("failed to execute the command", fields...)
