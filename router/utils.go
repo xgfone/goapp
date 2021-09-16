@@ -47,30 +47,45 @@ func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error)
 		Unwrap()
 	if err != nil {
 		return
-	} else if resp.Error != "" {
-		if resp.Stderr != "" {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Stderr))
-		} else if resp.Stdout != "" {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Stdout))
-		} else {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Error))
-		}
+	}
+
+	if stdout, err = decodeString(resp.Stdout); err != nil {
+		err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
 		return
 	}
 
-	var sout, serr []byte
-	if resp.Stdout != "" {
-		if sout, err = base64.StdEncoding.DecodeString(resp.Stdout); err != nil {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
-			return
-		}
+	if stderr, err = decodeString(resp.Stderr); err != nil {
+		err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
+		return
 	}
-	if resp.Stderr != "" {
-		if serr, err = base64.StdEncoding.DecodeString(resp.Stderr); err != nil {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
-			return
+
+	if resp.Error, err = decodeString(resp.Error); err != nil {
+		err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
+		return
+	}
+
+	if resp.Error != "" {
+		if stderr != "" {
+			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(stderr))
+		} else if stdout != "" {
+			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(stdout))
+		} else {
+			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Error))
 		}
 	}
 
-	return string(sout), string(serr), nil
+	return
+}
+
+func decodeString(s string) (string, error) {
+	if s == "" {
+		return "", nil
+	}
+
+	data, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }

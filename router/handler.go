@@ -117,7 +117,7 @@ type shellResult struct {
 //   {
 //       "stdout": "BASE64_STD_OUTPUT",
 //       "stderr": "BASE64_STD_ERR_OUTPUT",
-//       "error": "failure reason. If successfully, it is empty."
+//       "error": "BASE64 failure reason. If successfully, it is empty."
 //   }
 //
 // Notice:
@@ -153,9 +153,9 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 			if err != nil {
 				he := err.(ship.HTTPServerError)
 				if ce, ok := he.Err.(exec.Result); ok {
-					result.Error = ce.Err.Error()
+					result.Error = base64.StdEncoding.EncodeToString([]byte(ce.Err.Error()))
 				} else {
-					result.Error = he.Err.Error()
+					result.Error = base64.StdEncoding.EncodeToString([]byte(he.Err.Error()))
 				}
 			}
 
