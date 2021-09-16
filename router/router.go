@@ -51,7 +51,7 @@ func InitRouter(c *Config) *ship.Ship {
 
 	app := ship.Default()
 	app.Validator = ship.ValidatorFunc(validate.StructValidator(nil))
-	app.Use(Logger(config.LogReqBody), Recover)
+	app.Pre(Logger(config.LogReqBody), Recover)
 	app.Logger = log.DefalutLogger
 	return app
 }
