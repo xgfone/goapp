@@ -48,7 +48,13 @@ func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error)
 	if err != nil {
 		return
 	} else if resp.Error != "" {
-		err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Error))
+		if resp.Stderr != "" {
+			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Stderr))
+		} else if resp.Stdout != "" {
+			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Stdout))
+		} else {
+			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Error))
+		}
 		return
 	}
 

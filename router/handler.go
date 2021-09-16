@@ -217,10 +217,10 @@ func executeShellCommand(c context.Context, shell, cmd string) (string, string, 
 
 	stdout, stderr, err := exec.Run(c, shell, "-c", string(bs))
 	if err != nil {
-		return "", "", ship.ErrInternalServerError.New(err)
+		err = ship.ErrInternalServerError.New(err)
 	}
 
-	return stdout, stderr, nil
+	return stdout, stderr, err
 }
 
 var generateTmpFilename = middleware.GenerateToken(16)
@@ -244,7 +244,7 @@ func executeShellScript(c context.Context, shell, dir, script string) (string, s
 
 	stdout, stderr, err := exec.Run(c, shell, filename)
 	if err != nil {
-		return "", "", ship.ErrInternalServerError.New(err)
+		return stdout, stderr, ship.ErrInternalServerError.New(err)
 	}
 	return stdout, stderr, nil
 }
