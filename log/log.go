@@ -22,6 +22,7 @@ import (
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
+	"github.com/xgfone/go-log/writer"
 )
 
 // LogOpts collects the options about the log.
@@ -40,13 +41,13 @@ func InitLogging(level, filepath string) {
 // If filepath is empty, it will use Stdout as the writer.
 func InitLogging2(level, filepath, filesize string, filenum int) {
 	if level != "" {
-		log.SetLevel(log.NameToLevel(level))
+		log.SetLevel(log.ParseLevel(level))
 	}
 
 	if filepath != "" {
-		writer := log.FileWriter(filepath, filesize, filenum)
-		log.DefalutLogger.Encoder.SetWriter(log.SafeWriter(writer))
-		stdlog.SetOutput(log.NewIOWriter(writer, log.LvlTrace))
-		atexit.Register(func() { writer.Close() })
+		file := log.FileWriter(filepath, filesize, filenum)
+		log.DefaultLogger.SetWriter(writer.SafeWriter(file))
+		atexit.Register(func() { file.Close() })
+		stdlog.SetOutput(log.DefaultLogger)
 	}
 }

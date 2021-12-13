@@ -22,6 +22,8 @@ import (
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
+	"github.com/xgfone/go-log/logf"
+	"github.com/xgfone/go-log/writer"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/ship/v5"
 	"github.com/xgfone/ship/v5/middleware"
@@ -68,17 +70,17 @@ func main() {
 	gconf.LoadAndWatchSource(gconf.NewFileSource(configFile))
 
 	// Initialize the logging.
-	log.SetLevel(log.NameToLevel(loggroups.GetString("level")))
-	writer := log.FileWriter(loggroups.GetString("file"), "100M", 100)
-	log.DefalutLogger.Encoder.SetWriter(log.SafeWriter(writer))
-	stdlog.SetOutput(log.NewIOWriter(writer, log.LvlTrace))
-	atexit.Register(func() { writer.Close() })
+	log.SetLevel(log.ParseLevel(loggroups.GetString("level")))
+	file := log.FileWriter(loggroups.GetString("file"), "100M", 100)
+	log.SetWriter(writer.SafeWriter(file))
+	stdlog.SetOutput(log.DefaultLogger)
+	atexit.Register(func() { file.Close() })
 
 	// TODO ...
 
 	// Initialize the app router.
 	app := ship.Default()
-	app.Logger = log.DefalutLogger
+	app.Logger = logf.NewLogger(nil, 0)
 	app.Use(middleware.Logger(), Recover)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })

@@ -68,7 +68,7 @@ func LogInterceptor(debug, logArgs bool) Config {
 func Ping() Config {
 	return func(db *sqlx.DB) {
 		if err := db.Ping(); err != nil {
-			log.Fatal("failed to ping mysql", log.E(err))
+			log.Fatal().Kv("err", err).Printf("failed to ping mysql")
 		}
 	}
 }

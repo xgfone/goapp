@@ -27,7 +27,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/go-log"
+	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/ship/v5"
@@ -52,7 +52,7 @@ func InitRouter(c *Config) *ship.Ship {
 	app := ship.Default()
 	app.Validator = ship.ValidatorFunc(validate.StructValidator(nil))
 	app.Pre(Logger(config.LogReqBody), Recover)
-	app.Logger = log.DefalutLogger
+	app.Logger = logf.NewLogger(nil, 0)
 	return app
 }
 

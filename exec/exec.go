@@ -28,21 +28,19 @@ func init() { exec.DefaultTimeout = time.Second * 3 }
 
 func fatalError(name string, args []string, err error) {
 	ce := err.(exec.Result)
-	fields := make([]log.Field, 2, 5)
-	fields[0] = log.F("cmd", ce.Name)
-	fields[1] = log.F("args", ce.Args)
+	logger := log.Fatal().Kv("cmd", ce.Name).Kv("args", ce.Args)
 
 	if len(ce.Stdout) != 0 {
-		fields = append(fields, log.F("stdout", string(ce.Stdout)))
+		logger.Kv("stdout", string(ce.Stdout))
 	}
 	if len(ce.Stderr) != 0 {
-		fields = append(fields, log.F("stderr", string(ce.Stderr)))
+		logger.Kv("stderr", string(ce.Stderr))
 	}
 	if ce.Err != nil {
-		fields = append(fields, log.E(ce.Err))
+		logger.Kv("err", ce.Err)
 	}
 
-	log.Fatal("failed to execute the command", fields...)
+	logger.Printf("failed to execute the command")
 }
 
 // Execute executes a command name with args.
@@ -116,36 +114,33 @@ func SetDefaultCmdLogHook() { exec.DefaultCmd.ResultHook = LogExecutedCmdResultH
 // LogExecutedCmdResultHook returns a hook to log the executed command.
 func LogExecutedCmdResultHook(r exec.Result) {
 	if r.Err == nil {
-		log.Info("successfully execute the command", log.F("cmd", r.Name),
-			log.F("args", r.Args))
+		log.Info().Kv("cmd", r.Name).Kv("args", r.Args).
+			Printf("successfully execute the command")
 		return
 	}
 
-	fields := make([]log.Field, 2, 5)
+	logger := log.Error()
 	if e, ok := r.Err.(exec.Result); ok {
-		fields[0] = log.F("cmd", e.Name)
-		fields[1] = log.F("args", e.Args)
-
+		logger.Kv("cmd", e.Name).Kv("args", e.Args)
 		if len(e.Stdout) != 0 {
-			fields = append(fields, log.F("stdout", string(e.Stdout)))
+			logger.Kv("stdout", string(e.Stdout))
 		}
 		if len(e.Stderr) != 0 {
-			fields = append(fields, log.F("stderr", string(e.Stderr)))
+			logger.Kv("stderr", string(e.Stderr))
 		}
 		if e.Err != nil {
-			fields = append(fields, log.E(e.Err))
+			logger.Kv("err", e.Err)
 		}
 	} else {
-		fields[0] = log.F("cmd", r.Name)
-		fields[1] = log.F("args", r.Args)
+		logger.Kv("cmd", r.Name).Kv("args", r.Args)
 		if len(r.Stdout) != 0 {
-			fields = append(fields, log.F("stdout", string(r.Stdout)))
+			logger.Kv("stdout", string(r.Stdout))
 		}
 		if len(r.Stderr) != 0 {
-			fields = append(fields, log.F("stderr", string(r.Stderr)))
+			logger.Kv("stderr", string(r.Stderr))
 		}
-		fields = append(fields, log.E(r.Err))
+		logger.Kv("err", r.Err)
 	}
 
-	log.Error("failed to execute the command", fields...)
+	logger.Printf("failed to execute the command")
 }

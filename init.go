@@ -91,11 +91,9 @@ func InitApp2(appName, version, logfilesize string, logfilenum int, opts ...gcon
 	logfile := gconf.GetString(glog.LogOpts[0].Name)
 	loglevel := gconf.GetString(glog.LogOpts[1].Name)
 	glog.InitLogging2(loglevel, logfile, logfilesize, logfilenum)
-	if appName != "" {
-		log.DefalutLogger.Name = appName
-	}
+	log.DefaultLogger.SetName(appName)
 
 	if err := CallInit(); err != nil {
-		log.Fatal("failed to init", log.E(err))
+		log.Fatal().Kv("err", err).Printf("failed to init")
 	}
 }

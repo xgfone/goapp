@@ -81,26 +81,27 @@ func Logger(logReqBody bool) Middleware {
 				}
 			}
 
-			fields := make([]log.Field, 6, 8)
-			fields[0] = log.F("addr", req.RemoteAddr)
-			fields[1] = log.F("method", req.Method)
-			fields[2] = log.F("uri", req.RequestURI)
-			fields[3] = log.F("code", code)
-			fields[4] = log.F("start", start.Unix())
-			fields[5] = log.F("cost", cost.String())
-			if logReqBody {
-				fields = append(fields, log.F("reqbody", reqbody))
-			}
-			if err != nil {
-				fields = append(fields, log.E(err))
+			var logger log.Logger
+			if code < 400 {
+				logger = log.Info()
+			} else if code < 500 {
+				logger = log.Warn()
+			} else {
+				logger = log.Error()
 			}
 
-			if code < 400 {
-				log.Info("request", fields...)
-			} else if code < 500 {
-				log.Warn("request", fields...)
-			} else {
-				log.Error("request", fields...)
+			logger.Kv("addr", req.RemoteAddr).
+				Kv("method", req.Method).
+				Kv("uri", req.RequestURI).
+				Kv("code", code).
+				Kv("start", start.Unix()).
+				Kv("cost", cost)
+
+			if logReqBody {
+				logger.Kv("reqbody", reqbody)
+			}
+			if err != nil {
+				logger.Kv("err", err)
 			}
 
 			return

@@ -71,8 +71,8 @@ func getPluginPathAndConfig(p string, c interface{}) (string, interface{}) {
 func MustInitOpenTracingFromPlugin(pluginPath string, config interface{}) {
 	pluginPath, config = getPluginPathAndConfig(pluginPath, config)
 	if err := InitOpenTracingFromPlugin(pluginPath, config); err != nil {
-		log.Fatal("failed to initialize the opentracing implementation",
-			log.F("plugin", pluginPath), log.F("config", config), log.E(err))
+		log.Fatal().Kv("plugin", pluginPath).Kv("config", config).Kv("err", err).
+			Printf("failed to initialize the opentracing implementation")
 	}
 }
 

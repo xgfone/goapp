@@ -49,7 +49,7 @@ func InitMysqlDB(connURL string, configs ...Config) *sqlx.DB {
 	connURL = SetMySQLLocation(connURL, Location)
 	db, err := sqlx.Open("mysql", connURL)
 	if err != nil {
-		log.Fatal("failed to conenct to mysql", log.E(err))
+		log.Fatal().Kv("err", err).Printf("failed to conenct to mysql")
 	}
 
 	if configs == nil {

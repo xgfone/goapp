@@ -58,9 +58,6 @@ func Panic(err error, msg string, args ...interface{}) {
 // Or do nothing.
 func Must(err error, msg string, args ...interface{}) {
 	if err != nil {
-		if len(args) != 0 {
-			msg = fmt.Sprintf(msg, args...)
-		}
-		log.Fatal(msg, log.E(err))
+		log.Fatal().Kv("err", err).Printf(msg, args...)
 	}
 }

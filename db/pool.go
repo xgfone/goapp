@@ -164,7 +164,8 @@ func (p *Pool) getDB(key string) (db Wrapper) {
 	} else {
 		db = p.dbs[p.index(key)%len(p.dbs)]
 	}
-	log.Debug("calculating the index by key", log.F("key", key), log.F("index", db.Index))
+	log.Debug().Kv("key", key).Kv("index", db.Index).
+		Printf("calculating the index by key")
 	return
 }
 
