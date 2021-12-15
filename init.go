@@ -21,12 +21,13 @@ import (
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-log"
+	"github.com/xgfone/go-log/logf"
 	glog "github.com/xgfone/goapp/log"
 	"github.com/xgfone/gover"
 )
 
 func init() {
-	gconf.Conf.Errorf = log.Errorf
+	gconf.Conf.Errorf = logf.Errorf
 	rand.Seed(time.Now().UnixNano())
 
 	// http.DefaultClient.Timeout = time.Second * 3

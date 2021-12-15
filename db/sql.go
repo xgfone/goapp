@@ -20,6 +20,7 @@ import (
 
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
+	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/sqlx"
 )
 
@@ -56,9 +57,9 @@ func ConnMaxLifetime(d time.Duration) Config {
 func LogInterceptor(debug, logArgs bool) Config {
 	return func(db *sqlx.DB) {
 		if debug {
-			db.Interceptor = sqlx.LogInterceptor(log.Debugf, logArgs)
+			db.Interceptor = sqlx.LogInterceptor(logf.Debugf, logArgs)
 		} else {
-			db.Interceptor = sqlx.LogInterceptor(log.Infof, logArgs)
+			db.Interceptor = sqlx.LogInterceptor(logf.Infof, logArgs)
 		}
 	}
 }
