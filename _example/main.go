@@ -61,7 +61,7 @@ func main() {
 	loggroups.RegisterOpts(logopts...)
 
 	// Initialize the config
-	gconf.Conf.Errorf = log.Errorf
+	gconf.Conf.Errorf = logf.Errorf
 	gconf.SetVersion(gover.Text())
 	gconf.AddAndParseOptFlag(gconf.Conf)
 	gconf.LoadSource(gconf.NewFlagSource())
@@ -73,14 +73,14 @@ func main() {
 	log.SetLevel(log.ParseLevel(loggroups.GetString("level")))
 	file := log.FileWriter(loggroups.GetString("file"), "100M", 100)
 	log.SetWriter(writer.SafeWriter(file))
-	stdlog.SetOutput(log.DefaultLogger)
+	stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
 	atexit.Register(func() { file.Close() })
 
 	// TODO ...
 
 	// Initialize the app router.
 	app := ship.Default()
-	app.Logger = logf.NewLogger(nil, 0)
+	app.Logger = logf.NewLogger(log.DefaultLogger, 0)
 	app.Use(middleware.Logger(), Recover)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })

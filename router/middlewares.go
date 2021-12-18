@@ -81,7 +81,7 @@ func Logger(logReqBody bool) Middleware {
 				}
 			}
 
-			var logger log.Logger
+			var logger *log.Emitter
 			if code < 400 {
 				logger = log.Info()
 			} else if code < 500 {

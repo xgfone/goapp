@@ -46,8 +46,8 @@ func InitLogging2(level, filepath, filesize string, filenum int) {
 
 	if filepath != "" {
 		file := log.FileWriter(filepath, filesize, filenum)
-		log.DefaultLogger.SetWriter(writer.SafeWriter(file))
+		log.SetWriter(writer.SafeWriter(file))
 		atexit.Register(func() { file.Close() })
-		stdlog.SetOutput(log.DefaultLogger)
+		stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
 	}
 }
