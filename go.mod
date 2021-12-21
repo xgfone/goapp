@@ -3,9 +3,6 @@ module github.com/xgfone/goapp
 require (
 	github.com/go-playground/validator/v10 v10.8.0
 	github.com/go-stack/stack v1.8.0
-	github.com/opentracing/opentracing-go v1.2.0
-	github.com/prometheus/client_golang v1.11.0
-	github.com/prometheus/common v0.30.0
 	github.com/vishvananda/netlink v1.1.0
 	github.com/xgfone/cast v0.5.0
 	github.com/xgfone/gconf/v6 v6.0.1

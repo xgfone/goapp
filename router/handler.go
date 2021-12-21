@@ -25,8 +25,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/common/expfmt"
 	"github.com/xgfone/go-exec"
 	"github.com/xgfone/ship/v5"
 	"github.com/xgfone/ship/v5/middleware"
@@ -34,42 +32,6 @@ import (
 
 // Handler is the type alias of ship.Handler.
 type Handler = ship.Handler
-
-// DisableBuiltinPrometheusCollector removes the collectors that the default
-// prometheus register registers
-func DisableBuiltinPrometheusCollector() {
-	prometheus.Unregister(prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}))
-	prometheus.Unregister(prometheus.NewGoCollector())
-}
-
-// PrometheusHandler returns a prometheus handler.
-//
-// if missing gatherer, it is prometheus.DefaultGatherer.
-func PrometheusHandler(gatherer ...prometheus.Gatherer) Handler {
-	gather := prometheus.DefaultGatherer
-	if len(gatherer) > 0 && gatherer[0] != nil {
-		gather = gatherer[0]
-	}
-
-	return func(ctx *ship.Context) error {
-		mfs, err := gather.Gather()
-		if err != nil {
-			return err
-		}
-
-		ct := expfmt.Negotiate(ctx.Request().Header)
-		ctx.SetContentType(string(ct))
-		enc := expfmt.NewEncoder(ctx, ct)
-
-		for _, mf := range mfs {
-			if err = enc.Encode(mf); err != nil {
-				ctx.Errorf("failed to encode prometheus metric: %s", err)
-			}
-		}
-
-		return nil
-	}
-}
 
 // DefaultShellConfig is the default ShellConfig.
 var DefaultShellConfig = ShellConfig{Shell: "bash", Timeout: time.Minute}

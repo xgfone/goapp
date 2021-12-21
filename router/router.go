@@ -24,7 +24,6 @@ import (
 	rpprof "runtime/pprof"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
@@ -98,7 +97,6 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 	group.Route("/routes").GET(getAllRoutes(app))
 	group.Route("/ready").GET(boolHandler(conf.IsReady))
 	group.Route("/healthy").GET(boolHandler((conf.IsHealthy)))
-	group.Route("/metrics").GET(ship.FromHTTPHandler(promhttp.Handler()))
 	group.Route("/debug/vars").GET(ship.FromHTTPHandler(expvar.Handler()))
 	group.Route("/debug/pprof/profile").GET(ship.FromHTTPHandlerFunc(pprof.Profile))
 	group.Route("/debug/pprof/cmdline").GET(ship.FromHTTPHandlerFunc(pprof.Cmdline))

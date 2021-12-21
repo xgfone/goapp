@@ -16,13 +16,10 @@ package router
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/goapp"
 	"github.com/xgfone/ship/v5"
@@ -104,100 +101,6 @@ func Logger(logReqBody bool) Middleware {
 				logger.Kv("err", err)
 			}
 
-			return
-		}
-	}
-}
-
-// HistogramBuckets is used to replace the default Histogram buckets.
-var HistogramBuckets = []float64{.005, .01, .025, .05, .075, .1, .25, .5, .75, 1, 1.5, 2}
-
-// Prometheus returns a middleware to handle the prometheus metrics.
-//
-// The first argument is the namespace, and the second is the subsystem.
-// Both of them are optional.
-func Prometheus(namespaceAndSubsystem ...string) Middleware {
-	var namespace, subsystem string
-	switch len(namespaceAndSubsystem) {
-	case 0:
-	case 1:
-		namespace = namespaceAndSubsystem[0]
-	default:
-		namespace = namespaceAndSubsystem[0]
-		subsystem = namespaceAndSubsystem[1]
-	}
-
-	requestNumber := promauto.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: subsystem,
-
-			Name: "http_request_number",
-			Help: "The number of the current http request",
-		},
-		[]string{"method", "path"})
-
-	requestTotal := promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Namespace: namespace,
-			Subsystem: subsystem,
-
-			Name: "http_request_total",
-			Help: "The total number of the http request",
-		},
-		[]string{"method", "path", "code"})
-
-	requestDurations := promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Namespace: namespace,
-			Subsystem: subsystem,
-
-			Name: "http_request_duration_seconds",
-			Help: "The duration to handle the request",
-
-			Buckets: HistogramBuckets,
-		},
-		[]string{"method", "path", "code"})
-
-	return func(next Handler) Handler {
-		return func(ctx *ship.Context) (err error) {
-			var start time.Time
-
-			code := 200
-			path := ctx.Request().URL.Path
-			method := ctx.Method()
-
-			requestNumberGuage := requestNumber.With(prometheus.Labels{"method": method, "path": path})
-			requestNumberGuage.Inc()
-
-			defer func() {
-				if e := recover(); e != nil {
-					err = goapp.NewPanicError(e, 0)
-					code = 500
-				} else {
-					switch e := err.(type) {
-					case nil:
-						code = ctx.StatusCode()
-					case ship.HTTPServerError:
-						code = e.Code
-					default:
-						code = 500
-					}
-				}
-
-				labels := prometheus.Labels{
-					"method": method,
-					"path":   path,
-					"code":   fmt.Sprintf("%d", code),
-				}
-
-				requestTotal.With(labels).Inc()
-				requestDurations.With(labels).Observe(time.Since(start).Seconds())
-				requestNumberGuage.Dec()
-			}()
-
-			start = time.Now()
-			err = next(ctx)
 			return
 		}
 	}
