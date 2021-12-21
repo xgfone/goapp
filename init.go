@@ -17,11 +17,13 @@ package goapp
 import (
 	"math/rand"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
+	"github.com/xgfone/goapp/exec"
 	glog "github.com/xgfone/goapp/log"
 	"github.com/xgfone/gover"
 )
@@ -35,6 +37,9 @@ func init() {
 	tp.IdleConnTimeout = time.Second * 30
 	tp.MaxIdleConnsPerHost = 100
 	tp.MaxIdleConns = 0
+
+	exec.SetDefaultCmdLock(new(sync.Mutex))
+	exec.SetDefaultCmdLogHook()
 }
 
 var inits []func() error
