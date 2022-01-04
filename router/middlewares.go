@@ -100,6 +100,7 @@ func Logger(logReqBody bool) Middleware {
 			if err != nil {
 				logger.Kv("err", err)
 			}
+			logger.Printf("log request")
 
 			return
 		}
