@@ -16,6 +16,7 @@ package router
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net/http"
 	"time"
@@ -27,6 +28,62 @@ import (
 
 // Middleware is the type alias of ship.Middleware.
 type Middleware = ship.Middleware
+
+type reqctx uint8
+
+// GetContext returns the http reqeust context from the context.
+func getContext(ctx context.Context) *ship.Context {
+	c, _ := ctx.Value(reqctx(255)).(*ship.Context)
+	return c
+}
+
+// SetContext sets the http request context into the context.
+func setContext(ctx context.Context, c *ship.Context) (newctx context.Context) {
+	return context.WithValue(ctx, reqctx(255), c)
+}
+
+type mwHandler ship.Handler
+
+func (h mwHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.HandleHTTP(w, r)
+}
+
+func (h mwHandler) HandleHTTP(w http.ResponseWriter, r *http.Request) error {
+	c := getContext(r.Context())
+	if r != c.Request() {
+		c.SetRequest(r)
+	}
+	if resp, ok := w.(*ship.Response); !ok || resp != c.Response() {
+		c.SetResponse(w)
+	}
+	return ship.Handler(h)(c)
+}
+
+// NewMiddleware returns a common middleware with the handler.
+//
+// Notice: the wrapped http.Handler has implemented the interface
+//
+//   type interface {
+//       HandleHTTP(http.ResponseWriter, *http.Request) error
+//   }
+//
+// So it can be used to wrap the error returned by other middleware handlers.
+func NewMiddleware(handle func(http.Handler, http.ResponseWriter, *http.Request) error) Middleware {
+	return func(next ship.Handler) ship.Handler {
+		return func(c *ship.Context) error {
+			req := c.Request()
+			if ctx := req.Context(); getContext(ctx) == nil {
+				req = req.WithContext(setContext(ctx, c))
+				c.SetRequest(req)
+			}
+			return handle(mwHandler(next), c.Response(), req)
+		}
+	}
+}
+
+// func
+
+/// ----------------------------------------------------------------------- ///
 
 // Recover is a ship middleware to recover the panic if exists.
 func Recover(next Handler) Handler {
