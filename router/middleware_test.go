@@ -15,8 +15,6 @@
 package router
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/xgfone/goapp"
@@ -29,7 +27,7 @@ func TestRecover(t *testing.T) {
 		t.Error(err)
 	}
 
-	panicStack := "middleware_test.go:33"
+	panicStack := "middleware_test.go:31"
 	err = Recover(func(ctx *ship.Context) (err error) { panic("testpanic") })(nil)
 	switch e := err.(type) {
 	case nil:
@@ -45,43 +43,4 @@ func TestRecover(t *testing.T) {
 	default:
 		t.Error(err)
 	}
-}
-
-func TestNewMiddleware(t *testing.T) {
-	r := ship.New()
-	r.Use(NewMiddleware(func(h http.Handler, w http.ResponseWriter, r *http.Request) error {
-		w.Header().Set("test", "abc")
-		h.ServeHTTP(w, r)
-		return nil
-	}))
-	r.Route("/").GET(func(c *ship.Context) error { return c.NoContent(201) })
-
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "http://127.0.0.1", nil)
-	r.ServeHTTP(rec, req)
-	if rec.Code != 201 {
-		t.Errorf("expect the status code %d, but got %d", 201, rec.Code)
-	}
-	if test := rec.Header().Get("test"); test != "abc" {
-		t.Errorf("expect 'test' header '%s', but got '%s'", "abc", test)
-	}
-}
-
-func BenchmarkNewMiddleware(b *testing.B) {
-	r := ship.New()
-	r.Use(NewMiddleware(func(h http.Handler, w http.ResponseWriter, r *http.Request) error {
-		h.ServeHTTP(w, r)
-		return nil
-	}))
-	r.Route("/").GET(func(c *ship.Context) error { return nil })
-
-	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "http://127.0.0.1", nil)
-
-	b.ResetTimer()
-	b.RunParallel(func(p *testing.PB) {
-		for p.Next() {
-			r.ServeHTTP(rec, req)
-		}
-	})
 }
