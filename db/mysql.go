@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2020~2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,49 +15,22 @@
 package db
 
 import (
-	"fmt"
-	"net/url"
-	"strings"
-	"time"
-
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/sqlx"
 )
 
-// SetMySQLLocation sets the loc argument in the mysql connection url if missing.
-func SetMySQLLocation(mysqlConnURL string, loc *time.Location) string {
-	if loc == nil {
-		return mysqlConnURL
-	}
-
-	if index := strings.IndexByte(mysqlConnURL, '?') + 1; index > 0 {
-		query, err := url.ParseQuery(mysqlConnURL[index:])
-		if err == nil && query.Get("loc") == "" {
-			query.Set("loc", loc.String())
-			return mysqlConnURL[:index] + query.Encode()
-		}
-		return mysqlConnURL
-	}
-
-	return fmt.Sprintf("%s?loc=%s", mysqlConnURL, loc.String())
-}
-
 // InitMysqlDB initializes the MySQL DB.
-//
-// If configs is nil, it will use DefaultConfig as the default.
-func InitMysqlDB(connURL string, configs ...Config) *sqlx.DB {
+func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
+	if configs == nil {
+		configs = make([]sqlx.Config, len(sqlx.DefaultConfigs)+1)
+		configs[len(sqlx.DefaultConfigs)] = OnExit
+		copy(configs, sqlx.DefaultConfigs)
+	}
+
 	connURL = SetMySQLLocation(connURL, Location)
-	db, err := sqlx.Open("mysql", connURL)
+	db, err := sqlx.Open("mysql", connURL, configs...)
 	if err != nil {
 		log.Fatal().Kv("err", err).Printf("failed to conenct to mysql")
-	}
-
-	if configs == nil {
-		configs = DefaultConfig
-	}
-
-	for _, c := range configs {
-		c(db)
 	}
 
 	return db

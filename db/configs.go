@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2020~2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build go1.15
-
 package db
 
 import (
-	"time"
-
+	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/sqlx"
 )
 
-// ConnMaxIdleTime returns a Config to set the maximum idle time of the connection.
-func ConnMaxIdleTime(d time.Duration) Config {
-	return func(db *sqlx.DB) { db.SetConnMaxIdleTime(d) }
+// LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
+func LogInterceptor(debug, logArgs bool) sqlx.Config {
+	return func(db *sqlx.DB) {
+		if debug {
+			db.Interceptor = sqlx.LogInterceptor(logf.Debugf, logArgs)
+		} else {
+			db.Interceptor = sqlx.LogInterceptor(logf.Infof, logArgs)
+		}
+	}
+}
+
+// OnExit returns a Config to register a close callback which will be called
+// when the program exits.
+func OnExit() sqlx.Config {
+	return func(db *sqlx.DB) { atexit.Register(func() { db.Close() }) }
 }
