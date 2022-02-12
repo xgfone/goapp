@@ -18,11 +18,8 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/xgfone/go-exec"
@@ -97,20 +94,19 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 	}
 
 	if conf.Shell == "" {
-		conf.Shell = exec.DefaultShell
-		if conf.Shell == "" {
+		if conf.Shell = exec.DefaultShell; conf.Shell == "" {
 			conf.Shell = "bash"
 		}
 	}
 
 	if handle == nil {
-		handle = func(c *ship.Context, stdout, stderr []byte, err error) error {
+		handle = func(c *ship.Context, stdout, stderr string, err error) error {
 			var result shellResult
 			if len(stdout) > 0 {
-				result.Stdout = base64.StdEncoding.EncodeToString(stdout)
+				result.Stdout = base64.StdEncoding.EncodeToString([]byte(stdout))
 			}
 			if len(stderr) > 0 {
-				result.Stderr = base64.StdEncoding.EncodeToString(stderr)
+				result.Stderr = base64.StdEncoding.EncodeToString([]byte(stderr))
 			}
 			if err != nil {
 				he := err.(ship.HTTPServerError)
@@ -126,14 +122,14 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 	}
 
 	return func(ctx *ship.Context) error {
-		var cmd shellRequest
 		buf := ctx.AcquireBuffer()
-		_, err := io.CopyBuffer(buf, ctx.Body(), make([]byte, 1024))
 		defer ctx.ReleaseBuffer(buf)
+		_, err := io.CopyBuffer(buf, ctx.Body(), make([]byte, 1024))
 		if err != nil {
 			return ship.ErrBadRequest.New(err)
 		}
 
+		var cmd shellRequest
 		if err := json.NewDecoder(buf).Decode(&cmd); err != nil {
 			return ship.ErrBadRequest.New(err)
 		}
@@ -166,7 +162,7 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err erro
 			stdout, stderr, err = executeShellScript(c, shell, conf.Dir, cmd.Script)
 		}
 
-		return handle(ctx, []byte(stdout), []byte(stderr), err)
+		return handle(ctx, stdout, stderr, err)
 	}
 }
 
@@ -188,25 +184,21 @@ func executeShellCommand(c context.Context, shell, cmd string) (string, string, 
 var generateTmpFilename = middleware.GenerateToken(16)
 
 func executeShellScript(c context.Context, shell, dir, script string) (string, string, error) {
-	bs, err := base64.StdEncoding.DecodeString(script)
+	scriptContent, err := base64.StdEncoding.DecodeString(script)
 	if err != nil {
 		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", script, err)
 		return "", "", err
 	}
 
-	filename := fmt.Sprintf("__run_shell_script_%s.sh", generateTmpFilename())
-	if dir != "" {
-		filename = filepath.Join(dir, filename)
-	}
-
-	if err = ioutil.WriteFile(filename, bs, 0700); err != nil {
+	filename, err := exec.GetScriptFile(dir, scriptContent)
+	if err != nil {
 		return "", "", ship.ErrInternalServerError.New(err)
 	}
 	defer os.Remove(filename)
 
 	stdout, stderr, err := exec.Run(c, shell, filename)
 	if err != nil {
-		return stdout, stderr, ship.ErrInternalServerError.New(err)
+		err = ship.ErrInternalServerError.New(err)
 	}
-	return stdout, stderr, nil
+	return stdout, stderr, err
 }
