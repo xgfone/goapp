@@ -86,7 +86,7 @@ type shellResult struct {
 //
 // The returned handler is very dangerous, and should not be called
 // by the non-trusted callers.
-func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr []byte, err error) error,
+func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr string, err error) error,
 	config ...ShellConfig) Handler {
 	var conf ShellConfig
 	if len(config) > 0 {
@@ -190,7 +190,7 @@ func executeShellScript(c context.Context, shell, dir, script string) (string, s
 		return "", "", err
 	}
 
-	filename, err := exec.GetScriptFile(dir, scriptContent)
+	filename, err := exec.GetScriptFile(dir, string(scriptContent))
 	if err != nil {
 		return "", "", ship.ErrInternalServerError.New(err)
 	}

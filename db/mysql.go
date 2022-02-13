@@ -23,11 +23,11 @@ import (
 func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
 	if configs == nil {
 		configs = make([]sqlx.Config, len(sqlx.DefaultConfigs)+1)
-		configs[len(sqlx.DefaultConfigs)] = OnExit
+		configs[len(sqlx.DefaultConfigs)] = OnExit()
 		copy(configs, sqlx.DefaultConfigs)
 	}
 
-	connURL = SetMySQLLocation(connURL, Location)
+	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
 	db, err := sqlx.Open("mysql", connURL, configs...)
 	if err != nil {
 		log.Fatal().Kv("err", err).Printf("failed to conenct to mysql")
