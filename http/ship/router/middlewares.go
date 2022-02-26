@@ -16,24 +16,31 @@ package router
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/xgfone/go-log"
-	"github.com/xgfone/goapp"
 	"github.com/xgfone/ship/v5"
 )
 
 // Middleware is the type alias of ship.Middleware.
 type Middleware = ship.Middleware
 
+// Handler is the type alias of ship.Handler.
+type Handler = ship.Handler
+
 // Recover is a ship middleware to recover the panic if exists.
 func Recover(next Handler) Handler {
 	return func(ctx *ship.Context) (err error) {
 		defer func() {
-			if e := recover(); e != nil {
-				err = goapp.NewPanicError(e, 0)
+			switch e := recover().(type) {
+			case nil:
+			case error:
+				err = e
+			default:
+				err = fmt.Errorf("%v", e)
 			}
 		}()
 

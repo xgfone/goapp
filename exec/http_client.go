@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package router
+package exec
 
 import (
 	"context"
@@ -21,13 +21,12 @@ import (
 	"net/http"
 
 	httpclient "github.com/xgfone/go-http-client"
-	"github.com/xgfone/ship/v5"
 )
 
-// ExecShellByHTTP executes the shell command or script by HTTP.
+// ExecuteShellByHTTP executes the shell command or script by HTTP.
 //
 // Notice: it uses the default interface implementation of ExecuteShell.
-func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error) {
+func ExecuteShellByHTTP(url, cmd, script string) (stdout, stderr string, err error) {
 	var req shellRequest
 	var resp shellResult
 
@@ -50,27 +49,27 @@ func ExecShellByHTTP(url, cmd, script string) (stdout, stderr string, err error)
 	}
 
 	if stdout, err = decodeString(resp.Stdout); err != nil {
-		err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
+		err = httpclient.NewError(200, http.MethodPost, url, err)
 		return
 	}
 
 	if stderr, err = decodeString(resp.Stderr); err != nil {
-		err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
+		err = httpclient.NewError(200, http.MethodPost, url, err)
 		return
 	}
 
 	if resp.Error, err = decodeString(resp.Error); err != nil {
-		err = ship.NewHTTPClientError(http.MethodPost, url, 200, err)
+		err = httpclient.NewError(200, http.MethodPost, url, err)
 		return
 	}
 
 	if resp.Error != "" {
 		if stderr != "" {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(stderr))
+			err = httpclient.NewError(200, http.MethodPost, url, errors.New(stderr))
 		} else if stdout != "" {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(stdout))
+			err = httpclient.NewError(200, http.MethodPost, url, errors.New(stdout))
 		} else {
-			err = ship.NewHTTPClientError(http.MethodPost, url, 200, errors.New(resp.Error))
+			err = httpclient.NewError(200, http.MethodPost, url, errors.New(resp.Error))
 		}
 	}
 

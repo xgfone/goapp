@@ -1,4 +1,4 @@
-// Copyright 2020~2022 xgfone
+// Copyright 2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package db provides some assistant functions about the database.
 package db
 
 import (
+	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/sqlx"
 )
+
+// Connection is the configuration option to connect to the sql database.
+var Connection = gconf.StrOpt("connection", "The URL connection to the alarm database, user:password@tcp(ip:port)/db")
 
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
 func LogInterceptor(debug, logArgs bool) sqlx.Config {
@@ -35,4 +41,18 @@ func LogInterceptor(debug, logArgs bool) sqlx.Config {
 // when the program exits.
 func OnExit() sqlx.Config {
 	return func(db *sqlx.DB) { atexit.Register(func() { db.Close() }) }
+}
+
+// InitMysqlDB initializes the mysql connection.
+func InitMysqlDB(connURL string) *sqlx.DB {
+	configs := append([]sqlx.Config{}, sqlx.DefaultConfigs...)
+	configs = append(configs, LogInterceptor(true, true))
+	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
+
+	db, err := sqlx.Open("mysql", connURL, configs...)
+	if err != nil {
+		log.Fatal().Str("conn", connURL).Err(err).
+			Printf("fail to open the mysql connection")
+	}
+	return db
 }

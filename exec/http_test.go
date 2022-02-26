@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package router
+package exec
 
 import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/xgfone/ship/v5"
 )
 
 func TestExecuteShell(t *testing.T) {
-	handler := ExecuteShell(func(ctx *ship.Context, stdout, stderr string, err error) error {
-		return ctx.Text(200, stdout+"|"+stderr)
+	handler := ExecuteShellHandler(func(w http.ResponseWriter, stdout, stderr string, err error) {
+		w.WriteHeader(200)
+		io.WriteString(w, stdout+"|"+stderr)
 	})
 
-	router := ship.New()
-	router.Route("/shell").POST(handler)
+	router := http.NewServeMux()
+	router.Handle("/shell", handler)
 
 	// For Command
 	cmd := base64.StdEncoding.EncodeToString([]byte("echo -n abc123"))

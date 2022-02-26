@@ -1,4 +1,4 @@
-// Copyright 2021 xgfone
+// Copyright 2021~2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package exec
+// Package remote provides the command execution functions on the remote host.
+package remote
 
 import (
 	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,10 +33,10 @@ var SSHUser = "root"
 // SSHOptions is the options of ssh/scp command.
 var SSHOptions = "-o StrictHostKeyChecking=no"
 
-// ExecuteCmdBySSHContext executes the shell command by SSH.
-func ExecuteCmdBySSHContext(ctx context.Context, host, cmd string) (
+// ExecuteCmdBySSHContext executes the command on the remote host by SSH.
+func ExecuteCmdBySSHContext(ctx context.Context, remoteHost, cmd string) (
 	stdout, stderr string, err error) {
-	cmd = fmt.Sprintf(`ssh %s %s@%s "%s"`, SSHOptions, SSHUser, host, cmd)
+	cmd = fmt.Sprintf(`ssh %s %s@%s "%s"`, SSHOptions, SSHUser, remoteHost, cmd)
 	_stdout, _stderr, err := exec.RunShellCmd(ctx, cmd)
 	if err == nil {
 		stdout, stderr = string(_stdout), string(_stderr)
@@ -76,10 +76,10 @@ func CopyFilesFromRemoteBySSHContext(ctx context.Context, remoteHost,
 
 // ExecuteCmdBySSH is equal to
 //
-//   ExecuteCmdBySSHContext(context.Background(), host, cmd)
+//   ExecuteCmdBySSHContext(context.Background(), remoteHost, cmd)
 //
-func ExecuteCmdBySSH(host, cmd string) (stdout, stderr string, err error) {
-	return ExecuteCmdBySSHContext(context.Background(), host, cmd)
+func ExecuteCmdBySSH(remoteHost, cmd string) (stdout, stderr string, err error) {
+	return ExecuteCmdBySSHContext(context.Background(), remoteHost, cmd)
 }
 
 // CopyFilesToRemoteBySSH is equal to
@@ -104,42 +104,41 @@ func CopyFilesFromRemoteBySSH(remoteHost, localDirOrFile string, remoteFiles ...
 
 // ExecuteScriptBySSH is equal to
 //
-//   ExecuteScriptBySSHContext(context.Background(), host, script)
+//   ExecuteScriptBySSHContext(context.Background(), remoteHost, script)
 //
-func ExecuteScriptBySSH(host, script string) (stdout, stderr string, err error) {
-	return ExecuteScriptBySSHContext(context.Background(), host, script)
+func ExecuteScriptBySSH(remoteHost, script string) (stdout, stderr string, err error) {
+	return ExecuteScriptBySSHContext(context.Background(), remoteHost, script)
 }
 
 // ExecuteScriptBySSHContext executes the shell script by SSH.
-func ExecuteScriptBySSHContext(ctx context.Context, host, script string) (
+func ExecuteScriptBySSHContext(ctx context.Context, remoteHost, script string) (
 	stdout, stderr string, err error) {
-	filename1 := getScriptFile(script)
-	filename2 := filename1
-	if exec.ShellScriptDir != "" {
-		filename1 = filepath.Join(exec.ShellScriptDir, filename1)
-		filename2 = filename1
-	} else {
-		filename2 = filepath.Join("~", filename1)
-	}
 
-	if err = ioutil.WriteFile(filename1, []byte(script), 0700); err != nil {
-		return
-	}
-	defer os.Remove(filename1)
-
-	err = CopyFilesToRemoteBySSHContext(ctx, host, filename2, filename1)
+	localfile, err := exec.GetScriptFile("", script)
 	if err != nil {
 		return
 	}
-	defer ExecuteCmdBySSHContext(ctx, host, fmt.Sprintf("rm -f %s", filename2))
+	defer os.Remove(localfile)
+
+	remotefile := localfile
+	if dir := filepath.Dir(localfile); dir != "" {
+		remotefile = filepath.Join(dir, localfile)
+	}
+
+	err = CopyFilesToRemoteBySSHContext(ctx, remoteHost, remotefile, localfile)
+	if err != nil {
+		return
+	}
+	defer ExecuteCmdBySSHContext(ctx, remoteHost, fmt.Sprintf("rm -f %s", remotefile))
 
 	shell := exec.DefaultCmd.Shell
 	if shell == "" {
 		if shell = exec.DefaultShell; shell == "" {
-			shell = "sh"
+			shell = "bash"
 		}
 	}
-	return ExecuteCmdBySSHContext(ctx, host, fmt.Sprintf("%s %s", shell, filename2))
+
+	return ExecuteCmdBySSHContext(ctx, remoteHost, fmt.Sprintf("%s %s", shell, remotefile))
 }
 
 func getScriptFile(script string) (filename string) {

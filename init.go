@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2020~2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,45 +17,34 @@ package goapp
 import (
 	"math/rand"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
-	"github.com/xgfone/goapp/exec"
+	"github.com/xgfone/goapp/config"
+	_ "github.com/xgfone/goapp/exec" // import to initialize the log hook
 	glog "github.com/xgfone/goapp/log"
 	"github.com/xgfone/gover"
+)
+
+var (
+	logGroup = gconf.Group("log")
+	logfile  = logGroup.NewString("file", "", "The file path of the log. The default is stdout.")
+	loglevel = logGroup.NewString("level", "info", "The level of the log, such as debug, info, etc.")
 )
 
 func init() {
 	gconf.Conf.Errorf = logf.Errorf
 	rand.Seed(time.Now().UnixNano())
 
-	// http.DefaultClient.Timeout = time.Second * 3
 	tp := http.DefaultTransport.(*http.Transport)
 	tp.IdleConnTimeout = time.Second * 30
 	tp.MaxIdleConnsPerHost = 100
 	tp.MaxIdleConns = 0
-
-	exec.SetDefaultCmdLock(new(sync.Mutex))
-	exec.SetDefaultCmdLogHook()
 }
 
 var inits []func() error
-
-// InitConfig initializes the configuration, which will set the version,
-// register the options, parse the CLI arguments with "flag",
-// load the "flag", "env" and "file" sources.
-func InitConfig(app, version string, opts ...gconf.Opt) {
-	gconf.SetVersion(version)
-	gconf.RegisterOpts(opts...)
-	gconf.AddAndParseOptFlag(gconf.Conf)
-	gconf.LoadSource(gconf.NewFlagSource())
-	gconf.LoadSource(gconf.NewEnvSource(app))
-	configFile := gconf.GetString(gconf.ConfigFileOpt.Name)
-	gconf.LoadAndWatchSource(gconf.NewFileSource(configFile))
-}
 
 // RegisterInit registers the initialization functions.
 func RegisterInit(initfuncs ...func() error) {
@@ -72,34 +61,18 @@ func CallInit() (err error) {
 	return
 }
 
-// Init is equal to InitApp(appName, gover.Text(), opts...).
-func Init(appName string, opts ...gconf.Opt) {
-	InitApp(appName, gover.Text(), opts...)
-}
-
-// InitApp initializes the application, which is equal to
-//   InitApp2(appName, version, "100M", 100, opts...)
-func InitApp(appName, version string, opts ...gconf.Opt) {
-	InitApp2(appName, version, "100M", 100, opts...)
-}
-
-// InitApp2 initializes the application.
+// Init is used to initialize the application.
 //
 //  1. Register the log options.
 //  2. Initialize configuration.
 //  3. Initialize the logging.
 //  4. Call the registered initialization functions.
 //
-func InitApp2(appName, version, logfilesize string, logfilenum int, opts ...gconf.Opt) {
-	gconf.RegisterOpts(glog.LogOpts...)
-	InitConfig(appName, version, opts...)
-
-	logfile := gconf.GetString(glog.LogOpts[0].Name)
-	loglevel := gconf.GetString(glog.LogOpts[1].Name)
-	glog.InitLogging2(loglevel, logfile, logfilesize, logfilenum)
-	log.DefaultLogger = log.DefaultLogger.WithName(appName)
+func Init(appName string, opts ...gconf.Opt) {
+	config.InitConfig(appName, gover.Text(), opts...)
+	glog.InitLoging(appName, loglevel.Get(), logfile.Get())
 
 	if err := CallInit(); err != nil {
-		log.Fatal().Kv("err", err).Printf("failed to init")
+		log.Fatal().Err(err).Printf("fail to init")
 	}
 }

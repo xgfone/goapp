@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2020~2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,42 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package log is used to initialize the logger, and supplies some assistant
-// functions about log.
+// Package log is used to initialize the logging.
 package log
 
 import (
 	stdlog "log"
 
-	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/writer"
 )
 
-// LogOpts collects the options about the log.
-var LogOpts = []gconf.Opt{
-	gconf.StrOpt("log.file", "The file path of the log. The default is stdout.").As("logfile"),
-	gconf.StrOpt("log.level", "The level of the log, such as debug, info").D("info").As("loglevel"),
-}
-
-// InitLogging is equal to InitLogging2(level, filepath, "100M", 100).
-func InitLogging(level, filepath string) {
-	InitLogging2(level, filepath, "100M", 100)
-}
-
-// InitLogging2 initializes the logging.
+// InitLoging initializes the logging configuration.
 //
-// If filepath is empty, it will use Stdout as the writer.
-func InitLogging2(level, filepath, filesize string, filenum int) {
-	if level != "" {
-		log.SetLevel(log.ParseLevel(level))
+// If logfile is empty, output the log to os.Stderr.
+func InitLoging(appName, loglevel, logfile string) {
+	if loglevel != "" {
+		log.SetLevel(log.ParseLevel(loglevel))
 	}
 
-	if filepath != "" {
-		file := log.FileWriter(filepath, filesize, filenum)
+	if logfile != "" {
+		file := log.FileWriter(logfile, "100M", 100)
 		log.SetWriter(writer.SafeWriter(file))
-		atexit.RegisterWithPriority(90, func() { file.Close() })
+		atexit.RegisterWithPriority(0, func() { file.Close() })
 		stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
+	}
+
+	if appName != "" {
+		log.DefaultLogger = log.DefaultLogger.WithName(appName)
 	}
 }

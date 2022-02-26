@@ -28,6 +28,7 @@ import (
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
+	"github.com/xgfone/goapp/exec"
 	"github.com/xgfone/goapp/validate"
 	"github.com/xgfone/gover"
 	"github.com/xgfone/ship/v5"
@@ -35,7 +36,7 @@ import (
 
 // DefaultRuntimeRouteConfig is the default RuntimeRouteConfig
 // with DefaultShellConfig.
-var DefaultRuntimeRouteConfig = RuntimeRouteConfig{ShellConfig: DefaultShellConfig}
+var DefaultRuntimeRouteConfig = RuntimeRouteConfig{ShellConfig: exec.DefaultShellConfig}
 
 // Config is used to configure the app router.
 type Config struct {
@@ -66,7 +67,7 @@ func StartServer(addr string, handler http.Handler) {
 
 // RuntimeRouteConfig is used to configure the runtime routes.
 type RuntimeRouteConfig struct {
-	ShellConfig
+	exec.ShellConfig
 
 	Prefix    string
 	IsReady   func() bool
@@ -105,7 +106,8 @@ func AddRuntimeRoutes(app *ship.Ship, config ...RuntimeRouteConfig) {
 	}
 
 	if conf.ShellConfig.Shell != "" {
-		group.Route("/shell").POST(ExecuteShell(nil, conf.ShellConfig))
+		httpHandler := exec.ExecuteShellHandler(nil, conf.ShellConfig)
+		group.Route("/shell").POST(ship.FromHTTPHandler(httpHandler))
 	}
 }
 

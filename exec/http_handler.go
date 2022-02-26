@@ -1,4 +1,4 @@
-// Copyright 2020 xgfone
+// Copyright 2022 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package router
+package exec
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"io"
+	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/xgfone/go-exec"
@@ -27,11 +30,12 @@ import (
 	"github.com/xgfone/ship/v5/middleware"
 )
 
-// Handler is the type alias of ship.Handler.
-type Handler = ship.Handler
+var bufpool = sync.Pool{New: func() interface{} {
+	return bytes.NewBuffer(make([]byte, 0, 512))
+}}
 
-// DefaultShellConfig is the default ShellConfig.
-var DefaultShellConfig = ShellConfig{Shell: "bash", Timeout: time.Minute}
+func getBuffer() *bytes.Buffer    { return bufpool.Get().(*bytes.Buffer) }
+func putBuffer(buf *bytes.Buffer) { buf.Reset(); bufpool.Put(buf) }
 
 func init() {
 	if os.PathSeparator == '/' {
@@ -39,11 +43,17 @@ func init() {
 	}
 }
 
+// DefaultShellConfig is the default ShellConfig.
+var DefaultShellConfig = ShellConfig{Shell: "bash", Timeout: time.Minute}
+
+// ShellResultHandler is used to handle the result of the shell command or script.
+type ShellResultHandler func(w http.ResponseWriter, stdout, stderr string, err error)
+
 // ShellConfig is used to configure the shell execution.
 type ShellConfig struct {
-	Dir     string        // The directory to save and run the shell script.
-	Shell   string        // The shell name or path, which is "bash" by default.
 	Timeout time.Duration // The timeout to execute the shell command.
+	Shell   string        // The shell name or path, which is "bash" by default.
+	Dir     string        // The directory to save and run the shell script.
 }
 
 type shellRequest struct {
@@ -59,7 +69,7 @@ type shellResult struct {
 	Error  string `json:"error,omitempty"`
 }
 
-// ExecuteShell returns a handler to execute a SHELL command or script.
+// ExecuteShellHandler returns a http handler to execute a SHELL command or script.
 //
 // The request body is the command to be executed as JSON like this:
 //
@@ -84,10 +94,9 @@ type shellResult struct {
 //   2. If shell is given, it will override the Shell in ShellConfig.
 //   3. If timeout is given, it will override the Timeout in ShellConfig.
 //
-// The returned handler is very dangerous, and should not be called
+// The returned http handler is very dangerous, and should not be called
 // by the non-trusted callers.
-func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr string, err error) error,
-	config ...ShellConfig) Handler {
+func ExecuteShellHandler(handler ShellResultHandler, config ...ShellConfig) http.Handler {
 	var conf ShellConfig
 	if len(config) > 0 {
 		conf = config[0]
@@ -99,46 +108,31 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr string, err erro
 		}
 	}
 
-	if handle == nil {
-		handle = func(c *ship.Context, stdout, stderr string, err error) error {
-			var result shellResult
-			if len(stdout) > 0 {
-				result.Stdout = base64.StdEncoding.EncodeToString([]byte(stdout))
-			}
-			if len(stderr) > 0 {
-				result.Stderr = base64.StdEncoding.EncodeToString([]byte(stderr))
-			}
-			if err != nil {
-				he := err.(ship.HTTPServerError)
-				if ce, ok := he.Err.(exec.Result); ok {
-					result.Error = base64.StdEncoding.EncodeToString([]byte(ce.Err.Error()))
-				} else {
-					result.Error = base64.StdEncoding.EncodeToString([]byte(he.Err.Error()))
-				}
-			}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buf := getBuffer()
+		defer putBuffer(buf)
 
-			return c.JSON(200, result)
-		}
-	}
-
-	return func(ctx *ship.Context) error {
-		buf := ctx.AcquireBuffer()
-		defer ctx.ReleaseBuffer(buf)
-		_, err := io.CopyBuffer(buf, ctx.Body(), make([]byte, 1024))
+		_, err := io.CopyBuffer(buf, r.Body, make([]byte, 1024))
 		if err != nil {
-			return ship.ErrBadRequest.New(err)
+			w.WriteHeader(400)
+			io.WriteString(w, err.Error())
+			return
 		}
 
 		var cmd shellRequest
 		if err := json.NewDecoder(buf).Decode(&cmd); err != nil {
-			return ship.ErrBadRequest.New(err)
+			w.WriteHeader(400)
+			io.WriteString(w, err.Error())
+			return
 		}
 
 		timeout := conf.Timeout
 		if cmd.Timeout != "" {
 			t, err := time.ParseDuration(cmd.Timeout)
 			if err != nil {
-				return ship.ErrBadRequest.New(err)
+				w.WriteHeader(400)
+				io.WriteString(w, err.Error())
+				return
 			}
 			timeout = t
 		}
@@ -162,7 +156,40 @@ func ExecuteShell(handle func(ctx *ship.Context, stdout, stderr string, err erro
 			stdout, stderr, err = executeShellScript(c, shell, conf.Dir, cmd.Script)
 		}
 
-		return handle(ctx, stdout, stderr, err)
+		if handler != nil {
+			handler(w, stdout, stderr, err)
+		} else {
+			defaultHandler(w, buf, stdout, stderr, err)
+		}
+	})
+}
+
+func defaultHandler(w http.ResponseWriter, buf *bytes.Buffer, stdout, stderr string, err error) {
+	var result shellResult
+	if len(stdout) > 0 {
+		result.Stdout = base64.StdEncoding.EncodeToString([]byte(stdout))
+	}
+	if len(stderr) > 0 {
+		result.Stderr = base64.StdEncoding.EncodeToString([]byte(stderr))
+	}
+
+	switch e := err.(type) {
+	case nil:
+	case exec.Result:
+		result.Error = base64.StdEncoding.EncodeToString([]byte(e.Err.Error()))
+	default:
+		result.Error = base64.StdEncoding.EncodeToString([]byte(e.Error()))
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	buf.Reset()
+	if err := json.NewEncoder(buf).Encode(result); err != nil {
+		w.WriteHeader(500)
+		io.WriteString(w, err.Error())
+	} else {
+		w.WriteHeader(200)
+		w.Write(buf.Bytes())
 	}
 }
 
