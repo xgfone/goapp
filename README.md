@@ -13,10 +13,10 @@ package main
 
 import (
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
+	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/goapp"
-	"github.com/xgfone/goapp/router"
+	"github.com/xgfone/goapp/http/ship/router"
 	"github.com/xgfone/ship/v5"
 )
 
@@ -31,15 +31,12 @@ func main() {
 
 	// Initialize the app router.
 	app := router.InitRouter(nil)
-	app.Logger = log.DefalutLogger
-	app.Use(router.Logger(true), router.Recover)
+	app.Logger = logf.NewLogger(log.DefaultLogger, 0)
 	app.Route("/path1").GET(ship.OkHandler())
 	app.Route("/path2").GET(func(c *ship.Context) error { return c.Text(200, "OK") })
 
 	// Start the HTTP server.
-	runner := ship.NewRunner(app)
-	runner.RegisterOnShutdown(atexit.Execute)
-	runner.Start(addr.Get())
+	router.StartServer(addr.Get(), app)
 }
 ```
 
@@ -54,10 +51,10 @@ $ ./app --help
         The address to listen to. (default: ":80")
   --config-file string
         the config file path. (default: "")
-  --logfile string
+  --log.file string
         The file path of the log. The default is stdout. (default: "")
-  --loglevel string
-        The level of the log, such as debug, info (default: "info")
+  --log.level string
+        The level of the log, such as debug, info, etc. (default: "info")
   --opt1 string
         help doc (default: "")
   --opt2 int
