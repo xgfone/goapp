@@ -25,6 +25,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/xgfone/cast"
+	"github.com/xgfone/go-apiserver/http/binder"
+	"github.com/xgfone/go-apiserver/http/reqresp"
 )
 
 // Validate is the default global validator.
@@ -94,6 +96,8 @@ func StructValidator(validate *validator.Validate) func(interface{}) error {
 }
 
 func init() {
+	reqresp.DefaultBinder.(*binder.DefaultValidateBinder).Validate = StructValidator(nil)
+
 	SetValidateTagName(Validate, "json", "query")
 	Validate.RegisterValidation("addr", func(fl validator.FieldLevel) bool {
 		host, port, err := net.SplitHostPort(fl.Field().String())

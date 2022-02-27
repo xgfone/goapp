@@ -46,7 +46,7 @@ $ make
 ```
 
 ```shell
-$ ./app --help
+$ go run main.go --help
   --addr string
         The address to listen to. (default: ":80")
   --config-file string

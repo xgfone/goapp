@@ -15,17 +15,26 @@
 // Package config is used to configure the application.
 package config
 
-import "github.com/xgfone/gconf/v6"
+import (
+	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/gover"
+)
 
 // InitConfig initializes the configuration, which will set the version,
 // register the options, parse the CLI arguments with "flag",
 // load the "flag", "env" and "file" configuration sources.
 func InitConfig(app, version string, opts ...gconf.Opt) {
+	if version == "" {
+		version = gover.Text()
+	}
+
 	gconf.SetVersion(version)
 	gconf.RegisterOpts(opts...)
 	gconf.AddAndParseOptFlag(gconf.Conf)
 	gconf.LoadSource(gconf.NewFlagSource())
 	gconf.LoadSource(gconf.NewEnvSource(app))
-	configFile := gconf.GetString(gconf.ConfigFileOpt.Name)
-	gconf.LoadAndWatchSource(gconf.NewFileSource(configFile))
+
+	if cfile, _ := gconf.Get(gconf.ConfigFileOpt.Name).(string); cfile != "" {
+		gconf.LoadAndWatchSource(gconf.NewFileSource(cfile))
+	}
 }

@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -26,8 +27,6 @@ import (
 	"time"
 
 	"github.com/xgfone/go-exec"
-	"github.com/xgfone/ship/v5"
-	"github.com/xgfone/ship/v5/middleware"
 )
 
 var bufpool = sync.Pool{New: func() interface{} {
@@ -196,36 +195,24 @@ func defaultHandler(w http.ResponseWriter, buf *bytes.Buffer, stdout, stderr str
 func executeShellCommand(c context.Context, shell, cmd string) (string, string, error) {
 	bs, err := base64.StdEncoding.DecodeString(cmd)
 	if err != nil {
-		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", cmd, err)
+		err = fmt.Errorf("failed to decode base64 '%s': %v", cmd, err)
 		return "", "", err
 	}
-
-	stdout, stderr, err := exec.Run(c, shell, "-c", string(bs))
-	if err != nil {
-		err = ship.ErrInternalServerError.New(err)
-	}
-
-	return stdout, stderr, err
+	return exec.Run(c, shell, "-c", string(bs))
 }
-
-var generateTmpFilename = middleware.GenerateToken(16)
 
 func executeShellScript(c context.Context, shell, dir, script string) (string, string, error) {
 	scriptContent, err := base64.StdEncoding.DecodeString(script)
 	if err != nil {
-		err = ship.ErrBadRequest.Newf("failed to decode base64 '%s': %v", script, err)
+		err = fmt.Errorf("failed to decode base64 '%s': %v", script, err)
 		return "", "", err
 	}
 
 	filename, err := exec.GetScriptFile(dir, string(scriptContent))
 	if err != nil {
-		return "", "", ship.ErrInternalServerError.New(err)
+		return "", "", err
 	}
 	defer os.Remove(filename)
 
-	stdout, stderr, err := exec.Run(c, shell, filename)
-	if err != nil {
-		err = ship.ErrInternalServerError.New(err)
-	}
-	return stdout, stderr, err
+	return exec.Run(c, shell, filename)
 }

@@ -25,14 +25,8 @@ import (
 	"github.com/xgfone/ship/v5"
 )
 
-// Middleware is the type alias of ship.Middleware.
-type Middleware = ship.Middleware
-
-// Handler is the type alias of ship.Handler.
-type Handler = ship.Handler
-
 // Recover is a ship middleware to recover the panic if exists.
-func Recover(next Handler) Handler {
+func Recover(next ship.Handler) ship.Handler {
 	return func(ctx *ship.Context) (err error) {
 		defer func() {
 			switch e := recover().(type) {
@@ -54,7 +48,7 @@ type reqBodyWrapper struct {
 }
 
 // Logger returns a logger middleware to log the request.
-func Logger(logReqBody bool) Middleware {
+func Logger(logReqBody bool) ship.Middleware {
 	return func(next ship.Handler) ship.Handler {
 		return func(c *ship.Context) (err error) {
 			req := c.Request()

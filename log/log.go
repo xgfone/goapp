@@ -18,6 +18,7 @@ package log
 import (
 	stdlog "log"
 
+	apilog "github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/writer"
@@ -35,10 +36,12 @@ func InitLoging(appName, loglevel, logfile string) {
 		file := log.FileWriter(logfile, "100M", 100)
 		log.SetWriter(writer.SafeWriter(file))
 		atexit.RegisterWithPriority(0, func() { file.Close() })
-		stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
 	}
 
 	if appName != "" {
 		log.DefaultLogger = log.DefaultLogger.WithName(appName)
 	}
+
+	apilog.DefaultLogger = log.DefaultLogger
+	stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
 }

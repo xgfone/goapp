@@ -20,18 +20,18 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/goapp/config"
 	_ "github.com/xgfone/goapp/exec" // import to initialize the log hook
 	glog "github.com/xgfone/goapp/log"
-	"github.com/xgfone/gover"
+	_ "github.com/xgfone/goapp/validate" // import to initialize the validator
 )
 
 var (
-	logGroup = gconf.Group("log")
-	logfile  = logGroup.NewString("file", "", "The file path of the log. The default is stdout.")
-	loglevel = logGroup.NewString("level", "info", "The level of the log, such as debug, info, etc.")
+	logfile  = gconf.StrOpt("log.file", "The file path of the log. The default is stdout.")
+	loglevel = gconf.StrOpt("log.level", "The level of the log, such as debug, info, etc.").D("info")
 )
 
 func init() {
@@ -69,10 +69,13 @@ func CallInit() (err error) {
 //  4. Call the registered initialization functions.
 //
 func Init(appName string, opts ...gconf.Opt) {
-	config.InitConfig(appName, gover.Text(), opts...)
-	glog.InitLoging(appName, loglevel.Get(), logfile.Get())
+	gconf.RegisterOpts(logfile, loglevel)
+	config.InitConfig(appName, "", opts...)
+	glog.InitLoging(appName, gconf.GetString(loglevel.Name), gconf.GetString(logfile.Name))
 
 	if err := CallInit(); err != nil {
 		log.Fatal().Err(err).Printf("fail to init")
 	}
+
+	go atexit.Signals()
 }
