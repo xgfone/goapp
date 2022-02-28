@@ -30,8 +30,10 @@ import (
 )
 
 var (
-	logfile  = gconf.StrOpt("log.file", "The file path of the log. The default is stdout.")
-	loglevel = gconf.StrOpt("log.level", "The level of the log, such as debug, info, etc.").D("info")
+	loglevel = gconf.StrOpt("log.level", "The level of the log, such as debug, info, etc.").
+			As("loglevel").D("info")
+	logfile0 = gconf.StrOpt("log.file", "The file path of the log. The default is stderr.").
+			As("logfile")
 )
 
 func init() {
@@ -69,9 +71,9 @@ func CallInit() (err error) {
 //  4. Call the registered initialization functions.
 //
 func Init(appName string, opts ...gconf.Opt) {
-	gconf.RegisterOpts(logfile, loglevel)
+	gconf.RegisterOpts(logfile0, loglevel)
 	config.InitConfig(appName, "", opts...)
-	glog.InitLoging(appName, gconf.GetString(loglevel.Name), gconf.GetString(logfile.Name))
+	glog.InitLoging(appName, gconf.GetString(loglevel.Name), gconf.GetString(logfile0.Name))
 
 	if err := CallInit(); err != nil {
 		log.Fatal().Err(err).Printf("fail to init")
