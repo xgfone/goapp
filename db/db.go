@@ -44,11 +44,13 @@ func OnExit() sqlx.Config {
 }
 
 // InitMysqlDB initializes the mysql connection.
-func InitMysqlDB(connURL string) *sqlx.DB {
-	configs := append([]sqlx.Config{}, sqlx.DefaultConfigs...)
-	configs = append(configs, LogInterceptor(true, true))
-	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
+func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
+	if configs == nil {
+		configs = append([]sqlx.Config{}, sqlx.DefaultConfigs...)
+		configs = append(configs, LogInterceptor(true, true))
+	}
 
+	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
 	db, err := sqlx.Open("mysql", connURL, configs...)
 	if err != nil {
 		log.Fatal().Str("conn", connURL).Err(err).
