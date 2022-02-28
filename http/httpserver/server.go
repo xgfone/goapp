@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package http provides some convenient http functions.
-package http
+// Package httpserver provides some http server functions.
+package httpserver
 
 import (
 	"crypto/tls"
@@ -24,8 +24,8 @@ import (
 	"github.com/xgfone/go-log"
 )
 
-// StartServer is a simple convenient function to start a http server.
-func StartServer(name, addr string, handler http.Handler, tlsconfig *tls.Config, forceTLS bool) {
+// Start is a simple convenient function to start a http server.
+func Start(name, addr string, handler http.Handler, tlsconfig *tls.Config, forceTLS bool) {
 	ep, err := entrypoint.NewHTTPEntryPoint(name, addr, handler)
 	if err != nil {
 		log.Fatal().Str("name", name).Str("addr", addr).Err(err).
