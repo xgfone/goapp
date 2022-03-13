@@ -26,8 +26,8 @@ import (
 
 // Start is a simple convenient function to start a http server.
 func Start(name, addr string, handler http.Handler, tlsconfig *tls.Config, forceTLS bool) {
-	ep := entrypoint.NewEntryPoint(name, addr, handler)
-	if err := ep.Init(); err != nil {
+	ep, err := entrypoint.NewEntryPoint(name, addr, handler)
+	if err != nil {
 		log.Fatal().Str("name", name).Str("addr", addr).Err(err).
 			Printf("fail to start the http server")
 	}
