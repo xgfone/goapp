@@ -26,7 +26,6 @@ import (
 	"github.com/xgfone/goapp/config"
 	_ "github.com/xgfone/goapp/exec" // import to initialize the log hook
 	glog "github.com/xgfone/goapp/log"
-	_ "github.com/xgfone/goapp/validate" // import to initialize the validator
 )
 
 var (
@@ -69,11 +68,15 @@ func CallInit() (err error) {
 //  2. Initialize configuration.
 //  3. Initialize the logging.
 //  4. Call the registered initialization functions.
+//  5. Start a goroutine to monitor the exit signals.
 //
 func Init(appName string, opts ...gconf.Opt) {
 	gconf.RegisterOpts(logfile0, loglevel)
 	config.InitConfig(appName, "", opts...)
-	glog.InitLoging(appName, gconf.GetString(loglevel.Name), gconf.GetString(logfile0.Name))
+
+	logfile := gconf.GetString(logfile0.Name)
+	loglevel := gconf.GetString(loglevel.Name)
+	glog.InitLoging(appName, loglevel, logfile)
 
 	if err := CallInit(); err != nil {
 		log.Fatal().Err(err).Printf("fail to init")
