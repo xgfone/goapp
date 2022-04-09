@@ -26,6 +26,12 @@ import (
 // Connection is the configuration option to connect to the sql database.
 var Connection = gconf.StrOpt("connection", "The URL connection to the alarm database, user:password@tcp(ip:port)/db")
 
+func init() {
+	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs,
+		LogInterceptor(true, true),
+		OnExit())
+}
+
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
 func LogInterceptor(debug, logArgs bool) sqlx.Config {
 	return func(db *sqlx.DB) {
@@ -46,8 +52,7 @@ func OnExit() sqlx.Config {
 // InitMysqlDB initializes the mysql connection.
 func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
 	if configs == nil {
-		configs = append([]sqlx.Config{}, sqlx.DefaultConfigs...)
-		configs = append(configs, LogInterceptor(true, true))
+		configs = sqlx.DefaultConfigs
 	}
 
 	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
