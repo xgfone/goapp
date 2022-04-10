@@ -38,3 +38,8 @@ func Start(name, addr string, handler http.Handler, tlsconfig *tls.Config, force
 	ep.OnShutdown(atexit.Execute)
 	ep.Start()
 }
+
+// Start2 is a brief Start.
+func Start2(addr string, handler http.Handler) {
+	Start("", addr, handler, nil, false)
+}
