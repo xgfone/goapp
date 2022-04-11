@@ -42,7 +42,6 @@ func ExecuteShellByHTTP(url, cmd, script string) (stdout, stderr string, err err
 		SetAccepts("application/json").
 		SetBody(req).
 		Do(context.Background(), &resp).
-		Close().
 		Unwrap()
 	if err != nil {
 		return
