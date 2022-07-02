@@ -39,10 +39,11 @@ func init() {
 	gconf.Conf.Errorf = logf.Errorf
 	rand.Seed(time.Now().UnixNano())
 
-	tp := http.DefaultTransport.(*http.Transport)
-	tp.IdleConnTimeout = time.Second * 30
-	tp.MaxIdleConnsPerHost = 100
-	tp.MaxIdleConns = 0
+	if tp, ok := http.DefaultTransport.(*http.Transport); ok {
+		tp.IdleConnTimeout = time.Second * 30
+		tp.MaxIdleConnsPerHost = 100
+		tp.MaxIdleConns = 0
+	}
 }
 
 var inits []func() error
