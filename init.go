@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-apiserver/tools/signal"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
@@ -83,5 +84,5 @@ func Init(appName string, opts ...gconf.Opt) {
 		log.Fatal().Err(err).Printf("fail to init")
 	}
 
-	go atexit.Signals()
+	go signal.WaitExit(atexit.Execute)
 }
