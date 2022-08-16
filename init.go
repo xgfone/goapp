@@ -22,7 +22,6 @@ import (
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-apiserver/tools/signal"
 	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/go-log"
 	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/goapp/config"
 	_ "github.com/xgfone/goapp/exec" // import to initialize the log hook
@@ -47,23 +46,6 @@ func init() {
 	}
 }
 
-var inits []func() error
-
-// RegisterInit registers the initialization functions.
-func RegisterInit(initfuncs ...func() error) {
-	inits = append(inits, initfuncs...)
-}
-
-// CallInit calls the registered initialization functions.
-func CallInit() (err error) {
-	for _, f := range inits {
-		if err = f(); err != nil {
-			return
-		}
-	}
-	return
-}
-
 // Init is used to initialize the application.
 //
 //  1. Register the log options.
@@ -80,9 +62,6 @@ func Init(appName string, opts ...gconf.Opt) {
 	loglevel := gconf.GetString(loglevel.Name)
 	glog.InitLoging(appName, loglevel, logfile)
 
-	if err := CallInit(); err != nil {
-		log.Fatal().Err(err).Printf("fail to init")
-	}
-
+	atexit.Init()
 	go signal.WaitExit(atexit.Execute)
 }
