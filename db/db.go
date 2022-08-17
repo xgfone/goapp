@@ -46,7 +46,7 @@ func LogInterceptor(debug, logArgs bool) sqlx.Config {
 // OnExit returns a Config to register a close callback which will be called
 // when the program exits.
 func OnExit() sqlx.Config {
-	return func(db *sqlx.DB) { atexit.Register(func() { db.Close() }) }
+	return func(db *sqlx.DB) { atexit.OnExit(func() { db.Close() }) }
 }
 
 // InitMysqlDB initializes the mysql connection.

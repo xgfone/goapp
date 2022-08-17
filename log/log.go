@@ -35,7 +35,7 @@ func InitLoging(appName, loglevel, logfile string) {
 	if logfile != "" {
 		file := log.FileWriter(logfile, "100M", 100)
 		log.SetWriter(writer.SafeWriter(file))
-		atexit.RegisterWithPriority(0, func() { file.Close() })
+		atexit.OnExitWithPriority(0, func() { file.Close() })
 	}
 
 	if appName != "" {

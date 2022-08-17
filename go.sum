@@ -12,8 +12,8 @@ github.com/xgfone/go-atexit v0.6.0 h1:ay/DlbrUme5rGD1Ii1M2W9/SRYH8BCLkhcgqfoeYE3
 github.com/xgfone/go-atexit v0.6.0/go.mod h1:yN4Hf2wE06X4kJLL2qxBNKuJHTRdDRoifivfFoKdC8o=
 github.com/xgfone/go-exec v0.4.0 h1:FsRyWZktnbmaBhy7QGop7GIEfQlaIo/YCpdaY/uLYkc=
 github.com/xgfone/go-exec v0.4.0/go.mod h1:uyASdRqXjtI9NvhLeSXZcKSEL6uJw4SaBxGjh0me0kw=
-github.com/xgfone/go-http-client v0.9.0 h1:Da63lwBjaJfL/dl6H2SfrmULlm8oKzMyBVm65c8DCXs=
-github.com/xgfone/go-http-client v0.9.0/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
+github.com/xgfone/go-http-client v0.10.0 h1:KGFKBYwamJMwQ0f+DKg0oNOPfUsJ2hJPRICfW9qVy3g=
+github.com/xgfone/go-http-client v0.10.0/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
 github.com/xgfone/go-log v0.16.0 h1:VreBn0oufAXuQxcpHwtqhRJ57K5fUfq4PDc9uTGrdOk=
 github.com/xgfone/go-log v0.16.0/go.mod h1:8y4q7j+Nf9WN6MQ15hkU+XFcPJEzm4qpL82OodWy1W8=
 github.com/xgfone/gover v0.4.0 h1:+4n+7pp79Dd1csfrv4Qh1OCdBMYBJ2b4VoweKK3Eobk=
