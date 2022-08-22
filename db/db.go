@@ -36,7 +36,7 @@ func init() {
 func LogInterceptor(debug, logArgs bool) sqlx.Config {
 	return func(db *sqlx.DB) {
 		if debug {
-			db.Interceptor = sqlx.LogInterceptor(logf.Debugf, logArgs)
+			db.Interceptor = sqlx.LogInterceptor(logf.Tracef, logArgs)
 		} else {
 			db.Interceptor = sqlx.LogInterceptor(logf.Infof, logArgs)
 		}
