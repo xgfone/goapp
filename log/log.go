@@ -17,6 +17,7 @@ package log
 
 import (
 	stdlog "log"
+	"time"
 
 	apilog "github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
@@ -34,8 +35,11 @@ func InitLoging(appName, loglevel, logfile string) {
 
 	if logfile != "" {
 		file := log.FileWriter(logfile, "100M", 100)
-		log.SetWriter(writer.SafeWriter(file))
+		output := writer.SafeWriter(writer.BufferWriter(file, 0))
+
+		log.SetWriter(output)
 		atexit.OnExitWithPriority(0, func() { file.Close() })
+		go loopFlushWriter(output.(writer.Flusher), 0)
 	}
 
 	if appName != "" {
@@ -44,4 +48,22 @@ func InitLoging(appName, loglevel, logfile string) {
 
 	apilog.DefaultLogger = log.DefaultLogger
 	stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
+}
+
+func loopFlushWriter(f writer.Flusher, interval time.Duration) {
+	if interval <= 0 {
+		interval = time.Second * 10
+	}
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-atexit.Done():
+			return
+		case <-ticker.C:
+			f.Flush()
+		}
+	}
 }
