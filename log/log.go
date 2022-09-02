@@ -35,11 +35,11 @@ func InitLoging(appName, loglevel, logfile string) {
 
 	if logfile != "" {
 		file := log.FileWriter(logfile, "100M", 100)
-		output := writer.SafeWriter(writer.BufferWriter(file, 0))
+		fwriter := writer.SafeWriter(writer.BufferWriter(file, 0))
 
-		log.SetWriter(output)
-		atexit.OnExitWithPriority(0, func() { file.Close() })
-		go loopFlushWriter(output.(writer.Flusher), 0)
+		log.SetWriter(fwriter)
+		atexit.OnExitWithPriority(0, func() { fwriter.Close() })
+		go loopFlushWriter(fwriter.(writer.Flusher), 0)
 	}
 
 	if appName != "" {
