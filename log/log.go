@@ -25,6 +25,8 @@ import (
 	"github.com/xgfone/go-log/writer"
 )
 
+func init() { log.OnExit = atexit.Execute }
+
 // InitLoging initializes the logging configuration.
 //
 // If logfile is empty, output the log to os.Stderr.
