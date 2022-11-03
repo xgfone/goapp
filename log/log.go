@@ -50,6 +50,7 @@ func InitLoging(appName, loglevel, logfile string) {
 
 	apilog.DefaultLogger = log.DefaultLogger
 	stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
+	stdlog.SetFlags(0)
 }
 
 func loopFlushWriter(f writer.Flusher, interval time.Duration) {
