@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"net/http"
 
 	httpclient "github.com/xgfone/go-http-client"
 )
@@ -37,38 +36,37 @@ func ExecuteShellByHTTP(url, cmd, script string) (stdout, stderr string, err err
 		req.Script = base64.StdEncoding.EncodeToString([]byte(script))
 	}
 
-	err = httpclient.Post(url).
+	response := httpclient.Post(url).
 		SetContentType("application/json; charset=UTF-8").
 		SetAccepts("application/json").
 		SetBody(req).
-		Do(context.Background(), &resp).
-		Unwrap()
-	if err != nil {
+		Do(context.Background(), &resp)
+	if err = response.Unwrap(); err != nil {
 		return
 	}
 
 	if stdout, err = decodeString(resp.Stdout); err != nil {
-		err = httpclient.NewError(200, http.MethodPost, url, err)
+		err = response.ToError(err)
 		return
 	}
 
 	if stderr, err = decodeString(resp.Stderr); err != nil {
-		err = httpclient.NewError(200, http.MethodPost, url, err)
+		err = response.ToError(err)
 		return
 	}
 
 	if resp.Error, err = decodeString(resp.Error); err != nil {
-		err = httpclient.NewError(200, http.MethodPost, url, err)
+		err = response.ToError(err)
 		return
 	}
 
 	if resp.Error != "" {
 		if stderr != "" {
-			err = httpclient.NewError(200, http.MethodPost, url, errors.New(stderr))
+			err = response.ToError(errors.New(stderr))
 		} else if stdout != "" {
-			err = httpclient.NewError(200, http.MethodPost, url, errors.New(stdout))
+			err = response.ToError(errors.New(stdout))
 		} else {
-			err = httpclient.NewError(200, http.MethodPost, url, errors.New(resp.Error))
+			err = response.ToError(errors.New(resp.Error))
 		}
 	}
 
