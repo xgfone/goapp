@@ -8,7 +8,7 @@ require (
 	github.com/xgfone/go-http-client v0.12.0
 	github.com/xgfone/go-log v0.19.0
 	github.com/xgfone/gover v0.4.0
-	github.com/xgfone/sqlx v0.22.0
+	github.com/xgfone/sqlx v0.22.1
 )
 
 go 1.13
