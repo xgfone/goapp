@@ -31,7 +31,7 @@ var TaskService = task.DefaultService
 
 // Monitor is the default service monitor.
 var Monitor = service.NewMonitor(
-	service.LogService(log.LvlInfo, "task", TaskService),
+	service.LogService(log.LevelInfo, "task", TaskService),
 	service.NothingChecker(),
 	nil)
 
@@ -43,8 +43,8 @@ func init() {
 // RunTask runs the task function synchronously if TaskService is activated.
 // Or, do nothing.
 func RunTask(delay, interval time.Duration, taskFunc func(context.Context)) {
-	runner := task.WrappedRunnerFunc(TaskService, taskFunc)
-	wait.RunForever(atexit.Context(), delay, interval, runner)
+	runner := task.WrapRunner(TaskService, task.RunnerFunc(taskFunc))
+	wait.RunForever(atexit.Context(), delay, interval, runner.Run)
 }
 
 // SetChecker resets the checker of the monitor service.

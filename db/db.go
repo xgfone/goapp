@@ -17,9 +17,8 @@ package db
 
 import (
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/go-log"
-	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/sqlx"
 )
 
@@ -28,18 +27,14 @@ var Connection = gconf.StrOpt("connection", "The URL connection to the sql datab
 
 func init() {
 	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs,
-		LogInterceptor(true, true),
+		LogInterceptor(),
 		OnExit())
 }
 
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
-func LogInterceptor(debug, logArgs bool) sqlx.Config {
+func LogInterceptor() sqlx.Config {
 	return func(db *sqlx.DB) {
-		if debug {
-			db.Interceptor = sqlx.LogInterceptor(logf.Tracef, logArgs)
-		} else {
-			db.Interceptor = sqlx.LogInterceptor(logf.Infof, logArgs)
-		}
+		db.Interceptor = sqlx.LogInterceptor(log.Tracef, false)
 	}
 }
 
@@ -58,8 +53,7 @@ func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
 	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
 	db, err := sqlx.Open("mysql", connURL, configs...)
 	if err != nil {
-		log.Fatal().Str("conn", connURL).Err(err).
-			Printf("fail to open the mysql connection")
+		log.Fatal("fail to open the mysql connection", "conn", connURL, "err", err)
 	}
 	return db
 }

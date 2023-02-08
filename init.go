@@ -20,9 +20,9 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-apiserver/tools/signal"
 	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/go-log/logf"
 	"github.com/xgfone/goapp/config"
 	_ "github.com/xgfone/goapp/exec" // import to initialize the log hook
 	glog "github.com/xgfone/goapp/log"
@@ -36,7 +36,7 @@ var (
 )
 
 func init() {
-	gconf.Conf.Errorf = logf.Errorf
+	gconf.Conf.Errorf = log.Errorf
 	rand.Seed(time.Now().UnixNano())
 
 	if tp, ok := http.DefaultTransport.(*http.Transport); ok {
@@ -53,7 +53,6 @@ func init() {
 //  3. Initialize the logging.
 //  4. Call the registered initialization functions.
 //  5. Start a goroutine to monitor the exit signals.
-//
 func Init(appName string, opts ...gconf.Opt) {
 	gconf.RegisterOpts(logfile0, loglevel)
 	config.InitConfig(appName, "", opts...)

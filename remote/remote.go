@@ -76,17 +76,15 @@ func CopyFilesFromRemoteBySSHContext(ctx context.Context, remoteHost,
 
 // ExecuteCmdBySSH is equal to
 //
-//   ExecuteCmdBySSHContext(context.Background(), remoteHost, cmd)
-//
+//	ExecuteCmdBySSHContext(context.Background(), remoteHost, cmd)
 func ExecuteCmdBySSH(remoteHost, cmd string) (stdout, stderr string, err error) {
 	return ExecuteCmdBySSHContext(context.Background(), remoteHost, cmd)
 }
 
 // CopyFilesToRemoteBySSH is equal to
 //
-//   CopyFilesToRemoteBySSHContext(context.Background(), remoteHost,
-//                                 remoteDirOrFile, localFiles...)
-//
+//	CopyFilesToRemoteBySSHContext(context.Background(), remoteHost,
+//	                              remoteDirOrFile, localFiles...)
 func CopyFilesToRemoteBySSH(remoteHost, remoteDirOrFile string, localFiles ...string) error {
 	return CopyFilesToRemoteBySSHContext(context.Background(), remoteHost,
 		remoteDirOrFile, localFiles...)
@@ -94,9 +92,8 @@ func CopyFilesToRemoteBySSH(remoteHost, remoteDirOrFile string, localFiles ...st
 
 // CopyFilesFromRemoteBySSH is equal to
 //
-//    CopyFilesFromRemoteBySSHContext(context.Background(), remoteHost,
-//                                    localDirOrFile, remoteFiles...)
-//
+//	CopyFilesFromRemoteBySSHContext(context.Background(), remoteHost,
+//	                                localDirOrFile, remoteFiles...)
 func CopyFilesFromRemoteBySSH(remoteHost, localDirOrFile string, remoteFiles ...string) error {
 	return CopyFilesFromRemoteBySSHContext(context.Background(), remoteHost,
 		localDirOrFile, remoteFiles...)
@@ -104,8 +101,7 @@ func CopyFilesFromRemoteBySSH(remoteHost, localDirOrFile string, remoteFiles ...
 
 // ExecuteScriptBySSH is equal to
 //
-//   ExecuteScriptBySSHContext(context.Background(), remoteHost, script)
-//
+//	ExecuteScriptBySSHContext(context.Background(), remoteHost, script)
 func ExecuteScriptBySSH(remoteHost, script string) (stdout, stderr string, err error) {
 	return ExecuteScriptBySSHContext(context.Background(), remoteHost, script)
 }

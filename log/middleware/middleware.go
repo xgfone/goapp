@@ -17,11 +17,12 @@
 //
 // Example:
 //
-//   import _ "github.com/xgfone/goapp/log/middleware"
-//
+//	import _ "github.com/xgfone/goapp/log/middleware"
 package middleware
 
 import (
+	"context"
+
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-apiserver/middleware/logger"
 )
@@ -37,8 +38,8 @@ var (
 )
 
 func init() {
-	logger.LogReqHeaders = logReqHeaders.Get
-	logger.LogReqBodyLen = logReqBodyLen.Get
-	logger.LogRespHeaders = logRespHeaders.Get
-	logger.LogRespBodyLen = logRespBodyLen.Get
+	logger.LogReqHeaders = func(context.Context) bool { return logReqHeaders.Get() }
+	logger.LogReqBodyLen = func(context.Context) int { return logReqBodyLen.Get() }
+	logger.LogRespHeaders = func(context.Context) bool { return logRespHeaders.Get() }
+	logger.LogRespBodyLen = func(context.Context) int { return logRespBodyLen.Get() }
 }

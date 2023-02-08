@@ -19,8 +19,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-exec"
-	"github.com/xgfone/go-log"
 )
 
 func init() {
@@ -32,11 +32,9 @@ func init() {
 // LogExecutedCmdResultHook is a hook to log the executed command.
 func LogExecutedCmdResultHook(r exec.Result) {
 	if r.Err == nil {
-		log.Info().Str("cmd", r.Name).StrSlice("args", r.Args).
-			Printf("successfully execute the command")
+		log.Info("successfully execute the command", "cmd", r.Name, "args", r.Args)
 	} else {
-		log.Error().Str("cmd", r.Name).StrSlice("args", r.Args).
-			Str("stdout", r.Stdout).Str("stderr", r.Stderr).
-			Err(r.Err).Print("fail to execute the command")
+		log.Error("fail to execute the command", "cmd", r.Name, "args", r.Args,
+			"stdout", r.Stdout, "stderr", r.Stderr, "err", r.Err)
 	}
 }

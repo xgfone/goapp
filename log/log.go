@@ -16,57 +16,59 @@
 package log
 
 import (
-	stdlog "log"
-	"time"
+	"fmt"
+	"io"
+	"os"
+	"strings"
 
-	apilog "github.com/xgfone/go-apiserver/log"
+	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/go-log"
-	"github.com/xgfone/go-log/writer"
 )
 
-func init() { log.OnExit = atexit.Execute }
+func parseLevel(level string) log.Level {
+	switch strings.ToLower(level) {
+	case "":
+	case "trace":
+		return log.LevelTrace
+	case "debug":
+		return log.LevelDebug
+	case "info":
+		return log.LevelInfo
+	case "warn":
+		return log.LevelWarn
+	case "error":
+		return log.LevelError
+	case "fatal":
+		return log.LevelFatal
+	default:
+		fmt.Printf("unknown the level '%s'\n", level)
+		atexit.Exit(1)
+	}
+
+	return log.LevelInfo
+}
 
 // InitLoging initializes the logging configuration.
 //
 // If logfile is empty, output the log to os.Stderr.
 func InitLoging(appName, loglevel, logfile string) {
-	if loglevel != "" {
-		log.SetLevel(log.ParseLevel(loglevel))
-	}
+	level := parseLevel(loglevel)
 
+	var writer io.WriteCloser = os.Stderr
 	if logfile != "" {
-		file := log.FileWriter(logfile, "100M", 100)
-		fwriter := writer.SafeWriter(writer.BufferWriter(file, 0))
-
-		log.SetWriter(fwriter)
-		atexit.OnExitWithPriority(0, func() { fwriter.Close() })
-		go loopFlushWriter(fwriter.(writer.Flusher), 0)
-	}
-
-	if appName != "" {
-		log.DefaultLogger = log.DefaultLogger.WithName(appName)
-	}
-
-	apilog.DefaultLogger = log.DefaultLogger
-	stdlog.SetOutput(log.DefaultLogger.WithDepth(2))
-	stdlog.SetFlags(0)
-}
-
-func loopFlushWriter(f writer.Flusher, interval time.Duration) {
-	if interval <= 0 {
-		interval = time.Second * 10
-	}
-
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-atexit.Done():
-			return
-		case <-ticker.C:
-			f.Flush()
+		file, err := log.NewFileWriter(logfile, "100M", 100)
+		if err != nil {
+			log.Fatal("fail to new the file log writer", "logfile", logfile, "err", err)
 		}
+
+		writer = file
+		atexit.OnExitWithPriority(0, func() { file.Close() })
 	}
+
+	handler := log.NewJSONHandler(writer, level)
+	if appName != "" {
+		handler = handler.WithAttrs([]log.Attr{log.String("logger", appName)})
+	}
+
+	log.SetDefault(nil, handler)
 }
