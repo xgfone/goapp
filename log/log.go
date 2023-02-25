@@ -17,58 +17,70 @@ package log
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
 	"github.com/xgfone/go-apiserver/log"
+	"github.com/xgfone/go-apiserver/tools/io2"
 	"github.com/xgfone/go-atexit"
 )
 
-func parseLevel(level string) log.Level {
-	switch strings.ToLower(level) {
-	case "":
-	case "trace":
-		return log.LevelTrace
-	case "debug":
-		return log.LevelDebug
-	case "info":
-		return log.LevelInfo
-	case "warn":
-		return log.LevelWarn
-	case "error":
-		return log.LevelError
-	case "fatal":
-		return log.LevelFatal
-	default:
-		fmt.Printf("unknown the level '%s'\n", level)
-		atexit.Exit(1)
-	}
+var level = new(log.LevelVar)
 
-	return log.LevelInfo
+func init() { log.SetDefault(log.NewJSONHandler(log.Writer, level)) }
+
+func parseLevel(lvl string) (level log.Level, err error) {
+	switch strings.ToLower(lvl) {
+	case "":
+		level = log.LevelInfo
+	case "trace":
+		level = log.LevelTrace
+	case "debug":
+		level = log.LevelDebug
+	case "info":
+		level = log.LevelInfo
+	case "warn":
+		level = log.LevelWarn
+	case "error":
+		level = log.LevelError
+	case "fatal":
+		level = log.LevelFatal
+	default:
+		err = fmt.Errorf("unknown level '%s'", level)
+	}
+	return
+}
+
+// SetLevel resets the log level.
+func SetLevel(loglevel string) error {
+	lvl, err := parseLevel(loglevel)
+	if err == nil {
+		level.Set(lvl)
+	}
+	return err
 }
 
 // InitLoging initializes the logging configuration.
 //
 // If logfile is empty, output the log to os.Stderr.
 func InitLoging(appName, loglevel, logfile string) {
-	level := parseLevel(loglevel)
+	if lvl, err := parseLevel(loglevel); err != nil {
+		log.Fatal("fail to parse log level", "err", err)
+	} else {
+		level.Set(lvl)
+	}
 
-	var writer io.WriteCloser = os.Stderr
 	if logfile != "" {
-		file, err := log.NewFileWriter(logfile, "100M", 100)
+		file, err := io2.NewFileWriter(logfile, "100M", 100)
 		if err != nil {
 			log.Fatal("fail to new the file log writer", "logfile", logfile, "err", err)
 		}
 
-		writer = file
 		atexit.OnExitWithPriority(0, func() { file.Close() })
+		switch old := log.Writer.Swap(file); old {
+		case os.Stderr, os.Stdout:
+		default:
+			io2.Close(old)
+		}
 	}
-
-	handler := log.NewJSONHandler(writer, level)
-	if appName != "" {
-		handler = handler.WithAttrs([]log.Attr{log.String("logger", appName)})
-	}
-
-	log.SetDefault(nil, handler)
 }
