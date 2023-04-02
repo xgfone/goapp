@@ -22,8 +22,8 @@ import (
 	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-apiserver/service"
 	"github.com/xgfone/go-apiserver/service/task"
-	"github.com/xgfone/go-apiserver/tools/wait"
 	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-wait"
 )
 
 // TaskService is the default task service.

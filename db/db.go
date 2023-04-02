@@ -19,7 +19,8 @@ import (
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/sqlx"
+	"github.com/xgfone/go-defaults"
+	"github.com/xgfone/go-sqlx"
 )
 
 // Connection is the configuration option to connect to the sql database.
@@ -50,7 +51,7 @@ func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
 		configs = sqlx.DefaultConfigs
 	}
 
-	connURL = sqlx.SetConnURLLocation(connURL, sqlx.Location)
+	connURL = sqlx.SetConnURLLocation(connURL, defaults.TimeLocation.Get())
 	db, err := sqlx.Open("mysql", connURL, configs...)
 	if err != nil {
 		log.Fatal("fail to open the mysql connection", "conn", connURL, "err", err)

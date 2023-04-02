@@ -21,8 +21,8 @@ import (
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-apiserver/log"
-	"github.com/xgfone/go-apiserver/tools/signal"
 	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-atexit/signal"
 	"github.com/xgfone/goapp/config"
 	_ "github.com/xgfone/goapp/exec" // import to initialize the log hook
 	glog "github.com/xgfone/goapp/log"
