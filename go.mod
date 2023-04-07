@@ -2,9 +2,10 @@ module github.com/xgfone/goapp
 
 require (
 	github.com/xgfone/gconf/v6 v6.3.0
-	github.com/xgfone/go-apiserver v0.31.0
+	github.com/xgfone/go-apiserver v0.32.0
 	github.com/xgfone/go-atexit v0.10.0
-	github.com/xgfone/go-defaults v0.2.1
+	github.com/xgfone/go-checker v0.2.0
+	github.com/xgfone/go-defaults v0.3.0
 	github.com/xgfone/go-exec v0.4.0
 	github.com/xgfone/go-http-client v0.12.0
 	github.com/xgfone/go-sqlx v0.25.0
@@ -14,6 +15,7 @@ require (
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/xgfone/go-atomicvalue v0.2.0 // indirect
 	github.com/xgfone/go-cast v0.8.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/sys v0.5.0 // indirect

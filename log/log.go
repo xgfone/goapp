@@ -20,8 +20,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/xgfone/go-apiserver/io2"
 	"github.com/xgfone/go-apiserver/log"
-	"github.com/xgfone/go-apiserver/tools/io2"
 	"github.com/xgfone/go-atexit"
 )
 

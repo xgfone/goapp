@@ -23,16 +23,13 @@ import (
 	"github.com/xgfone/go-apiserver/service"
 	"github.com/xgfone/go-apiserver/service/task"
 	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-checker"
 	"github.com/xgfone/go-wait"
 )
 
-// TaskService is the default task service.
-var TaskService = task.DefaultService
-
 // Monitor is the default service monitor.
 var Monitor = service.NewMonitor(
-	service.LogService(log.LevelInfo, "task", TaskService),
-	service.NothingChecker(),
+	service.LogService(log.LevelInfo, "task", task.DefaultService),
 	nil)
 
 func init() {
@@ -40,16 +37,16 @@ func init() {
 	atexit.OnExit(Monitor.Deactivate)
 }
 
-// RunTask runs the task function synchronously if TaskService is activated.
+// RunTask runs the task function synchronously if task.DefaultService is activated.
 // Or, do nothing.
 func RunTask(delay, interval time.Duration, taskFunc func(context.Context)) {
-	runner := task.WrapRunner(TaskService, task.RunnerFunc(taskFunc))
+	runner := task.WrapRunner(nil, task.RunnerFunc(taskFunc))
 	wait.RunForever(atexit.Context(), delay, interval, runner.Run)
 }
 
-// SetChecker resets the checker of the monitor service.
-func SetChecker(checker service.Checker) { Monitor.SetChecker(checker) }
+// SetCheckCond resets the check condition of the monitor service.
+func SetCheckCond(cond checker.Condition) { Monitor.SetChecker(cond) }
 
-// SetVipChecker is a convenient function to set the checker based on vip,
-// which is equal to SetChecker(service.NewVipChecker(vip, "")).
-func SetVipChecker(vip string) { SetChecker(service.NewVipChecker(vip, "")) }
+// SetVipCheckCond is a convenient function to set the checker based on vip,
+// which is equal to SetCheckCond(checker.NewVipCondition(vip, "")).
+func SetVipCheckCond(vip string) { SetCheckCond(checker.NewVipCondition(vip, "")) }
