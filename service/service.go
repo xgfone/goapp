@@ -27,14 +27,20 @@ import (
 	"github.com/xgfone/go-wait"
 )
 
-// Monitor is the default service monitor.
-var Monitor = service.NewMonitor(
-	service.LogService(log.LevelInfo, "task", task.DefaultService),
-	nil)
+var (
+	taskservice = service.LogService(log.LevelInfo, "task", task.DefaultService)
+	svcchecker  = checker.NewChecker("taskservice", checker.AlwaysTrue(), func(_ string, ok bool) {
+		if ok {
+			taskservice.Activate()
+		} else {
+			taskservice.Deactivate()
+		}
+	})
+)
 
 func init() {
-	atexit.OnInit(Monitor.Activate)
-	atexit.OnExit(Monitor.Deactivate)
+	atexit.OnInitWithPriority(1000, func() { svcchecker.Start(atexit.Context()) })
+	atexit.OnExit(svcchecker.Stop)
 }
 
 // RunTask runs the task function synchronously if task.DefaultService is activated.
@@ -45,7 +51,7 @@ func RunTask(delay, interval time.Duration, taskFunc func(context.Context)) {
 }
 
 // SetCheckCond resets the check condition of the monitor service.
-func SetCheckCond(cond checker.Condition) { Monitor.SetChecker(cond) }
+func SetCheckCond(cond checker.Condition) { svcchecker.SetCondition(cond) }
 
 // SetVipCheckCond is a convenient function to set the checker based on vip,
 // which is equal to SetCheckCond(checker.NewVipCondition(vip, "")).
