@@ -8,7 +8,7 @@ require (
 	github.com/xgfone/go-defaults v0.3.0
 	github.com/xgfone/go-exec v0.4.0
 	github.com/xgfone/go-http-client v0.13.0
-	github.com/xgfone/go-sqlx v0.25.0
+	github.com/xgfone/go-sqlx v0.26.0
 	github.com/xgfone/go-wait v0.1.0
 	github.com/xgfone/gover v0.4.0
 )
@@ -17,6 +17,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/xgfone/go-atomicvalue v0.2.0 // indirect
 	github.com/xgfone/go-cast v0.8.0 // indirect
+	github.com/xgfone/go-op v0.4.0 // indirect
 	golang.org/x/exp v0.0.0-20230420155350-5d9e357047b1 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
