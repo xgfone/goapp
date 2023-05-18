@@ -24,6 +24,7 @@ import (
 	"context"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-apiserver/http/reqresp"
 	"github.com/xgfone/go-apiserver/middleware/logger"
 )
 
@@ -42,4 +43,11 @@ func init() {
 	logger.LogReqBodyLen = func(context.Context) int { return logReqBodyLen.Get() }
 	logger.LogRespHeaders = func(context.Context) bool { return logRespHeaders.Get() }
 	logger.LogRespBodyLen = func(context.Context) int { return logRespBodyLen.Get() }
+}
+
+// NotLogHTTPRootPath is used to configure
+// "github.com/xgfone/go-apiserver/middleware/logger.LogReq".
+func NotLogHTTPRootPath(ctx context.Context) bool {
+	c := reqresp.GetContextFromCtx(ctx)
+	return c == nil || c.Request.URL.Path != "/"
 }
