@@ -2,8 +2,8 @@ github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
 github.com/xgfone/gconf/v6 v6.3.0 h1:3vbjbKJ9h+UkXhJjglPyn/i2ECe6TFzQEgVAjARLX9g=
 github.com/xgfone/gconf/v6 v6.3.0/go.mod h1:aHrM2cCFZ9uNHdnctQZQte4ACcwkOGW/RDicrnsu8MU=
-github.com/xgfone/go-apiserver v0.35.0 h1:DOTVZQSzfGbTk8ETvK2CRpgMj4sbc2qB47VtjkCKc/g=
-github.com/xgfone/go-apiserver v0.35.0/go.mod h1:HqaC7ACqHpWOksbFM6Zg9mg37USdhN6RvB1g6EK0/9Y=
+github.com/xgfone/go-apiserver v0.36.0 h1:cYVpu6mHJX4InldmQJchqK3SvYupXNDwy+zcVA6SoAc=
+github.com/xgfone/go-apiserver v0.36.0/go.mod h1:5Whk44KK0l+wAwix3UdZvIDJvMpQS/YMDpD1AARdrnk=
 github.com/xgfone/go-atexit v0.10.0 h1:lFvHqY+4eoKG7qU2goyNF4gLusJfLRHv8muZcrnL/9c=
 github.com/xgfone/go-atexit v0.10.0/go.mod h1:yN4Hf2wE06X4kJLL2qxBNKuJHTRdDRoifivfFoKdC8o=
 github.com/xgfone/go-atomicvalue v0.2.0 h1:C/28ARO2Nsx1UymHfpxQRxwNwseSDlsgQgsM1VahV6U=
@@ -18,9 +18,9 @@ github.com/xgfone/go-defaults v0.6.0 h1:D6Hw6ygvpAAUX6bGqD2yd1qiwbSYGF2FDO6eQKz2
 github.com/xgfone/go-defaults v0.6.0/go.mod h1:zwcnD8escc6E5QrCNKRLQddb4/hcUnUOM20kUeki18Y=
 github.com/xgfone/go-exec v0.4.0 h1:FsRyWZktnbmaBhy7QGop7GIEfQlaIo/YCpdaY/uLYkc=
 github.com/xgfone/go-exec v0.4.0/go.mod h1:uyASdRqXjtI9NvhLeSXZcKSEL6uJw4SaBxGjh0me0kw=
-github.com/xgfone/go-generics v0.1.0 h1:Uw6cqXZJRAa49wvwLF6S+mnuBhFZcCCUSJaNYo0LmMI=
-github.com/xgfone/go-http-client v0.13.0 h1:JE9ZDRyNKf4LMdilJ4Ern6QxoUkSuXhUch7LaTYN2t4=
-github.com/xgfone/go-http-client v0.13.0/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
+github.com/xgfone/go-generics v0.3.0 h1:f823MBfR+RwCfv1Eo57G99bgnJUcuoe3J9ehlLJWsX8=
+github.com/xgfone/go-http-client v0.13.1 h1:+z7aztg8RR00g6x+sEdVK+vf5+G99hR89twPy3ltRcc=
+github.com/xgfone/go-http-client v0.13.1/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
 github.com/xgfone/go-op v0.4.0 h1:LzKPHM2KIK8b3jQH2attJTuptfgx+p4NDcZQpXoJxTI=
 github.com/xgfone/go-op v0.4.0/go.mod h1:J8xaM7cCXnvDgpU3BjIqNz+1TGAJQPLKHVVeceu+emA=
 github.com/xgfone/go-sqlx v0.26.1 h1:nyKJVclwF00ylD58ASJYlzglAP1Q0UgKKHRPeLdiMDY=

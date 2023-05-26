@@ -31,6 +31,8 @@ import (
 var (
 	group = gconf.Group("log")
 
+	logReqQuery = group.NewBool("reqquery", false, "If true, log the request query.")
+
 	logReqHeaders  = group.NewBool("reqheaders", false, "If true, log the request headers.")
 	logRespHeaders = group.NewBool("respheaders", false, "If true, log the response headers.")
 
@@ -39,6 +41,7 @@ var (
 )
 
 func init() {
+	logger.LogReqQuery = func(ctx context.Context) bool { return logReqQuery.Get() }
 	logger.LogReqHeaders = func(context.Context) bool { return logReqHeaders.Get() }
 	logger.LogReqBodyLen = func(context.Context) int { return logReqBodyLen.Get() }
 	logger.LogRespHeaders = func(context.Context) bool { return logRespHeaders.Get() }
