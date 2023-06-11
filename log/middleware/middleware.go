@@ -1,4 +1,4 @@
-// Copyright 2022 xgfone
+// Copyright 2022~2023 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,36 +21,113 @@
 package middleware
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"net/http"
+	"strings"
+	"sync"
+	"unsafe"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-apiserver/http/header"
 	"github.com/xgfone/go-apiserver/http/reqresp"
+	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-apiserver/middleware/logger"
+	"github.com/xgfone/go-generics/slices"
 )
 
 var (
-	group = gconf.Group("log")
-
-	logReqQuery = group.NewBool("reqquery", false, "If true, log the request query.")
-
+	group          = gconf.Group("log")
+	logQuery       = group.NewBool("query", false, "If true, log the request query.")
+	logReqBody     = group.NewBool("reqbody", false, "If true, log the request body.")
 	logReqHeaders  = group.NewBool("reqheaders", false, "If true, log the request headers.")
 	logRespHeaders = group.NewBool("respheaders", false, "If true, log the response headers.")
 
-	logReqBodyLen  = group.NewInt("reqbodylen", 0, "If greater than 0, log the request body only if the body length is not greater than it.")
-	logRespBodyLen = group.NewInt("respbodylen", 0, "If greater than 0, log the response body only if the body length is not greater than it.")
+	logReqBodyTypes = group.NewStringSlice("reqbodytypes", []string{
+		header.MIMEApplicationJSON, header.MIMEApplicationForm,
+	}, "The content types of the request body to log.")
 )
 
-func init() {
-	logger.LogReqQuery = func(ctx context.Context) bool { return logReqQuery.Get() }
-	logger.LogReqHeaders = func(context.Context) bool { return logReqHeaders.Get() }
-	logger.LogReqBodyLen = func(context.Context) int { return logReqBodyLen.Get() }
-	logger.LogRespHeaders = func(context.Context) bool { return logRespHeaders.Get() }
-	logger.LogRespBodyLen = func(context.Context) int { return logRespBodyLen.Get() }
+var bufpool = sync.Pool{New: func() interface{} { return bytes.NewBuffer(make([]byte, 0, 512)) }}
+
+func getbuffer() *bytes.Buffer  { return bufpool.Get().(*bytes.Buffer) }
+func putbuffer(b *bytes.Buffer) { b.Reset(); bufpool.Put(b) }
+
+type bufferCloser struct {
+	*bytes.Buffer
+	io.Closer
 }
 
-// NotLogHTTPRootPath is used to configure
-// "github.com/xgfone/go-apiserver/middleware/logger.LogReq".
-func NotLogHTTPRootPath(ctx context.Context) bool {
-	c := reqresp.GetContextFromCtx(ctx)
-	return c == nil || c.Request.URL.Path != "/"
+func init() {
+	logger.Start = start
+	logger.Enabled = enabled
+}
+
+func enabled(ctx context.Context, req interface{}) bool {
+	r, ok := req.(*http.Request)
+	return !ok || r.URL.Path != "/"
+}
+
+func start(ctx context.Context, req interface{}) logger.Collector {
+	r, ok := req.(*http.Request)
+	if !ok {
+		return nil
+	}
+
+	logquery := logQuery.Get()
+	logreqbody := logReqBody.Get()
+	logreqheader := logReqHeaders.Get()
+	logresheader := logRespHeaders.Get()
+
+	var reqct string
+	var reqbody []byte
+	var reqbodybuf *bytes.Buffer
+	if logreqbody {
+		reqct = header.ContentType(r.Header)
+		if logreqbody = slices.Contains(logReqBodyTypes.Get(), reqct); logreqbody {
+			reqbodybuf = getbuffer()
+			_, err := io.CopyBuffer(reqbodybuf, r.Body, make([]byte, 512))
+			if err != nil {
+				log.Error("fail to read the request body", "raddr", r.RemoteAddr,
+					"method", r.Method, "path", r.RequestURI, "err", err)
+			}
+
+			reqbody = reqbodybuf.Bytes()
+			r.Body = bufferCloser{Buffer: reqbodybuf, Closer: r.Body}
+		}
+	}
+
+	if !logreqbody && !logquery && !logreqheader && !logresheader {
+		return nil
+	}
+
+	return func(kvs []interface{}) (newkvs []interface{}, clean func()) {
+		if logquery {
+			kvs = append(kvs, "query", r.URL.RawQuery)
+		}
+
+		if logreqbody {
+			clean = func() { putbuffer(reqbodybuf) }
+			reqbodystr := unsafe.String(unsafe.SliceData(reqbody), len(reqbody))
+			if strings.HasSuffix(reqct, "json") {
+				kvs = append(kvs, "reqbody", rawString(reqbodystr))
+			} else {
+				kvs = append(kvs, "reqbody", reqbodystr)
+			}
+		}
+
+		if logreqheader {
+			kvs = append(kvs, "reqheaders", r.Header)
+		}
+
+		if logresheader {
+			if c := reqresp.GetContextFromCtx(ctx); c != nil {
+				kvs = append(kvs, "respheaders", c.ResponseWriter.Header())
+			}
+		}
+
+		newkvs = kvs
+		return
+	}
 }
