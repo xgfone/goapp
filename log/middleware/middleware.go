@@ -31,6 +31,7 @@ import (
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-apiserver/http/header"
+	"github.com/xgfone/go-apiserver/http/middlewares"
 	"github.com/xgfone/go-apiserver/http/reqresp"
 	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-apiserver/middleware/logger"
@@ -41,10 +42,11 @@ var (
 	group          = gconf.Group("log")
 	logQuery       = group.NewBool("query", false, "If true, log the request query.")
 	logReqBody     = group.NewBool("reqbody", false, "If true, log the request body.")
+	logRespBody    = group.NewBool("respbody", false, "If true, log the response body.")
 	logReqHeaders  = group.NewBool("reqheaders", false, "If true, log the request headers.")
 	logRespHeaders = group.NewBool("respheaders", false, "If true, log the response headers.")
 
-	logReqBodyTypes = group.NewStringSlice("reqbodytypes", []string{
+	logBodyTypes = group.NewStringSlice("bodytypes", []string{
 		header.MIMEApplicationJSON, header.MIMEApplicationForm,
 	}, "The content types of the request body to log.")
 )
@@ -62,6 +64,7 @@ type bufferCloser struct {
 func init() {
 	logger.Start = start
 	logger.Enabled = enabled
+	middlewares.WrapLoggerResponse = wrapResponse
 }
 
 func enabled(ctx context.Context, req interface{}) bool {
@@ -85,7 +88,7 @@ func start(ctx context.Context, req interface{}) logger.Collector {
 	var reqbodybuf *bytes.Buffer
 	if logreqbody {
 		reqct = header.ContentType(r.Header)
-		if logreqbody = slices.Contains(logReqBodyTypes.Get(), reqct); logreqbody {
+		if logreqbody = slices.Contains(logBodyTypes.Get(), reqct); logreqbody {
 			reqbodybuf = getbuffer()
 			_, err := io.CopyBuffer(reqbodybuf, r.Body, make([]byte, 512))
 			if err != nil {
@@ -109,10 +112,10 @@ func start(ctx context.Context, req interface{}) logger.Collector {
 
 		if logreqbody {
 			clean = func() { putbuffer(reqbodybuf) }
-			reqbodystr := unsafe.String(unsafe.SliceData(reqbody), len(reqbody))
 			if strings.HasSuffix(reqct, "json") {
-				kvs = append(kvs, "reqbody", rawString(reqbodystr))
+				kvs = append(kvs, "reqbody", rawData(reqbody))
 			} else {
+				reqbodystr := unsafe.String(unsafe.SliceData(reqbody), len(reqbody))
 				kvs = append(kvs, "reqbody", reqbodystr)
 			}
 		}
@@ -130,4 +133,43 @@ func start(ctx context.Context, req interface{}) logger.Collector {
 		newkvs = kvs
 		return
 	}
+}
+
+func wrapResponse(w http.ResponseWriter, r *http.Request) (new http.ResponseWriter, kvs []interface{}, clean func()) {
+	if !logRespBody.Get() {
+		return w, nil, nil
+	}
+
+	respbuf := getbuffer()
+	new = reqresp.NewResponseWriter(w, reqresp.DisableReaderFrom(),
+		reqresp.WriteWithResponse(func(w http.ResponseWriter, p []byte) (n int, err error) {
+			if n, err = w.Write(p); n > 0 {
+				respbuf.Write(p[:n])
+			}
+			return
+		}))
+
+	kvs = []interface{}{"respbody", respbodyv{w: w, b: respbuf}}
+	clean = func() { putbuffer(respbuf) }
+	return
+}
+
+type respbodyv struct {
+	w http.ResponseWriter
+	b *bytes.Buffer
+}
+
+func (v respbodyv) LogValue() log.Value {
+	ct := header.ContentType(v.w.Header())
+	if !slices.Contains(logBodyTypes.Get(), ct) {
+		return log.AnyValue(nil)
+	}
+
+	respbody := v.b.Bytes()
+	if strings.HasSuffix(ct, "json") {
+		return log.AnyValue(rawData(respbody))
+	}
+
+	respbodystr := unsafe.String(unsafe.SliceData(respbody), len(respbody))
+	return log.AnyValue(respbodystr)
 }

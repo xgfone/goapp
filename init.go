@@ -33,6 +33,7 @@ var (
 			As("loglevel").D("info").U(updateLogLevel)
 	logfile0 = gconf.StrOpt("log.file", "The file path of the log. The default is stderr.").
 			As("logfile")
+	logfilenum = gconf.IntOpt("log.filenum", "The number of the log files.").D(100)
 )
 
 func init() {
@@ -60,12 +61,13 @@ func updateLogLevel(old, new interface{}) {
 //  4. Call the registered initialization functions.
 //  5. Start a goroutine to monitor the exit signals.
 func Init(appName string, opts ...gconf.Opt) {
-	gconf.RegisterOpts(logfile0, loglevel)
+	gconf.RegisterOpts(logfile0, loglevel, logfilenum)
 	config.InitConfig(appName, "", opts...)
 
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
-	glog.InitLoging(appName, loglevel, logfile)
+	logfilenum := gconf.GetInt(logfilenum.Name)
+	glog.InitLoging(appName, loglevel, logfile, logfilenum)
 
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)

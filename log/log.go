@@ -63,7 +63,7 @@ func SetLevel(loglevel string) error {
 // InitLoging initializes the logging configuration.
 //
 // If logfile is empty, output the log to os.Stderr.
-func InitLoging(appName, loglevel, logfile string) {
+func InitLoging(appName, loglevel, logfile string, logfilenum int) {
 	if lvl, err := parseLevel(loglevel); err != nil {
 		log.Fatal("fail to parse log level", "err", err)
 	} else {
@@ -71,7 +71,11 @@ func InitLoging(appName, loglevel, logfile string) {
 	}
 
 	if logfile != "" {
-		file, err := io2.NewFileWriter(logfile, "100M", 100)
+		if logfilenum <= 0 {
+			logfilenum = 100
+		}
+
+		file, err := io2.NewFileWriter(logfile, "100M", logfilenum)
 		if err != nil {
 			log.Fatal("fail to new the file log writer", "logfile", logfile, "err", err)
 		}
