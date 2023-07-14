@@ -46,9 +46,11 @@ var (
 	logReqHeaders  = group.NewBool("reqheaders", false, "If true, log the request headers.")
 	logRespHeaders = group.NewBool("respheaders", false, "If true, log the response headers.")
 
+	logBodyMaxLen = group.NewInt("bodymaxlen", 1024,
+		"The maximum length of the request or response body to log.")
 	logBodyTypes = group.NewStringSlice("bodytypes", []string{
 		header.MIMEApplicationJSON, header.MIMEApplicationForm,
-	}, "The content types of the request body to log.")
+	}, "The content types of the request or response body to log.")
 )
 
 var bufpool = sync.Pool{New: func() interface{} { return bytes.NewBuffer(make([]byte, 0, 512)) }}
@@ -112,11 +114,14 @@ func start(ctx context.Context, req interface{}) logger.Collector {
 
 		if logreqbody {
 			clean = func() { putbuffer(reqbodybuf) }
-			if strings.HasSuffix(reqct, "json") {
-				kvs = append(kvs, "reqbody", rawData(reqbody))
-			} else {
-				reqbodystr := unsafe.String(unsafe.SliceData(reqbody), len(reqbody))
-				kvs = append(kvs, "reqbody", reqbodystr)
+			kvs = append(kvs, "reqbodylen", len(reqbody))
+			if maxlen := logBodyMaxLen.Get(); maxlen > 0 && len(reqbody) <= maxlen {
+				if strings.HasSuffix(reqct, "json") {
+					kvs = append(kvs, "reqbody", rawData(reqbody))
+				} else {
+					reqbodystr := unsafe.String(unsafe.SliceData(reqbody), len(reqbody))
+					kvs = append(kvs, "reqbody", reqbodystr)
+				}
 			}
 		}
 
@@ -149,17 +154,28 @@ func wrapResponse(w http.ResponseWriter, r *http.Request) (new http.ResponseWrit
 			return
 		}))
 
-	kvs = []interface{}{"respbody", respbodyv{w: w, b: respbuf}}
+	kvs = []interface{}{
+		"respbodylen", respbodylen{b: respbuf},
+		"respbody", respbodycnt{w: w, b: respbuf},
+	}
 	clean = func() { putbuffer(respbuf) }
 	return
 }
 
-type respbodyv struct {
+type respbodylen struct{ b *bytes.Buffer }
+
+func (v respbodylen) LogValue() log.Value { return log.AnyValue(v.b.Len()) }
+
+type respbodycnt struct {
 	w http.ResponseWriter
 	b *bytes.Buffer
 }
 
-func (v respbodyv) LogValue() log.Value {
+func (v respbodycnt) LogValue() log.Value {
+	if maxlen := logBodyMaxLen.Get(); maxlen > 0 && v.b.Len() > maxlen {
+		return log.AnyValue(nil)
+	}
+
 	ct := header.ContentType(v.w.Header())
 	if !slices.Contains(logBodyTypes.Get(), ct) {
 		return log.AnyValue(nil)
