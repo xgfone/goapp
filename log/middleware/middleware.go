@@ -36,6 +36,7 @@ import (
 	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-apiserver/middleware/logger"
 	"github.com/xgfone/go-generics/slices"
+	"github.com/xgfone/go-rawjson"
 )
 
 var (
@@ -117,7 +118,7 @@ func start(ctx context.Context, req interface{}) logger.Collector {
 			kvs = append(kvs, "reqbodylen", len(reqbody))
 			if maxlen := logBodyMaxLen.Get(); maxlen > 0 && len(reqbody) <= maxlen {
 				if strings.HasSuffix(reqct, "json") {
-					kvs = append(kvs, "reqbody", rawData(reqbody))
+					kvs = append(kvs, "reqbody", rawjson.Bytes(reqbody))
 				} else {
 					reqbodystr := unsafe.String(unsafe.SliceData(reqbody), len(reqbody))
 					kvs = append(kvs, "reqbody", reqbodystr)
@@ -183,7 +184,7 @@ func (v respbodycnt) LogValue() log.Value {
 
 	respbody := v.b.Bytes()
 	if strings.HasSuffix(ct, "json") {
-		return log.AnyValue(rawData(respbody))
+		return log.AnyValue(rawjson.Bytes(respbody))
 	}
 
 	respbodystr := unsafe.String(unsafe.SliceData(respbody), len(respbody))

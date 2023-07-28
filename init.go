@@ -29,7 +29,7 @@ import (
 )
 
 var (
-	loglevel = gconf.StrOpt("log.level", "The level of the log, such as debug, info, etc.").
+	loglevel = gconf.StrOpt("log.level", "The level of the log, such as trace, debug, info, warn, error, etc.").
 			As("loglevel").D("info").U(updateLogLevel)
 	logfile0 = gconf.StrOpt("log.file", "The file path of the log. The default is stderr.").
 			As("logfile")

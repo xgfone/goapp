@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package service provides some convenient service functions.
-package service
+// Package services provides some convenient service functions.
+package services
 
 import (
 	"context"
@@ -21,19 +21,19 @@ import (
 
 	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-apiserver/service"
-	"github.com/xgfone/go-apiserver/service/task"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-checker"
 	"github.com/xgfone/go-wait"
 )
 
 var (
-	taskservice = service.LogService(log.LevelInfo, "task", task.DefaultService)
-	svcchecker  = checker.NewChecker("taskservice", checker.AlwaysTrue(), func(_ string, ok bool) {
+	taskservice = service.LogService(log.LevelInfo, "task", service.DefaultProxy)
+	allservices = service.Services{taskservice}
+	svcchecker  = checker.NewChecker("services", checker.AlwaysTrue(), func(_ string, ok bool) {
 		if ok {
-			taskservice.Activate()
+			allservices.Activate()
 		} else {
-			taskservice.Deactivate()
+			allservices.Deactivate()
 		}
 	})
 )
@@ -43,12 +43,26 @@ func init() {
 	atexit.OnExit(svcchecker.Stop)
 }
 
-// RunTask runs the task function synchronously if task.DefaultService is activated.
-// Or, do nothing.
-func RunTask(delay, interval time.Duration, taskFunc func(context.Context)) {
-	runner := task.WrapRunner(nil, task.RunnerFunc(taskFunc))
-	wait.RunForever(atexit.Context(), delay, interval, runner.Run)
+// RunTaskOrElse runs the task function synchronously if service.DefaultProxy is activated.
+// Or, run the elsef function.
+func RunTaskOrElse(delay, interval time.Duration, taskf func(context.Context), elsef func()) {
+	wait.RunForever(atexit.Context(), delay, interval, func(context.Context) {
+		service.DefaultProxy.RunFunc(taskf, elsef)
+	})
 }
+
+// RunTask is equal to RunTask(delay, interval, taskf, nil).
+func RunTask(delay, interval time.Duration, taskf func(context.Context)) {
+	RunTaskOrElse(delay, interval, taskf, nil)
+}
+
+// RunTaskAlways always runs the task function synchronously and periodically.
+func RunTaskAlways(delay, interval time.Duration, task func(context.Context)) {
+	wait.RunForever(atexit.Context(), delay, interval, task)
+}
+
+// Append appends the new services.
+func Append(services ...service.Service) { allservices = allservices.Append(services...) }
 
 // SetCheckCond resets the check condition of the monitor service.
 func SetCheckCond(cond checker.Condition) { svcchecker.SetCondition(cond) }
