@@ -28,14 +28,23 @@ var Connection = gconf.StrOpt("connection", "The URL connection to the sql datab
 
 func init() {
 	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs,
-		LogInterceptor(),
+		LogInterceptor(false),
 		OnExit())
 }
 
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
-func LogInterceptor() sqlx.Config {
-	return func(db *sqlx.DB) {
-		db.Interceptor = sqlx.LogInterceptor(log.Tracef, false)
+func LogInterceptor(logargs bool) sqlx.Config {
+	return func(db *sqlx.DB) { db.Interceptor = logsql(logargs) }
+}
+
+func logsql(logargs bool) sqlx.InterceptorFunc {
+	return func(sql string, args []interface{}) (string, []interface{}, error) {
+		if logargs {
+			log.Trace("log sql statement", "sql", sql, "args", args)
+		} else {
+			log.Trace("log sql statement", "sql", sql)
+		}
+		return sql, args, nil
 	}
 }
 
