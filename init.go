@@ -48,9 +48,8 @@ func init() {
 }
 
 func updateLogLevel(old, new interface{}) {
-	if err := glog.SetLevel(new.(string)); err != nil {
-		log.Error("fail to update the log level", "old", old, "new", new, "err", err)
-	}
+	err := glog.SetLevel(new.(string))
+	log.Info("update the log level", "old", old, "new", new, "err", err)
 }
 
 // Init is used to initialize the application.
