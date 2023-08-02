@@ -22,12 +22,12 @@ github.com/xgfone/go-generics v0.3.0 h1:f823MBfR+RwCfv1Eo57G99bgnJUcuoe3J9ehlLJW
 github.com/xgfone/go-generics v0.3.0/go.mod h1:8+Wd/5eVql1eKLRXbMuXi5Q3MZkRAFtiV05wAfVuvqU=
 github.com/xgfone/go-http-client v0.15.0 h1:E4LYXQbjVdJ9lhoaS65LFuXZK/hC/gYdUoASBWDlzH4=
 github.com/xgfone/go-http-client v0.15.0/go.mod h1:eO64VZLtf4gbN1EgFfjQ4zU0AXfn0lTMA5rdtXVvlCc=
-github.com/xgfone/go-op v0.6.0 h1:3Ivw+Lx9nL79FK0TntfG/tnCGefnQlLM1GZLjY48D6c=
-github.com/xgfone/go-op v0.6.0/go.mod h1:J8xaM7cCXnvDgpU3BjIqNz+1TGAJQPLKHVVeceu+emA=
+github.com/xgfone/go-op v0.6.1 h1:d+Z4UMiWBVCys5+NbqHNi/ri6XYus73nEAGrsOr9A4U=
+github.com/xgfone/go-op v0.6.1/go.mod h1:J8xaM7cCXnvDgpU3BjIqNz+1TGAJQPLKHVVeceu+emA=
 github.com/xgfone/go-rawjson v0.1.0 h1:8d5jMZqeUls5Y+cFbg86Hnh3Tvh8E9gpEHdyTi01XUU=
 github.com/xgfone/go-rawjson v0.1.0/go.mod h1:E65v25AiOvwZPbWHPOTHhfJD8cfj8I+cpn/2gqk0i+s=
-github.com/xgfone/go-sqlx v0.27.0 h1:ECmzrmHI5B8trsU85t97Y395SozwxNWGlo56AITM45g=
-github.com/xgfone/go-sqlx v0.27.0/go.mod h1:zme8U8glcqI0Zlc0ucLM/QGBGM1QIDM1gWfEQvmiA8E=
+github.com/xgfone/go-sqlx v0.27.2 h1:jZxcp756/L6da51Sc3KUpB3pJ0rRYvqYCgjrMydte98=
+github.com/xgfone/go-sqlx v0.27.2/go.mod h1:gD7iUIkdf4Ly1lFPAQ8x9CGLRsnlKD4jazepZFhPmlA=
 github.com/xgfone/go-structs v0.2.0 h1:Weq/TfH+9azlzUdtz9xwWFqxczD7R404G3k94G04Anw=
 github.com/xgfone/go-structs v0.2.0/go.mod h1:/zjyb3pm/NtFUnwUetDWuBfhYUuxzUyBSV2Xy1tvwnY=
 github.com/xgfone/go-validation v0.2.0 h1:Kj7i7k/piP2DvWMbm+ayeJV1HjvGf6tFAYgbADeCr6w=
