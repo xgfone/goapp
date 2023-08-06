@@ -4,15 +4,15 @@ require (
 	github.com/xgfone/gconf/v6 v6.3.0
 	github.com/xgfone/go-apiserver v0.40.0
 	github.com/xgfone/go-atexit v0.10.0
-	github.com/xgfone/go-checker v0.2.0
-	github.com/xgfone/go-defaults v0.6.0
+	github.com/xgfone/go-checker v0.3.0
+	github.com/xgfone/go-defaults v0.7.0
 	github.com/xgfone/go-exec v0.4.0
 	github.com/xgfone/go-generics v0.3.0
 	github.com/xgfone/go-http-client v0.15.0
 	github.com/xgfone/go-rawjson v0.1.0
 	github.com/xgfone/go-sqlx v0.27.2
-	github.com/xgfone/go-wait v0.1.0
-	github.com/xgfone/gover v0.4.0
+	github.com/xgfone/go-wait v0.2.0
+	github.com/xgfone/gover v0.5.0
 )
 
 require (

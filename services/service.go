@@ -39,7 +39,7 @@ var (
 )
 
 func init() {
-	atexit.OnInitWithPriority(1000, func() { go svcchecker.Start(atexit.Context()) })
+	atexit.OnInitWithPriority(10000, func() { go svcchecker.Start(atexit.Context()) })
 	atexit.OnExit(svcchecker.Stop)
 }
 
