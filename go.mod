@@ -10,7 +10,7 @@ require (
 	github.com/xgfone/go-generics v0.3.0
 	github.com/xgfone/go-http-client v0.15.0
 	github.com/xgfone/go-rawjson v0.1.0
-	github.com/xgfone/go-sqlx v0.27.2
+	github.com/xgfone/go-sqlx v0.28.0
 	github.com/xgfone/go-wait v0.2.0
 	github.com/xgfone/gover v0.5.0
 )
