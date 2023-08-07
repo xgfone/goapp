@@ -15,6 +15,7 @@
 package goapp
 
 import (
+	"expvar"
 	"net/http"
 	"time"
 
@@ -36,6 +37,11 @@ var (
 )
 
 func init() { gconf.Conf.Errorf = log.Errorf }
+
+func init() {
+	now := time.Now().Format(time.RFC3339Nano)
+	expvar.Publish("starttime", expvar.NewString(now))
+}
 
 func init() {
 	if tp, ok := http.DefaultTransport.(*http.Transport); ok {
