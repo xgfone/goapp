@@ -40,7 +40,7 @@ func init() { gconf.Conf.Errorf = log.Errorf }
 
 func init() {
 	now := time.Now().Format(time.RFC3339Nano)
-	expvar.Publish("starttime", expvar.NewString(now))
+	expvar.NewString("starttime").Set(now)
 }
 
 func init() {
