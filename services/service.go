@@ -28,17 +28,17 @@ import (
 
 var (
 	taskservice = service.LogService(log.LevelInfo, "task", service.DefaultProxy)
-	allservices = service.Services{taskservice}
 	svcchecker  = checker.NewChecker("services", checker.AlwaysTrue(), func(_ string, ok bool) {
 		if ok {
-			allservices.Activate()
+			service.DefaultServices.Activate()
 		} else {
-			allservices.Deactivate()
+			service.DefaultServices.Deactivate()
 		}
 	})
 )
 
 func init() {
+	service.Append(taskservice)
 	atexit.OnInitWithPriority(10000, func() { go svcchecker.Start(atexit.Context()) })
 	atexit.OnExit(svcchecker.Stop)
 }
@@ -61,8 +61,8 @@ func RunTaskAlways(delay, interval time.Duration, task func(context.Context)) {
 	wait.RunForever(atexit.Context(), delay, interval, task)
 }
 
-// Append appends the new services.
-func Append(services ...service.Service) { allservices = allservices.Append(services...) }
+// Append appends the new services, which the proxy of service.Append.
+func Append(services ...service.Service) { service.Append(services...) }
 
 // SetCheckCond resets the check condition of the monitor service.
 func SetCheckCond(cond checker.Condition) { svcchecker.SetCondition(cond) }

@@ -2,7 +2,7 @@ module github.com/xgfone/goapp
 
 require (
 	github.com/xgfone/gconf/v6 v6.3.0
-	github.com/xgfone/go-apiserver v0.40.0
+	github.com/xgfone/go-apiserver v0.41.0
 	github.com/xgfone/go-atexit v0.10.0
 	github.com/xgfone/go-checker v0.3.0
 	github.com/xgfone/go-defaults v0.7.0

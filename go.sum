@@ -2,8 +2,8 @@ github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
 github.com/xgfone/gconf/v6 v6.3.0 h1:3vbjbKJ9h+UkXhJjglPyn/i2ECe6TFzQEgVAjARLX9g=
 github.com/xgfone/gconf/v6 v6.3.0/go.mod h1:aHrM2cCFZ9uNHdnctQZQte4ACcwkOGW/RDicrnsu8MU=
-github.com/xgfone/go-apiserver v0.40.0 h1:mxHXcRDkTcOiAR5yQ9DKcVMR/KG/3cU/yo32ZT7KpWU=
-github.com/xgfone/go-apiserver v0.40.0/go.mod h1:xI1ak0Ei4VPSbwhWPQi9SyDDnIkLRFlZy45G4g5U/Ic=
+github.com/xgfone/go-apiserver v0.41.0 h1:y3zMagnP70g6Rv63dSzUU1cp/yKuhovCfEo3xeaZBsU=
+github.com/xgfone/go-apiserver v0.41.0/go.mod h1:jx3/YdXLyMXt9dFMA0/V0pKvF7n7rNbPraoehvG/xSI=
 github.com/xgfone/go-atexit v0.10.0 h1:lFvHqY+4eoKG7qU2goyNF4gLusJfLRHv8muZcrnL/9c=
 github.com/xgfone/go-atexit v0.10.0/go.mod h1:yN4Hf2wE06X4kJLL2qxBNKuJHTRdDRoifivfFoKdC8o=
 github.com/xgfone/go-atomicvalue v0.2.0 h1:C/28ARO2Nsx1UymHfpxQRxwNwseSDlsgQgsM1VahV6U=
