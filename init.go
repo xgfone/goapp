@@ -1,4 +1,4 @@
-// Copyright 2020~2022 xgfone
+// Copyright 2020~2023 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 package goapp
 
 import (
-	"math/rand"
 	"net/http"
 	"time"
 
@@ -36,10 +35,9 @@ var (
 	logfilenum = gconf.IntOpt("log.filenum", "The number of the log files.").D(100)
 )
 
-func init() {
-	gconf.Conf.Errorf = log.Errorf
-	rand.Seed(time.Now().UnixNano())
+func init() { gconf.Conf.Errorf = log.Errorf }
 
+func init() {
 	if tp, ok := http.DefaultTransport.(*http.Transport); ok {
 		tp.IdleConnTimeout = time.Second * 30
 		tp.MaxIdleConnsPerHost = 100
