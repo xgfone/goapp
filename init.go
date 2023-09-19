@@ -16,13 +16,15 @@ package goapp
 
 import (
 	"expvar"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-atexit/signal"
+	"github.com/xgfone/go-defaults"
 	"github.com/xgfone/goapp/config"
 	glog "github.com/xgfone/goapp/log"
 )
@@ -35,11 +37,19 @@ var (
 	logfilenum = gconf.IntOpt("log.filenum", "The number of the log files.").D(100)
 )
 
-func init() { gconf.Conf.Errorf = log.Errorf }
+func init() {
+	gconf.Conf.Errorf = func(format string, args ...interface{}) {
+		if len(args) > 0 {
+			format = fmt.Sprintf(format, args...)
+		}
+		slog.Error(format)
+	}
+}
 
 func init() {
 	now := time.Now().Format(time.RFC3339Nano)
 	expvar.NewString("starttime").Set(now)
+	defaults.ExitFunc.Set(atexit.Exit)
 }
 
 func init() {
@@ -52,7 +62,7 @@ func init() {
 
 func updateLogLevel(old, new interface{}) {
 	err := glog.SetLevel(new.(string))
-	log.Info("update the log level", "old", old, "new", new, "err", err)
+	slog.Info("update the log level", "old", old, "new", new, "err", err)
 }
 
 // Init is used to initialize the application.
@@ -69,7 +79,7 @@ func Init(appName string, opts ...gconf.Opt) {
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
 	logfilenum := gconf.GetInt(logfilenum.Name)
-	glog.InitLoging(appName, loglevel, logfile, logfilenum)
+	glog.InitLoging(loglevel, logfile, logfilenum)
 
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)

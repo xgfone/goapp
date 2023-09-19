@@ -16,75 +16,79 @@
 package log
 
 import (
-	"fmt"
+	"context"
+	"io"
+	"log"
+	"log/slog"
 	"os"
-	"strings"
 
-	"github.com/xgfone/go-apiserver/io2"
-	"github.com/xgfone/go-apiserver/log"
 	"github.com/xgfone/go-atexit"
+	"github.com/xgfone/go-defaults"
 )
 
-var level = new(log.LevelVar)
+// Attrs is the global log attributes appended into the log context
+// when setting the global default logger.
+var Attrs []slog.Attr
 
-func init() { log.SetDefault(log.NewJSONHandler(log.Writer, level)) }
-
-func parseLevel(lvl string) (level log.Level, err error) {
-	switch strings.ToLower(lvl) {
-	case "":
-		level = log.LevelInfo
-	case "trace":
-		level = log.LevelTrace
-	case "debug":
-		level = log.LevelDebug
-	case "info":
-		level = log.LevelInfo
-	case "warn":
-		level = log.LevelWarn
-	case "error":
-		level = log.LevelError
-	case "fatal":
-		level = log.LevelFatal
-	default:
-		err = fmt.Errorf("unknown level '%s'", level)
-	}
-	return
+func init() {
+	SetDefault(NewJSONHandler(Writer, Level))
+	defaults.HandlePanicFunc.Set(func(r any) { logpanic(r, 5) })
 }
 
-// SetLevel resets the log level.
-func SetLevel(loglevel string) error {
-	lvl, err := parseLevel(loglevel)
-	if err == nil {
-		level.Set(lvl)
+func logpanic(r any, skip int) {
+	stacks := defaults.GetStacks(skip)
+	slog.Error("wrap a panic", "panic", r, "stacks", stacks)
+}
+
+// SetDefault is used to set default global logger with the handler.
+func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
+	attrs = append(attrs, Attrs...)
+	if len(attrs) > 0 {
+		handler = handler.WithAttrs(attrs)
 	}
-	return err
+
+	log.SetFlags(log.Lshortfile | log.Llongfile)
+	slog.SetDefault(slog.New(handler))
+}
+
+// Trace emits a TRACE log message.
+func Trace(msg string, args ...any) {
+	slog.Log(context.Background(), LevelTrace, msg, args...)
+}
+
+// Fatal emits a FATAL log message.
+func Fatal(msg string, args ...any) {
+	slog.Log(context.Background(), LevelFatal, msg, args...)
+	atexit.Exit(1)
 }
 
 // InitLoging initializes the logging configuration.
 //
-// If logfile is empty, output the log to os.Stderr.
-func InitLoging(appName, loglevel, logfile string, logfilenum int) {
-	if lvl, err := parseLevel(loglevel); err != nil {
-		log.Fatal("fail to parse log level", "err", err)
-	} else {
-		level.Set(lvl)
+// If file is empty, output the log to os.Stderr.
+func InitLoging(level, file string, logfilenum int) {
+	if err := SetLevel(level); err != nil {
+		Fatal("fail to set the log level", "level", level, "err", err)
 	}
 
-	if logfile != "" {
-		if logfilenum <= 0 {
-			logfilenum = 100
-		}
+	if file != "" {
+		return
+	}
 
-		file, err := io2.NewFileWriter(logfile, "100M", logfilenum)
-		if err != nil {
-			log.Fatal("fail to new the file log writer", "logfile", logfile, "err", err)
-		}
+	if logfilenum <= 0 {
+		logfilenum = 100
+	}
 
-		atexit.OnExitWithPriority(0, func() { file.Close() })
-		switch old := log.Writer.Swap(file); old {
-		case os.Stderr, os.Stdout:
-		default:
-			io2.Close(old)
+	_file, err := NewFileWriter(file, "100M", logfilenum)
+	if err != nil {
+		Fatal("fail to new the file log writer", "file", file, "err", err)
+	}
+
+	atexit.OnExitWithPriority(0, func() { _file.Close() })
+	switch old := Writer.Swap(_file); old {
+	case os.Stderr, os.Stdout:
+	default:
+		if c, ok := old.(io.Closer); ok {
+			c.Close()
 		}
 	}
 }

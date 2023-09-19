@@ -27,8 +27,8 @@ var ParseAndLoadSource func(app string)
 
 func init() {
 	ParseAndLoadSource = func(app string) {
-		gconf.AddAndParseOptFlag(gconf.Conf)
-		gconf.LoadSource(gconf.NewFlagSource())
+		_ = gconf.AddAndParseOptFlag(gconf.Conf)
+		_ = gconf.LoadSource(gconf.NewFlagSource())
 	}
 }
 
@@ -43,8 +43,8 @@ func InitConfig(app, version string, opts ...gconf.Opt) {
 	gconf.SetVersion(version)
 	gconf.RegisterOpts(opts...)
 	ParseAndLoadSource(app)
-	gconf.LoadSource(gconf.NewEnvSource(app))
+	_ = gconf.LoadSource(gconf.NewEnvSource(app))
 	if cfile, _ := gconf.Get(gconf.ConfigFileOpt.Name).(string); cfile != "" {
-		gconf.LoadAndWatchSource(gconf.NewFileSource(cfile))
+		_ = gconf.LoadAndWatchSource(gconf.NewFileSource(cfile))
 	}
 }
