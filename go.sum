@@ -1,7 +1,7 @@
 github.com/fsnotify/fsnotify v1.6.0 h1:n+5WquG0fcWoWp6xPWfHdbskMCQaFnG6PfBrh1Ky4HY=
 github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbSClcnxKAGw=
-github.com/xgfone/gconf/v6 v6.3.0 h1:3vbjbKJ9h+UkXhJjglPyn/i2ECe6TFzQEgVAjARLX9g=
-github.com/xgfone/gconf/v6 v6.3.0/go.mod h1:aHrM2cCFZ9uNHdnctQZQte4ACcwkOGW/RDicrnsu8MU=
+github.com/xgfone/gconf/v6 v6.4.0 h1:uP92a1wcqVVt9KUjKW2wu+I5MY1FZBHi2NLHQM7WAhQ=
+github.com/xgfone/gconf/v6 v6.4.0/go.mod h1:XNWm7TRMA5rlKh8S00rSPo/zWzbVedXbU1sNonCX8bs=
 github.com/xgfone/go-atexit v0.11.0 h1:hpN7aowCWUUjy00SciUxrFTnpbK9JlJwV01zlRUel0o=
 github.com/xgfone/go-atexit v0.11.0/go.mod h1:yN4Hf2wE06X4kJLL2qxBNKuJHTRdDRoifivfFoKdC8o=
 github.com/xgfone/go-cast v0.8.1 h1:x80Qu+XCUyQoFvCo2j+CFRiKiJydF11jeAJRzRtGY9U=
