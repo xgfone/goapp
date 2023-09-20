@@ -15,9 +15,11 @@
 package goapp
 
 import (
+	"context"
 	"expvar"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
 
@@ -26,7 +28,7 @@ import (
 	"github.com/xgfone/go-atexit/signal"
 	"github.com/xgfone/go-defaults"
 	"github.com/xgfone/goapp/config"
-	glog "github.com/xgfone/goapp/log"
+	"github.com/xgfone/goapp/log"
 )
 
 var (
@@ -54,15 +56,25 @@ func init() {
 
 func init() {
 	if tp, ok := http.DefaultTransport.(*http.Transport); ok {
+		tp.DialContext = dialContext
+		tp.TLSHandshakeTimeout = time.Second * 2
 		tp.IdleConnTimeout = time.Second * 30
 		tp.MaxIdleConnsPerHost = 100
 		tp.MaxIdleConns = 0
 	}
 }
 
+func dialContext(ctx context.Context, network, addr string) (net.Conn, error) {
+	d := net.Dialer{Timeout: 3 * time.Second, KeepAlive: 30 * time.Second}
+	return d.DialContext(ctx, network, addr)
+}
+
 func updateLogLevel(old, new interface{}) {
-	err := glog.SetLevel(new.(string))
-	slog.Info("update the log level", "old", old, "new", new, "err", err)
+	if err := log.SetLevel(new.(string)); err != nil {
+		slog.Error("update the log level", "old", old, "new", new, "err", err)
+	} else {
+		slog.Info("update the log level", "old", old, "new", new)
+	}
 }
 
 // Init is used to initialize the application.
@@ -79,7 +91,7 @@ func Init(appName string, opts ...gconf.Opt) {
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
 	logfilenum := gconf.GetInt(logfilenum.Name)
-	glog.InitLoging(loglevel, logfile, logfilenum)
+	log.InitLoging(loglevel, logfile, logfilenum)
 
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)
