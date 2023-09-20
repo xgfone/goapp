@@ -70,7 +70,7 @@ func InitLoging(level, file string, logfilenum int) {
 		Fatal("fail to set the log level", "level", level, "err", err)
 	}
 
-	if file != "" {
+	if file == "" {
 		return
 	}
 
