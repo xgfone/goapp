@@ -96,3 +96,10 @@ func Init(appName string, opts ...gconf.Opt) {
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)
 }
+
+// ServeHTTPWithListener starts the http server with listener until it is stopped.
+func ServeHTTPWithListener(ln net.Listener, server *http.Server) {
+	atexit.OnExit(func() { _ = server.Shutdown(context.Background()) })
+	_ = server.Serve(ln)
+	atexit.Wait()
+}
