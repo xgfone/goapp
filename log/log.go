@@ -26,10 +26,6 @@ import (
 	"github.com/xgfone/go-defaults"
 )
 
-// Attrs is the global log attributes appended into the log context
-// when setting the global default logger.
-var Attrs []slog.Attr
-
 func init() {
 	SetDefault(NewJSONHandler(Writer, Level))
 	defaults.HandlePanicFunc.Set(func(r any) { logpanic(r, 5) })
@@ -42,7 +38,6 @@ func logpanic(r any, skip int) {
 
 // SetDefault is used to set default global logger with the handler.
 func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
-	attrs = append(attrs, Attrs...)
 	if len(attrs) > 0 {
 		handler = handler.WithAttrs(attrs)
 	}
