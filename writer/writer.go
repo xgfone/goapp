@@ -19,26 +19,26 @@ import (
 	"sync/atomic"
 )
 
-type writerWrapper struct{ io.Writer }
+type wrapper struct{ io.Writer }
 
-// SwitchWriter is a writer proxy, which can switch the writer to another
+// Switcher is a writer proxy, which can switch the writer to another
 // in running.
-type SwitchWriter struct{ w atomic.Value }
+type Switcher struct{ w atomic.Value }
 
-// NewSwitchWriter returns a new SwitchWriter with w.
-func NewSwitchWriter(writer io.Writer) *SwitchWriter {
-	w := new(SwitchWriter)
+// NewSwitcher returns a new Switcher with w.
+func NewSwitcher(writer io.Writer) *Switcher {
+	w := new(Switcher)
 	w.Set(writer)
 	return w
 }
 
 // Write implements the interface io.Writer.
-func (w *SwitchWriter) Write(b []byte) (int, error) {
+func (w *Switcher) Write(b []byte) (int, error) {
 	return w.Get().Write(b)
 }
 
 // Close implements the interface io.Closer.
-func (w *SwitchWriter) Close() error {
+func (w *Switcher) Close() error {
 	if c, ok := w.Get().(io.Closer); ok {
 		return c.Close()
 	}
@@ -46,27 +46,27 @@ func (w *SwitchWriter) Close() error {
 }
 
 // Set sets the writer to new.
-func (w *SwitchWriter) Set(new io.Writer) {
+func (w *Switcher) Set(new io.Writer) {
 	if new == nil {
-		panic("SwitchWriter.Set: io.Writer is nil")
+		panic("Switcher.Set: io.Writer is nil")
 	}
-	w.w.Store(writerWrapper{Writer: new})
+	w.w.Store(wrapper{Writer: new})
 }
 
 // Get returns the wrapped writer, which is equal to Unwrap.
-func (w *SwitchWriter) Get() io.Writer {
-	return w.w.Load().(writerWrapper).Writer
+func (w *Switcher) Get() io.Writer {
+	return w.w.Load().(wrapper).Writer
 }
 
 // Unwrap returns the wrapped writer.
-func (w *SwitchWriter) Unwrap() io.Writer {
-	return w.w.Load().(writerWrapper).Writer
+func (w *Switcher) Unwrap() io.Writer {
+	return w.w.Load().(wrapper).Writer
 }
 
 // Swap swaps the old writer with the new writer.
-func (w *SwitchWriter) Swap(new io.Writer) (old io.Writer) {
+func (w *Switcher) Swap(new io.Writer) (old io.Writer) {
 	if new == nil {
-		panic("SwitchWriter.Swap: io.Writer is nil")
+		panic("Switcher.Swap: io.Writer is nil")
 	}
-	return w.w.Swap(writerWrapper{Writer: new}).(writerWrapper).Writer
+	return w.w.Swap(wrapper{Writer: new}).(wrapper).Writer
 }

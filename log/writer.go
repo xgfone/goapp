@@ -25,7 +25,7 @@ import (
 )
 
 // Writer is the default global writer.
-var Writer = writer.NewSwitchWriter(os.Stderr)
+var Writer = writer.NewSwitcher(os.Stderr)
 
 // NewFileWriter returns a new file writer that rotates the files
 // based on the file size, which is used as the log writer.
