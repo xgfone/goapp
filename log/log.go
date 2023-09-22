@@ -59,7 +59,7 @@ func Trace(msg string, args ...any) {
 // Fatal emits a FATAL log message.
 func Fatal(msg string, args ...any) {
 	slog.Log(context.Background(), LevelFatal, msg, args...)
-	atexit.Exit(1)
+	defaults.Exit(1)
 }
 
 // InitLoging initializes the logging configuration.
