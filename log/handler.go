@@ -82,6 +82,9 @@ func (h *OptionHandler) clone() *OptionHandler {
 	return &nh
 }
 
+// Unwrap returns the inner wrapped slog handler.
+func (h *OptionHandler) Unwrap() slog.Handler { return h.Handler }
+
 // Enabled implements the interface Handler#Enabled.
 func (h *OptionHandler) Enabled(c context.Context, l slog.Level) bool {
 	if h.EnableFunc != nil {
