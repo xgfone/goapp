@@ -98,7 +98,7 @@ func Init(appName string, opts ...gconf.Opt) {
 }
 
 // ServeHTTPWithListener starts the http server with listener until it is stopped.
-func ServeHTTPWithListener(ln net.Listener, server *http.Server) {
+func ServeHTTPWithListener(server *http.Server, ln net.Listener) {
 	atexit.OnExit(func() { _ = server.Shutdown(context.Background()) })
 	_ = server.Serve(ln)
 	atexit.Wait()
