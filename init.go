@@ -32,6 +32,18 @@ import (
 )
 
 var (
+	// Version is the version of app.
+	//
+	// Default: github.com/xgfone/gover.Text()
+	Version string
+
+	// AppName is the name of app.
+	//
+	// Default: ""
+	AppName string
+)
+
+var (
 	loglevel = gconf.StrOpt("log.level", "The level of the log, such as trace, debug, info, warn, error, etc.").
 			As("loglevel").D("info").U(updateLogLevel)
 	logfile0 = gconf.StrOpt("log.file", "The file path of the log. The default is stderr.").
@@ -84,14 +96,14 @@ func updateLogLevel(old, new interface{}) {
 //  3. Initialize the logging.
 //  4. Call the registered initialization functions.
 //  5. Start a goroutine to monitor the exit signals.
-func Init(appName string, opts ...gconf.Opt) {
+func Init(opts ...gconf.Opt) {
 	gconf.RegisterOpts(logfile0, loglevel, logfilenum)
-	config.InitConfig(appName, "", opts...)
+	config.Init(AppName, Version, opts...)
 
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
 	logfilenum := gconf.GetInt(logfilenum.Name)
-	log.InitLoging(loglevel, logfile, logfilenum)
+	log.Init(AppName, loglevel, logfile, logfilenum)
 
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)

@@ -27,7 +27,7 @@ import (
 )
 
 // Connection is the configuration option to connect to the sql database.
-var Connection = gconf.StrOpt("connection", "The URL connection to the sql database, user:password@tcp(ip:port)/db")
+var Connection = gconf.StrOpt("connection", "The URL connection to the sql database, user:password@tcp(ip:port)/db.")
 
 func init() {
 	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, LogInterceptor(false), OnExit())

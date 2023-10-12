@@ -57,10 +57,10 @@ func Fatal(msg string, args ...any) {
 	defaults.Exit(1)
 }
 
-// InitLoging initializes the logging configuration.
+// Init initializes the logging configuration.
 //
 // If file is empty, output the log to os.Stderr.
-func InitLoging(level, file string, logfilenum int) {
+func Init(appName, level, file string, logfilenum int) {
 	if err := SetLevel(level); err != nil {
 		Fatal("fail to set the log level", "level", level, "err", err)
 	}

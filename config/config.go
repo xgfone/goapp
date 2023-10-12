@@ -32,10 +32,10 @@ func init() {
 	}
 }
 
-// InitConfig initializes the configuration, which will set the version,
+// Init initializes the configuration, which will set the version,
 // register the options, parse the CLI arguments with "flag",
 // load the "flag", "env" and "file" configuration sources.
-func InitConfig(app, version string, opts ...gconf.Opt) {
+func Init(app, version string, opts ...gconf.Opt) {
 	if version == "" {
 		version = gover.Text()
 	}
