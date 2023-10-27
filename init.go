@@ -108,16 +108,3 @@ func Init(opts ...gconf.Opt) {
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)
 }
-
-// ServeHTTPWithListener starts the http server with listener until it is stopped.
-func ServeHTTPWithListener(server *http.Server, ln net.Listener) {
-	atexit.OnExit(func() { _ = server.Shutdown(context.Background()) })
-	serveHTTP(server, ln)
-	atexit.Wait()
-}
-
-func serveHTTP(server *http.Server, ln net.Listener) {
-	slog.Info("start the http server", "addr", server.Addr)
-	defer slog.Info("stop the http server", "addr", server.Addr)
-	_ = server.Serve(ln)
-}
