@@ -30,7 +30,7 @@ import (
 var Connection = gconf.StrOpt("connection", "The URL connection to the sql database, user:password@tcp(ip:port)/db.")
 
 func init() {
-	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, LogInterceptor(false), OnExit())
+	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, LogInterceptor(true), OnExit())
 }
 
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
