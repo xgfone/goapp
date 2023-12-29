@@ -17,6 +17,7 @@ package log
 import (
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 )
 
@@ -29,7 +30,18 @@ const (
 // Level is the global log level.
 var Level = new(slog.LevelVar)
 
-// SetLevel resets the log level.
+// SetLevel resets the log level, which supports the case-insensitive string
+// as follow:
+//
+//	trace
+//	debug
+//	info
+//	warn
+//	error
+//	fatal
+//
+// If empty, use slog.LevelInfo instead.
+// If an integer, convert it to slog.Level directly.
 func SetLevel(level string) error {
 	lvl, err := parseLevel(level)
 	if err == nil {
@@ -55,7 +67,11 @@ func parseLevel(lvl string) (level slog.Level, err error) {
 	case "fatal":
 		level = LevelFatal
 	default:
-		err = fmt.Errorf("unknown level '%s'", level)
+		if v, _err := strconv.ParseInt(lvl, 10, 64); _err == nil {
+			level = slog.Level(v)
+		} else {
+			err = fmt.Errorf("unknown level '%s'", level)
+		}
 	}
 	return
 }
