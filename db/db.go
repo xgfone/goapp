@@ -29,7 +29,11 @@ import (
 // Connection is the configuration option to connect to the sql database.
 var Connection = gconf.StrOpt("connection", "The URL connection to the sql database, user:password@tcp(ip:port)/db.")
 
+// LogLevel is the level to log the sql statement and args.
+var LogLevel = new(slog.LevelVar)
+
 func init() {
+	LogLevel.Set(log.LevelTrace)
 	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, LogInterceptor(true), OnExit())
 }
 
@@ -39,7 +43,7 @@ func LogInterceptor(logargs bool) sqlx.Config {
 }
 
 func tracelog(msg string, attrs ...slog.Attr) {
-	slog.LogAttrs(context.Background(), log.LevelTrace, msg, attrs...)
+	slog.LogAttrs(context.Background(), LogLevel.Level(), msg, attrs...)
 }
 
 func logsql(logargs bool) sqlx.InterceptorFunc {
