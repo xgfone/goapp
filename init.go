@@ -21,6 +21,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/xgfone/gconf/v6"
@@ -41,6 +43,9 @@ var (
 	//
 	// Default: ""
 	AppName string
+
+	// PWD is the current working directory.
+	PWD string
 )
 
 var (
@@ -89,6 +94,33 @@ func updateLogLevel(old, new interface{}) {
 	}
 }
 
+func trysetpwd() {
+	if PWD == "" {
+		configfile := gconf.GetString(gconf.ConfigFileOpt.Name)
+		if configfile != "" {
+			PWD = filepath.Dir(configfile)
+		} else {
+			PWD = filepath.Dir(os.Args[0])
+		}
+	}
+
+	if PWD == "." {
+		return
+	}
+
+	PWD, err := filepath.Abs(PWD)
+	if err != nil {
+		slog.Error("fail to get the absolute path", "pwd", PWD, "err", err)
+		return
+	}
+
+	if err := os.Chdir(PWD); err != nil {
+		slog.Error("fail to change the current working directory", "pwd", PWD, "err", err)
+	} else {
+		slog.Info("change the current working directory", "pwd", PWD)
+	}
+}
+
 // Init is used to initialize the application.
 //
 //  1. Register the log options.
@@ -105,6 +137,7 @@ func Init(opts ...gconf.Opt) {
 	logfilenum := gconf.GetInt(logfilenum.Name)
 	log.Init(AppName, loglevel, logfile, logfilenum)
 
+	trysetpwd()
 	atexit.Init()
 	go signal.WaitExit(atexit.Execute)
 }
