@@ -96,6 +96,10 @@ func updateLogLevel(old, new interface{}) {
 
 func trysetpwd() {
 	if PWD == "" {
+		PWD = os.Getenv("WorkingDirectory")
+	}
+
+	if PWD == "" {
 		configfile := gconf.GetString(gconf.ConfigFileOpt.Name)
 		if configfile != "" {
 			PWD = filepath.Dir(configfile)
