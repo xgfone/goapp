@@ -59,16 +59,30 @@ func Fatal(msg string, args ...any) {
 
 // Init initializes the logging configuration.
 //
-// If file is empty, output the log to os.Stderr.
+// If file is empty or equal to "stderr", output the log to os.Stderr.
+// If file is equal to "stdout", output the log to os.Stdout.
+// Or, output the log to the given file.
 func Init(appName, level, file string, logfilenum int) {
 	if err := SetLevel(level); err != nil {
 		Fatal("fail to set the log level", "level", level, "err", err)
 	}
 
-	if file == "" {
+	switch file {
+	case "":
 		return
-	}
 
+	case "stdout":
+		Writer.Set(os.Stdout)
+
+	case "stderr":
+		Writer.Set(os.Stderr)
+
+	default:
+		setfilewriter(file, logfilenum)
+	}
+}
+
+func setfilewriter(file string, logfilenum int) {
 	if logfilenum <= 0 {
 		logfilenum = 100
 	}
