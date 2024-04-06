@@ -42,7 +42,7 @@ var (
 
 	// AppName is the name of app.
 	//
-	// Default: filepath.Base(os.Args[0])
+	// Default: filepath.Base(os.Args[0]), but not contain the suffix ".exe"
 	AppName string
 
 	// PWD is the current working directory.
