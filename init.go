@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/xgfone/gconf/v6"
@@ -41,7 +42,7 @@ var (
 
 	// AppName is the name of app.
 	//
-	// Default: ""
+	// Default: filepath.Base(os.Args[0])
 	AppName string
 
 	// PWD is the current working directory.
@@ -55,6 +56,13 @@ var (
 			As("logfile")
 	logfilenum = gconf.IntOpt("log.filenum", "The number of the log files.").D(100)
 )
+
+func init() {
+	if len(os.Args) > 0 {
+		AppName = filepath.Base(os.Args[0])
+		AppName = strings.TrimSuffix(AppName, ".exe")
+	}
+}
 
 func init() {
 	gconf.Conf.Errorf = func(format string, args ...interface{}) {
@@ -109,6 +117,7 @@ func trysetpwd() {
 	}
 
 	if PWD == "." {
+		slog.Debug("log the current working directory", "pwd", PWD)
 		return
 	}
 
