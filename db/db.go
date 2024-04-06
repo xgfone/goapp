@@ -42,16 +42,16 @@ func LogInterceptor(logargs bool) sqlx.Config {
 	return func(db *sqlx.DB) { db.Interceptor = logsql(logargs) }
 }
 
-func tracelog(msg string, attrs ...slog.Attr) {
+func _logsql(msg string, attrs ...slog.Attr) {
 	slog.LogAttrs(context.Background(), LogLevel.Level(), msg, attrs...)
 }
 
 func logsql(logargs bool) sqlx.InterceptorFunc {
 	return func(sql string, args []interface{}) (string, []interface{}, error) {
 		if logargs {
-			tracelog("log sql statement", slog.String("sql", sql), slog.Any("args", args))
+			_logsql("log sql statement", slog.String("sql", sql), slog.Any("args", args))
 		} else {
-			tracelog("log sql statement", slog.String("sql", sql))
+			_logsql("log sql statement", slog.String("sql", sql))
 		}
 		return sql, args, nil
 	}
