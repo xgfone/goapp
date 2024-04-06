@@ -26,15 +26,27 @@ import (
 	"github.com/xgfone/go-defaults"
 )
 
+var appnameattr slog.Attr
+
 func init() {
-	SetDefault(NewJSONHandler(Writer, Level))
 	defaults.HandlePanicFunc.Set(func(r any) { logpanic(r, 5) })
+	handler := NewOptionHandler(NewJSONHandler(Writer, Level))
+	handler.ReplaceFunc = replaceAttrForAppName
+	SetDefault(handler)
+}
+
+func replaceAttrForAppName(c context.Context, r slog.Record) slog.Record {
+	r.AddAttrs(appnameattr)
+	return r
 }
 
 func logpanic(r any, skip int) {
 	stacks := defaults.GetStacks(skip)
 	slog.Error("wrap a panic", "panic", r, "stacks", stacks)
 }
+
+// SetAppName sets the app name to append it into the log attrs.
+func SetAppName(appname string) { appnameattr = slog.String("app", appname) }
 
 // SetDefault is used to set default global logger with the handler.
 func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
@@ -62,7 +74,7 @@ func Fatal(msg string, args ...any) {
 // If file is empty or equal to "stderr", output the log to os.Stderr.
 // If file is equal to "stdout", output the log to os.Stdout.
 // Or, output the log to the given file.
-func Init(appName, level, file string, logfilenum int) {
+func Init(level, file string, logfilenum int) {
 	if err := SetLevel(level); err != nil {
 		Fatal("fail to set the log level", "level", level, "err", err)
 	}

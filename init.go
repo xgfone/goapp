@@ -61,6 +61,7 @@ func init() {
 	if len(os.Args) > 0 {
 		AppName = filepath.Base(os.Args[0])
 		AppName = strings.TrimSuffix(AppName, ".exe")
+		log.SetAppName(AppName)
 	}
 }
 
@@ -148,7 +149,7 @@ func Init(opts ...gconf.Opt) {
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
 	logfilenum := gconf.GetInt(logfilenum.Name)
-	log.Init(AppName, loglevel, logfile, logfilenum)
+	log.Init(loglevel, logfile, logfilenum)
 
 	trysetpwd()
 	atexit.Init()
