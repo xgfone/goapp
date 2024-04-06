@@ -90,7 +90,7 @@ func updateLogLevel(old, new interface{}) {
 	if err := log.SetLevel(new.(string)); err != nil {
 		slog.Error("update the log level", "old", old, "new", new, "err", err)
 	} else {
-		slog.Info("update the log level", "old", old, "new", new)
+		slog.Debug("update the log level", "old", old, "new", new)
 	}
 }
 
@@ -121,7 +121,7 @@ func trysetpwd() {
 	if err := os.Chdir(PWD); err != nil {
 		slog.Error("fail to change the current working directory", "pwd", PWD, "err", err)
 	} else {
-		slog.Info("change the current working directory", "pwd", PWD)
+		slog.Debug("change the current working directory", "pwd", PWD)
 	}
 }
 

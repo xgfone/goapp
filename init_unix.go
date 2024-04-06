@@ -20,6 +20,6 @@ func printRlimitNOFILE() {
 	if err != nil {
 		slog.Error("fail to get the nofile limit on unix", "err", err)
 	} else {
-		slog.Info("print nofile limit on unix", "cur", r.Cur, "max", r.Max)
+		slog.Debug("print nofile limit on unix", "cur", r.Cur, "max", r.Max)
 	}
 }
