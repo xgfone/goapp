@@ -155,5 +155,5 @@ func Init(opts ...gconf.Opt) {
 
 	trysetpwd()
 	atexit.Init()
-	go signal.WaitExit(atexit.Execute)
+	go signal.WaitExit(func() { atexit.Exit(0) })
 }
