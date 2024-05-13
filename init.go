@@ -78,6 +78,8 @@ func init() {
 	now := time.Now().Format(time.RFC3339Nano)
 	expvar.NewString("starttime").Set(now)
 	defaults.ExitFunc.Set(atexit.Exit)
+	defaults.OnExitFunc.Set(atexit.OnExit)
+	defaults.OnInitFunc.Set(atexit.OnInit)
 }
 
 func init() {

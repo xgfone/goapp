@@ -29,7 +29,7 @@ import (
 var appnameattr slog.Attr
 
 func init() {
-	defaults.HandlePanicFunc.Set(func(r any) { logpanic(r, 5) })
+	defaults.HandlePanicFunc.Set(func(_ context.Context, r any) { logpanic(r, 5) })
 	handler := NewOptionHandler(NewJSONHandler(Writer, Level))
 	handler.ReplaceFunc = replaceAttrForAppName
 	SetDefault(handler)
