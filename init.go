@@ -80,6 +80,8 @@ func init() {
 	defaults.ExitFunc.Set(atexit.Exit)
 	defaults.OnExitFunc.Set(atexit.OnExit)
 	defaults.OnInitFunc.Set(atexit.OnInit)
+	defaults.ExitWaitFunc.Set(atexit.Wait)
+	defaults.ExitContextFunc.Set(atexit.Context)
 }
 
 func init() {

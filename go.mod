@@ -3,12 +3,12 @@ module github.com/xgfone/goapp
 require (
 	github.com/xgfone/gconf/v6 v6.6.0
 	github.com/xgfone/go-atexit v0.12.0
-	github.com/xgfone/go-defaults v0.15.0
-	github.com/xgfone/go-sqlx v0.30.0
+	github.com/xgfone/go-defaults v0.16.0
+	github.com/xgfone/go-sqlx v0.31.0
 	github.com/xgfone/gover v0.5.0
 )
 
-require github.com/xgfone/go-op v0.7.0 // indirect
+require github.com/xgfone/go-op v0.8.0 // indirect
 
 go 1.21
 
