@@ -20,8 +20,8 @@ import (
 	"log/slog"
 
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-atexit"
 	"github.com/xgfone/go-defaults"
+	"github.com/xgfone/go-defaults/assists"
 	"github.com/xgfone/go-sqlx"
 	"github.com/xgfone/goapp/log"
 )
@@ -60,7 +60,7 @@ func logsql(logargs bool) sqlx.InterceptorFunc {
 // OnExit returns a Config to register a close callback which will be called
 // when the program exits.
 func OnExit() sqlx.Config {
-	return func(db *sqlx.DB) { atexit.OnExit(func() { db.Close() }) }
+	return func(db *sqlx.DB) { assists.OnClean(func() { db.Close() }) }
 }
 
 // InitMysqlDB initializes the mysql connection.

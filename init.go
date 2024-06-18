@@ -27,9 +27,8 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-atexit"
-	"github.com/xgfone/go-atexit/signal"
 	"github.com/xgfone/go-defaults"
+	"github.com/xgfone/go-defaults/assists"
 	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/log"
 )
@@ -77,11 +76,6 @@ func init() {
 func init() {
 	now := time.Now().Format(time.RFC3339Nano)
 	expvar.NewString("starttime").Set(now)
-	defaults.ExitFunc.Set(atexit.Exit)
-	defaults.OnExitFunc.Set(atexit.OnExit)
-	defaults.OnInitFunc.Set(atexit.OnInit)
-	defaults.ExitWaitFunc.Set(atexit.Wait)
-	defaults.ExitContextFunc.Set(atexit.Context)
 }
 
 func init() {
@@ -156,6 +150,6 @@ func Init(opts ...gconf.Opt) {
 	log.Init(loglevel, logfile, logfilenum)
 
 	trysetpwd()
-	atexit.Init()
-	go signal.WaitExit(func() { atexit.Exit(0) })
+	assists.RunInit()
+	go defaults.SignalForExit()
 }
