@@ -58,17 +58,6 @@ func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
 	slog.SetDefault(slog.New(handler))
 }
 
-// Trace emits a TRACE log message.
-func Trace(msg string, args ...any) {
-	slog.Log(context.Background(), LevelTrace, msg, args...)
-}
-
-// Fatal emits a FATAL log message.
-func Fatal(msg string, args ...any) {
-	slog.Log(context.Background(), LevelFatal, msg, args...)
-	defaults.Exit(1)
-}
-
 // Init initializes the logging configuration.
 //
 // If file is empty or equal to "stderr", output the log to os.Stderr.
@@ -76,7 +65,7 @@ func Fatal(msg string, args ...any) {
 // Or, output the log to the given file.
 func Init(level, file string, logfilenum int) {
 	if err := SetLevel(level); err != nil {
-		Fatal("fail to set the log level", "level", level, "err", err)
+		defaults.Fatal("fail to set the log level", "level", level, "err", err)
 	}
 
 	switch file {
@@ -101,7 +90,7 @@ func setfilewriter(file string, logfilenum int) {
 
 	_file, err := NewFileWriter(file, "100M", logfilenum)
 	if err != nil {
-		Fatal("fail to new the file log writer", "file", file, "err", err)
+		defaults.Fatal("fail to new the file log writer", "file", file, "err", err)
 	}
 
 	assists.OnClean(func() { _file.Close() })
