@@ -97,7 +97,7 @@ func updateLogLevel(old, new interface{}) {
 	if err := log.SetLevel(new.(string)); err != nil {
 		slog.Error("update the log level", "old", old, "new", new, "err", err)
 	} else {
-		slog.Debug("update the log level", "old", old, "new", new)
+		slog.Info("update the log level", "old", old, "new", new)
 	}
 }
 

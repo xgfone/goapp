@@ -23,7 +23,6 @@ import (
 	"os"
 
 	"github.com/xgfone/go-defaults"
-	"github.com/xgfone/go-defaults/assists"
 )
 
 var appnameattr slog.Attr
@@ -93,7 +92,7 @@ func setfilewriter(file string, logfilenum int) {
 		defaults.Fatal("fail to new the file log writer", "file", file, "err", err)
 	}
 
-	assists.OnClean(func() { _file.Close() })
+	defaults.OnExitPost(func() { _file.Close() })
 	// atexit.OnExitWithPriority(0, func() { _file.Close() })
 	switch old := Writer.Swap(_file); old {
 	case os.Stderr, os.Stdout:
