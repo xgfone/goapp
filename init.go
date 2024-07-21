@@ -1,4 +1,4 @@
-// Copyright 2020~2023 xgfone
+// Copyright 2020~2024 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -130,6 +130,7 @@ func trysetpwd() {
 		slog.Error("fail to change the current working directory", "pwd", PWD, "err", err)
 	} else {
 		slog.Debug("change the current working directory", "pwd", PWD)
+		expvar.NewString("pwd").Set(PWD)
 	}
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2022 xgfone
+// Copyright 2022~2024 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package config
 
 import (
+	"expvar"
+
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/gover"
 )
@@ -39,6 +41,7 @@ func Init(app, version string, opts ...gconf.Opt) {
 	if version == "" {
 		version = gover.Text()
 	}
+	expvar.NewString("version").Set(version)
 
 	gconf.SetVersion(version)
 	gconf.RegisterOpts(opts...)
