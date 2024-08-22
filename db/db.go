@@ -33,8 +33,31 @@ var LogLevel = new(slog.LevelVar)
 
 func init() {
 	LogLevel.Set(log.LevelTrace)
-	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, LogInterceptor(true), OnExit())
+	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs,
+		LogInterceptor(true),
+		SqlCollector(nil),
+		OnExit(),
+	)
 }
+
+// SqlCollector returns a config to set the sql collector interceptor.
+//
+// If c is nil, use sqlx.DefaultSqlCollector instead.
+func SqlCollector(c *sqlx.SqlCollector) sqlx.Config {
+	return func(d *sqlx.DB) {
+		if c == nil {
+			c = sqlx.DefaultSqlCollector
+		}
+
+		if d.Interceptor == nil {
+			d.Interceptor = c
+		} else {
+			d.Interceptor = sqlx.Interceptors{d.Interceptor, c}
+		}
+	}
+}
+
+// sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, )
 
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
 func LogInterceptor(logargs bool) sqlx.Config {
