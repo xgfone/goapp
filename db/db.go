@@ -57,8 +57,6 @@ func SqlCollector(c *sqlx.SqlCollector) sqlx.Config {
 	}
 }
 
-// sqlx.DefaultConfigs = append(sqlx.DefaultConfigs, )
-
 // LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
 func LogInterceptor(logargs bool) sqlx.Config {
 	return func(db *sqlx.DB) { db.Interceptor = logsql(logargs) }
