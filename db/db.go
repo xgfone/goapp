@@ -18,6 +18,7 @@ package db
 import (
 	"context"
 	"log/slog"
+	"sync/atomic"
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-defaults"
@@ -28,59 +29,27 @@ import (
 // Connection is the configuration option to connect to the sql database.
 var Connection = gconf.StrOpt("connection", "The URL connection to the sql database, user:password@tcp(ip:port)/db.")
 
-// LogLevel is the level to log the sql statement and args.
-var LogLevel = new(slog.LevelVar)
+var (
+	// LogLevel is the level to log the sql statement and args.
+	LogLevel = new(slog.LevelVar)
 
-func init() {
-	LogLevel.Set(log.LevelTrace)
-	sqlx.DefaultConfigs = append(sqlx.DefaultConfigs,
-		LogInterceptor(true),
-		SqlCollector(nil),
-		OnExit(),
-	)
-}
+	// LogArgs is used to decide whether log args when logging the sql statement.
+	LogArgs = new(atomic.Bool)
+)
 
-// SqlCollector returns a config to set the sql collector interceptor.
-//
-// If c is nil, use sqlx.DefaultSqlCollector instead.
-func SqlCollector(c *sqlx.SqlCollector) sqlx.Config {
-	return func(d *sqlx.DB) {
-		if c == nil {
-			c = sqlx.DefaultSqlCollector
-		}
-
-		if d.Interceptor == nil {
-			d.Interceptor = c
-		} else {
-			d.Interceptor = sqlx.Interceptors{d.Interceptor, c}
-		}
-	}
-}
-
-// LogInterceptor returns a Config to set the log interceptor for sqlx.DB.
-func LogInterceptor(logargs bool) sqlx.Config {
-	return func(db *sqlx.DB) { db.Interceptor = logsql(logargs) }
-}
+func init() { LogLevel.Set(log.LevelTrace) }
 
 func _logsql(msg string, attrs ...slog.Attr) {
 	slog.LogAttrs(context.Background(), LogLevel.Level(), msg, attrs...)
 }
 
-func logsql(logargs bool) sqlx.InterceptorFunc {
-	return func(sql string, args []interface{}) (string, []interface{}, error) {
-		if logargs {
-			_logsql("log sql statement", slog.String("sql", sql), slog.Any("args", args))
-		} else {
-			_logsql("log sql statement", slog.String("sql", sql))
-		}
-		return sql, args, nil
+func logsql(sql string, args []interface{}) (string, []interface{}, error) {
+	if LogArgs.Load() {
+		_logsql("log sql statement", slog.String("sql", sql), slog.Any("args", args))
+	} else {
+		_logsql("log sql statement", slog.String("sql", sql))
 	}
-}
-
-// OnExit returns a Config to register a close callback which will be called
-// when the program exits.
-func OnExit() sqlx.Config {
-	return func(db *sqlx.DB) { defaults.OnExitPost(func() { db.Close() }) }
+	return sql, args, nil
 }
 
 // InitMysqlDB initializes the mysql connection.
@@ -94,6 +63,11 @@ func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
 	if err != nil {
 		slog.Error("fail to open the mysql connection", "conn", connURL, "err", err)
 		defaults.Exit(1)
+	}
+
+	db.Interceptor = sqlx.Interceptors{
+		sqlx.InterceptorFunc(logsql),
+		sqlx.DefaultSqlCollector,
 	}
 	return db
 }
