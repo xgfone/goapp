@@ -2,9 +2,9 @@ github.com/xgfone/gconf/v6 v6.6.0 h1:nLCL7oXoHlHN7JxcsZrdyeNJVe/LFdaMUZNF/bIV4RY
 github.com/xgfone/gconf/v6 v6.6.0/go.mod h1:ShS4jssh9iI22fomQb4TULOruszU1KiVvYK7Hxutb4E=
 github.com/xgfone/go-defaults v0.19.0 h1:sHy3kTdI8Fu8c0EsT0jmzq7mVsm9fmudIaAj4vh8/mc=
 github.com/xgfone/go-defaults v0.19.0/go.mod h1:RjyN5TK6hyaROkw2nyfchvCSCOch8rJ/zPO9nO4Y+EQ=
-github.com/xgfone/go-op v0.10.0 h1:/fs+UiKwpaweUEioYoxw0+mksvtqCe/IKD+VUIpWBWw=
-github.com/xgfone/go-op v0.10.0/go.mod h1:J8xaM7cCXnvDgpU3BjIqNz+1TGAJQPLKHVVeceu+emA=
-github.com/xgfone/go-sqlx v0.37.0 h1:a1rJ67fwpFqMGicM8oROwAbScfjhlNHF+g3cYPSqf7E=
-github.com/xgfone/go-sqlx v0.37.0/go.mod h1:PxqB3yxkqCigFmFLJTgpdpG+sD6/sALqu8V/ppqo1ZI=
+github.com/xgfone/go-op v0.11.0 h1:6ujAulTlBgyUYy+1G74HRya9JeWcnaT+GXERlSk1X0A=
+github.com/xgfone/go-op v0.11.0/go.mod h1:J8xaM7cCXnvDgpU3BjIqNz+1TGAJQPLKHVVeceu+emA=
+github.com/xgfone/go-sqlx v0.39.0 h1:dG1TiskTuUPfbrXz8ysxdIMuF3zi+DIvAxIkq5yxY/A=
+github.com/xgfone/go-sqlx v0.39.0/go.mod h1:50L7iaPsvNBxxEicHeDoFEbq7shVh7eYbF3MC9Y33z8=
 github.com/xgfone/gover v0.5.0 h1:RzXLLi3qzgKsQ4t50zk9WwiO31CHqRdSQfeqzMy+fNo=
 github.com/xgfone/gover v0.5.0/go.mod h1:yqAjNjXWuDib6SYKFvCdZY13nxkxKRNwIEjNPQFKWHw=
