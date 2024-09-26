@@ -16,8 +16,6 @@
 package config
 
 import (
-	"expvar"
-
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/gover"
 )
@@ -41,7 +39,6 @@ func Init(app, version string, opts ...gconf.Opt) {
 	if version == "" {
 		version = gover.Text()
 	}
-	expvar.NewString("version").Set(version)
 
 	gconf.SetVersion(version)
 	gconf.RegisterOpts(opts...)

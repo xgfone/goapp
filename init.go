@@ -31,6 +31,7 @@ import (
 	"github.com/xgfone/go-defaults/assists"
 	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/log"
+	"github.com/xgfone/gover"
 )
 
 var (
@@ -76,6 +77,13 @@ func init() {
 func init() {
 	now := time.Now().Format(time.RFC3339Nano)
 	expvar.NewString("starttime").Set(now)
+}
+
+func init() {
+	if Version == "" {
+		Version = gover.Text()
+	}
+	expvar.NewString("version").Set(Version)
 }
 
 func init() {
@@ -144,6 +152,7 @@ func trysetpwd() {
 func Init(opts ...gconf.Opt) {
 	gconf.RegisterOpts(logfile0, loglevel, logfilenum)
 	config.Init(AppName, Version, opts...)
+	slog.Info("print version", "version", Version)
 
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
