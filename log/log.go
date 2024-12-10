@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/xgfone/go-defaults"
+	"github.com/xgfone/go-toolkit/runtimex"
 )
 
 var appnameattr slog.Attr
@@ -40,7 +41,7 @@ func replaceAttrForAppName(c context.Context, r slog.Record) slog.Record {
 }
 
 func logpanic(r any, skip int) {
-	stacks := defaults.GetStacks(skip)
+	stacks := runtimex.Stacks(skip)
 	slog.Error("wrap a panic", "panic", r, "stacks", stacks)
 }
 

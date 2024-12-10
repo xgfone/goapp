@@ -21,7 +21,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/xgfone/go-defaults"
+	"github.com/xgfone/go-toolkit/runtimex"
 )
 
 // NewJSONHandler returns a new json handler.
@@ -43,7 +43,7 @@ func replaceSourceAttr(groups []string, a slog.Attr) slog.Attr {
 	switch {
 	case a.Key == slog.SourceKey:
 		if src, ok := a.Value.Any().(*slog.Source); ok {
-			a.Value = slog.StringValue(fmt.Sprintf("%s:%d", defaults.TrimPkgFile(src.File), src.Line))
+			a.Value = slog.StringValue(fmt.Sprintf("%s:%d", runtimex.TrimPkgFile(src.File), src.Line))
 		}
 
 	case a.Key == slog.LevelKey:
