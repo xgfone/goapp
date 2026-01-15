@@ -43,7 +43,7 @@ func _logsql(msg string, attrs ...slog.Attr) {
 	slog.LogAttrs(context.Background(), LogLevel.Level(), msg, attrs...)
 }
 
-func logsql(sql string, args []interface{}) (string, []interface{}, error) {
+func logsql(sql string, args []any) (string, []any, error) {
 	if LogArgs.Load() {
 		_logsql("log sql statement", slog.String("sql", sql), slog.Any("args", args))
 	} else {

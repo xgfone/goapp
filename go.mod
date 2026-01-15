@@ -3,13 +3,11 @@ module github.com/xgfone/goapp
 require (
 	github.com/xgfone/gconf/v6 v6.6.0
 	github.com/xgfone/go-defaults v0.21.0
-	github.com/xgfone/go-sqlx v0.46.0
-	github.com/xgfone/go-toolkit v0.6.0
+	github.com/xgfone/go-sqlx v0.50.4
+	github.com/xgfone/go-toolkit v0.13.0
 	github.com/xgfone/gover v0.5.0
 )
 
-require github.com/xgfone/go-op v0.15.0 // indirect
+require github.com/xgfone/go-op v0.16.1 // indirect
 
-go 1.22
-
-retract v0.56.0
+go 1.22.0

@@ -66,7 +66,7 @@ func init() {
 }
 
 func init() {
-	gconf.Conf.Errorf = func(format string, args ...interface{}) {
+	gconf.Conf.Errorf = func(format string, args ...any) {
 		if len(args) > 0 {
 			format = fmt.Sprintf(format, args...)
 		}
@@ -101,7 +101,7 @@ func dialContext(ctx context.Context, network, addr string) (net.Conn, error) {
 	return d.DialContext(ctx, network, addr)
 }
 
-func updateLogLevel(old, new interface{}) {
+func updateLogLevel(old, new any) {
 	if err := log.SetLevel(new.(string)); err != nil {
 		slog.Error("update the log level", "old", old, "new", new, "err", err)
 	} else {
