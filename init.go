@@ -152,12 +152,13 @@ func trysetpwd() {
 func Init(opts ...gconf.Opt) {
 	gconf.RegisterOpts(logfile0, loglevel, logfilenum)
 	config.Init(AppName, Version, opts...)
-	slog.Info("print version", "version", Version)
 
 	logfile := gconf.GetString(logfile0.Name)
 	loglevel := gconf.GetString(loglevel.Name)
 	logfilenum := gconf.GetInt(logfilenum.Name)
 	log.Init(loglevel, logfile, logfilenum)
+
+	slog.Info("print version", "version", Version)
 
 	trysetpwd()
 	assists.RunInit()
