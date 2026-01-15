@@ -29,6 +29,7 @@ _testmain.go
 
 # test
 test_*
+test/
 
 # log
 *.log
@@ -46,3 +47,6 @@ debug_test
 # hidden files
 .*
 _*
+
+# bin
+bin/
