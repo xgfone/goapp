@@ -22,14 +22,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/xgfone/go-defaults"
-	"github.com/xgfone/go-toolkit/runtimex"
+	"github.com/xgfone/goapp/internal"
 )
 
 var appnameattr slog.Attr
 
 func init() {
-	defaults.HandlePanicFunc.Set(func(_ context.Context, r any) { logpanic(r, 5) })
 	handler := NewOptionHandler(NewJSONHandler(Writer, Level))
 	handler.ReplaceFunc = replaceAttrForAppName
 	SetDefault(handler)
@@ -38,11 +36,6 @@ func init() {
 func replaceAttrForAppName(c context.Context, r slog.Record) slog.Record {
 	r.AddAttrs(appnameattr)
 	return r
-}
-
-func logpanic(r any, skip int) {
-	stacks := runtimex.Stacks(skip)
-	slog.Error("wrap a panic", "panic", r, "stacks", stacks)
 }
 
 // SetAppName sets the app name to append it into the log attrs.
@@ -65,7 +58,7 @@ func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
 // Or, output the log to the given file.
 func Init(level, file string, logfilenum int) {
 	if err := SetLevel(level); err != nil {
-		defaults.Fatal("fail to set the log level", "level", level, "err", err)
+		internal.Fatal("fail to set the log level", "level", level, "err", err)
 	}
 
 	switch file {
@@ -90,10 +83,10 @@ func setfilewriter(file string, logfilenum int) {
 
 	_file, err := NewFileWriter(file, "100M", logfilenum)
 	if err != nil {
-		defaults.Fatal("fail to new the file log writer", "file", file, "err", err)
+		internal.Fatal("fail to new the file log writer", "file", file, "err", err)
 	}
 
-	defaults.OnExitPost(func() { _file.Close() })
+	internal.OnExit(func() { _file.Close() })
 	// atexit.OnExitWithPriority(0, func() { _file.Close() })
 	switch old := Writer.Swap(_file); old {
 	case os.Stderr, os.Stdout:

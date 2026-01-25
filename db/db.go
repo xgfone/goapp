@@ -21,8 +21,9 @@ import (
 	"sync/atomic"
 
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-defaults"
 	"github.com/xgfone/go-sqlx"
+	"github.com/xgfone/go-toolkit/timex"
+	"github.com/xgfone/goapp/internal"
 	"github.com/xgfone/goapp/log"
 )
 
@@ -58,11 +59,10 @@ func InitMysqlDB(connURL string, configs ...sqlx.Config) *sqlx.DB {
 		configs = sqlx.DefaultConfigs
 	}
 
-	connURL = sqlx.SetConnURLLocation(connURL, defaults.TimeLocation.Get())
+	connURL = sqlx.SetConnURLLocation(connURL, timex.Location)
 	db, err := sqlx.Open("mysql", connURL, configs...)
 	if err != nil {
-		slog.Error("fail to open the mysql connection", "conn", connURL, "err", err)
-		defaults.Exit(1)
+		internal.Fatal("fail to open the mysql connection", "conn", connURL, "err", err)
 	}
 
 	db.Interceptor = sqlx.Interceptors{

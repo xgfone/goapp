@@ -27,9 +27,8 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/go-defaults"
-	"github.com/xgfone/go-defaults/assists"
 	"github.com/xgfone/goapp/config"
+	"github.com/xgfone/goapp/internal"
 	"github.com/xgfone/goapp/log"
 	"github.com/xgfone/gover"
 )
@@ -161,6 +160,6 @@ func Init(opts ...gconf.Opt) {
 	slog.Info("print version", "version", Version)
 
 	trysetpwd()
-	assists.RunInit()
-	go defaults.SignalForExit()
+	internal.RunInit()
+	go internal.SignalForExit()
 }
