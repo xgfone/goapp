@@ -17,7 +17,19 @@ package internal
 import "github.com/xgfone/go-defaults/assists"
 
 func OnExit(f func()) {
+	assists.OnExit(f)
+}
+
+func OnExitPost(f func()) {
 	assists.OnExitPost(f)
+}
+
+func OnInit(f func()) {
+	assists.OnInit(f)
+}
+
+func OnInitPre(f func()) {
+	assists.OnInitPre(f)
 }
 
 func RunInit() {

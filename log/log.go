@@ -86,8 +86,7 @@ func setfilewriter(file string, logfilenum int) {
 		internal.Fatal("fail to new the file log writer", "file", file, "err", err)
 	}
 
-	internal.OnExit(func() { _file.Close() })
-	// atexit.OnExitWithPriority(0, func() { _file.Close() })
+	internal.OnExitPost(func() { _file.Close() })
 	switch old := Writer.Swap(_file); old {
 	case os.Stderr, os.Stdout:
 	default:
