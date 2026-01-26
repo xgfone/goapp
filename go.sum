@@ -1,5 +1,5 @@
-github.com/xgfone/gconf/v6 v6.7.0 h1:ZMSd0WnO1L3TG9GaBuqm2h5JINrCS2V3lsxg/JOXOuQ=
-github.com/xgfone/gconf/v6 v6.7.0/go.mod h1:deTLEyfRbupETMYbUVGHFGJBvNomKN7/xJfGG7WuZrQ=
+github.com/xgfone/gconf/v6 v6.7.1 h1:ZAFlzMtErAdEs3sCnY25pZ3OfGbXNENA4w9oEPQjwGA=
+github.com/xgfone/gconf/v6 v6.7.1/go.mod h1:deTLEyfRbupETMYbUVGHFGJBvNomKN7/xJfGG7WuZrQ=
 github.com/xgfone/go-cast v0.10.0 h1:ugkGKoeps3u4Zb3/RLvTip94T0NRDetuw3GQKaFO/M0=
 github.com/xgfone/go-cast v0.10.0/go.mod h1:b+oRunHDgaYsEIELAEIgoWjcI1jawrttujVFgJzc1x0=
 github.com/xgfone/go-defaults v0.22.0 h1:FCqheDTcTMX7dNJ4gJT/wtDupYYaTf1u7MwJ/TPLJ40=
