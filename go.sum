@@ -1,9 +1,9 @@
 github.com/xgfone/gconf/v6 v6.7.1 h1:ZAFlzMtErAdEs3sCnY25pZ3OfGbXNENA4w9oEPQjwGA=
 github.com/xgfone/gconf/v6 v6.7.1/go.mod h1:deTLEyfRbupETMYbUVGHFGJBvNomKN7/xJfGG7WuZrQ=
-github.com/xgfone/go-apiserver v0.59.0 h1:cEaLpmajHiM/ovNFo/zkpjr731SsFZo8MKpyXd8a0qQ=
-github.com/xgfone/go-apiserver v0.59.0/go.mod h1:p9+w+Ez/t982UbbqZDP07f1wJMO6uZkRGaAGWrrqSM4=
-github.com/xgfone/go-binder v0.9.0 h1:hf58AdWxeaT4BSy4EyouWCsPc3xQRLvJ4pAAXMHW9eg=
-github.com/xgfone/go-binder v0.9.0/go.mod h1:Fw3DcuV3vkdKJ/rS+ULeTRiTETksbMVp/KiKrG3QawE=
+github.com/xgfone/go-apiserver v0.59.1 h1:sc6VuVi053fYf1SwrEZK/uTKY6yYOAyAJE82QF4W8Ew=
+github.com/xgfone/go-apiserver v0.59.1/go.mod h1:MmFTPEadhy+SdTO2LcYN2fFgEPgvSIDWrvJgiqwGEpo=
+github.com/xgfone/go-binder v0.9.1 h1:bqj5R545Br/DeHZ3+doNF0phh3lE8gBY7uCpdie/4x4=
+github.com/xgfone/go-binder v0.9.1/go.mod h1:Fw3DcuV3vkdKJ/rS+ULeTRiTETksbMVp/KiKrG3QawE=
 github.com/xgfone/go-cast v0.10.0 h1:ugkGKoeps3u4Zb3/RLvTip94T0NRDetuw3GQKaFO/M0=
 github.com/xgfone/go-cast v0.10.0/go.mod h1:b+oRunHDgaYsEIELAEIgoWjcI1jawrttujVFgJzc1x0=
 github.com/xgfone/go-defaults v0.22.0 h1:FCqheDTcTMX7dNJ4gJT/wtDupYYaTf1u7MwJ/TPLJ40=
