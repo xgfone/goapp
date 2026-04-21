@@ -15,20 +15,21 @@
 package goapp
 
 import (
+	"context"
 	"net"
 	"net/http"
 
-	"github.com/xgfone/go-apiserver/http/server"
+	"github.com/xgfone/go-toolkit/httpx"
 	"github.com/xgfone/go-toolkit/runtimex"
 	"github.com/xgfone/goapp/internal"
 )
 
 func init() {
-	server.ServeWithListener = serve
+	httpx.SetServeFunc(serve)
 }
 
-func serve(hserver *http.Server, ln net.Listener) {
-	internal.OnExit(func() { server.Stop(hserver) })
-	server.DefaultServeWithListener(hserver, ln)
+func serve(ln net.Listener, server *http.Server) {
+	internal.OnExit(func() { _ = server.Shutdown(context.Background()) })
+	_ = server.Serve(ln)
 	runtimex.Exit(0)
 }
