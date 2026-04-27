@@ -22,10 +22,9 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/xgfone/go-toolkit/app"
 	"github.com/xgfone/goapp/internal"
 )
-
-var appnameattr slog.Attr
 
 func init() {
 	handler := NewOptionHandler(NewJSONHandler(Writer, Level))
@@ -34,12 +33,9 @@ func init() {
 }
 
 func replaceAttrForAppName(c context.Context, r slog.Record) slog.Record {
-	r.AddAttrs(appnameattr)
+	r.AddAttrs(slog.String("app", app.GetName()))
 	return r
 }
-
-// SetAppName sets the app name to append it into the log attrs.
-func SetAppName(appname string) { appnameattr = slog.String("app", appname) }
 
 // SetDefault is used to set default global logger with the handler.
 func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
@@ -86,7 +82,11 @@ func setfilewriter(file string, logfilenum int) {
 		internal.Fatal("fail to new the file log writer", "file", file, "err", err)
 	}
 
-	internal.OnExitPost(func() { _file.Close() })
+	internal.OnExitPost(func() {
+		Writer.Set(os.Stderr)
+		_file.Close()
+	})
+
 	switch old := Writer.Swap(_file); old {
 	case os.Stderr, os.Stdout:
 	default:

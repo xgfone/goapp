@@ -18,21 +18,20 @@ import (
 	"expvar"
 	"log/slog"
 
+	"github.com/xgfone/go-toolkit/app"
 	"github.com/xgfone/gover"
 )
 
-// Version is the version of app.
-//
-// Default: github.com/xgfone/gover.Text()
-var Version string
-
 func init() {
-	if Version == "" {
-		Version = gover.Text()
+	version := app.GetVersion()
+	if version == "" {
+		version = gover.Text()
+		app.SetVersion(version)
 	}
-	expvar.NewString("version").Set(Version)
+
+	expvar.Publish("version", expvar.Func(func() any { return version }))
 }
 
 func initversion() {
-	slog.Info("print version", "version", Version)
+	slog.Info("print version", "version", app.GetVersion())
 }

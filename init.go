@@ -19,13 +19,13 @@ import (
 	"time"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-toolkit/app"
 	"github.com/xgfone/goapp/config"
 	"github.com/xgfone/goapp/internal"
 )
 
 func init() {
-	now := time.Now().Format(time.RFC3339Nano)
-	expvar.NewString("starttime").Set(now)
+	expvar.NewString("starttime").Set(app.StartAt().Format(time.RFC3339Nano))
 }
 
 // Init is used to initialize the application.
@@ -37,7 +37,7 @@ func init() {
 //  5. Start a goroutine to monitor the exit signals.
 func Init(opts ...gconf.Opt) {
 	gconf.RegisterOpts(logfile0, loglevel, logfilenum)
-	config.Init(AppName, Version, opts...)
+	config.Init(opts...)
 
 	initlog()
 	trysetpwd()

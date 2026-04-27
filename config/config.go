@@ -17,7 +17,7 @@ package config
 
 import (
 	"github.com/xgfone/gconf/v6"
-	"github.com/xgfone/gover"
+	"github.com/xgfone/go-toolkit/app"
 )
 
 // ParseAndLoadSource is used to parse and load the options from some sources.
@@ -26,7 +26,7 @@ import (
 var ParseAndLoadSource func(app string)
 
 func init() {
-	ParseAndLoadSource = func(app string) {
+	ParseAndLoadSource = func(string) {
 		_ = gconf.AddAndParseOptFlag(gconf.Conf)
 		_ = gconf.LoadSource(gconf.NewFlagSource())
 	}
@@ -35,15 +35,14 @@ func init() {
 // Init initializes the configuration, which will set the version,
 // register the options, parse the CLI arguments with "flag",
 // load the "flag", "env" and "file" configuration sources.
-func Init(app, version string, opts ...gconf.Opt) {
-	if version == "" {
-		version = gover.Text()
+func Init(opts ...gconf.Opt) {
+	if version := app.GetVersion(); version != "" {
+		gconf.SetVersion(version)
 	}
 
-	gconf.SetVersion(version)
 	gconf.RegisterOpts(opts...)
-	ParseAndLoadSource(app)
-	_ = gconf.LoadSource(gconf.NewEnvSource(app))
+	ParseAndLoadSource(app.GetName())
+	_ = gconf.LoadSource(gconf.NewEnvSource(app.GetName()))
 	if cfile, _ := gconf.Get(gconf.ConfigFileOpt.Name).(string); cfile != "" {
 		_ = gconf.LoadAndWatchSource(gconf.NewFileSource(cfile))
 	}
