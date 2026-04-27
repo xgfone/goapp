@@ -14,24 +14,123 @@
 
 package internal
 
-import "github.com/xgfone/go-defaults/assists"
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"os"
+	"strconv"
+	"sync"
+	"time"
 
-func OnExit(f func()) {
-	assists.OnExit(f)
-}
+	"github.com/xgfone/go-toolkit/runtimex"
+)
 
-func OnExitPost(f func()) {
-	assists.OnExitPost(f)
-}
+/// ----------------------------------------------------------------------- ///
 
-func OnInit(f func()) {
-	assists.OnInit(f)
-}
+var (
+	init0funcs []func()
+	init1funcs []func()
+)
 
+// OnInitPre registers a pre-init function called before calling init functions
+// when calling RunInit().
 func OnInitPre(f func()) {
-	assists.OnInitPre(f)
+	init0funcs = append(init0funcs, f)
+	_traceregister("init0")
 }
 
+// OnInit registers an init function called when calling RunInit().
+func OnInit(f func()) {
+	init1funcs = append(init1funcs, f)
+	_traceregister("init1")
+}
+
+// RunInit calls the init functions in turn.
 func RunInit() {
-	assists.RunInit()
+	iter(init0funcs, func(f func()) { f() })
+	iter(init1funcs, func(f func()) { f() })
+}
+
+/// ----------------------------------------------------------------------- ///
+
+var (
+	exitfuncs  []func()
+	cleanfuncs []func()
+	exitonce   sync.Once
+	exitedch   = make(chan struct{})
+
+	exitctx, exitcancel = context.WithCancel(context.Background())
+)
+
+// OnExitPost registers a function called after calling exit functions.
+func OnExitPost(f func()) {
+	cleanfuncs = append(cleanfuncs, f)
+	_traceregister("exitpost")
+}
+
+// OnExit registers a function called when calling RunExit().
+func OnExit(f func()) {
+	exitfuncs = append(exitfuncs, f)
+	_traceregister("exit")
+}
+
+// ExitContext returns a context that it will be cancelled when calling RunExit.
+func ExitContext() context.Context { return exitctx }
+
+// WaitExit waits until all exit functions finish to be called.
+func WaitExit() { <-exitedch }
+
+// RunExit calls the exit functions in reverse turn.
+func RunExit() {
+	exitonce.Do(exit)
+	WaitExit()
+}
+
+func exit() {
+	exitcancel()
+	reverseIter(exitfuncs, runexit)
+	reverseIter(cleanfuncs, runexit)
+	close(exitedch)
+}
+
+func runexit(f func()) {
+	defer exitrecover()
+	f()
+}
+
+func exitrecover() {
+	if r := recover(); r != nil {
+		slog.Error("exit func panics", "panic", r)
+	}
+}
+
+func init() { OnExitPost(func() { time.Sleep(time.Millisecond * 10) }) }
+
+func iter[S ~[]E, E any](s S, f func(E)) {
+	for _, e := range s {
+		f(e)
+	}
+}
+
+func reverseIter[S ~[]E, E any](s S, f func(E)) {
+	for _len := len(s) - 1; _len >= 0; _len-- {
+		f(s[_len])
+	}
+}
+
+/// ----------------------------------------------------------------------- ///
+
+var DEBUG bool
+
+func init() {
+	DEBUG, _ = strconv.ParseBool(os.Getenv("DEBUG"))
+}
+
+func _traceregister(kind string) {
+	if DEBUG {
+		frame := runtimex.Caller(3)
+		msg := fmt.Sprintf("register %s function", kind)
+		slog.Info(msg, "file", frame.File, "line", frame.Line)
+	}
 }
