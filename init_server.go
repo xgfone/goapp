@@ -20,7 +20,6 @@ import (
 	"net/http"
 
 	"github.com/xgfone/go-toolkit/httpx"
-	"github.com/xgfone/go-toolkit/runtimex"
 	"github.com/xgfone/goapp/internal"
 )
 
@@ -31,5 +30,4 @@ func init() {
 func serve(ln net.Listener, server *http.Server) {
 	internal.OnExit(func() { _ = server.Shutdown(context.Background()) })
 	_ = server.Serve(ln)
-	runtimex.Exit(0)
 }

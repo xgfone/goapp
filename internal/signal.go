@@ -17,8 +17,6 @@ package internal
 import (
 	"os"
 	"os/signal"
-
-	"github.com/xgfone/go-toolkit/runtimex"
 )
 
 var exitsignals = []os.Signal{os.Interrupt}
@@ -32,5 +30,5 @@ func SignalForExit() {
 	signal.Notify(ch, exitsignals...)
 	<-ch
 
-	runtimex.Exit(0)
+	RunExit()
 }

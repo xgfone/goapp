@@ -119,6 +119,13 @@ func reverseIter[S ~[]E, E any](s S, f func(E)) {
 	}
 }
 
+func init() {
+	runtimex.SetExitFunc(func(code int) {
+		RunExit()
+		os.Exit(code)
+	})
+}
+
 /// ----------------------------------------------------------------------- ///
 
 var DEBUG bool
