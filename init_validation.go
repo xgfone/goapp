@@ -15,39 +15,10 @@
 package goapp
 
 import (
-	"context"
-	"reflect"
-
-	"github.com/xgfone/go-structs"
 	"github.com/xgfone/go-toolkit/validation"
+	"github.com/xgfone/goapp/internal/validate"
 )
 
 func init() {
-	validation.SetValidateFunc(func(_ context.Context, value any) error {
-		if value == nil {
-			return nil
-		}
-		return validate(reflect.ValueOf(value))
-	})
-}
-
-func validate(vf reflect.Value) (err error) {
-	switch vf.Kind() {
-	case reflect.Struct:
-		err = structs.ReflectValue(vf)
-
-	case reflect.Pointer:
-		if !vf.IsNil() {
-			err = validate(vf.Elem())
-		}
-
-	case reflect.Array, reflect.Slice:
-		for i, _len := 0, vf.Len(); i < _len; i++ {
-			if err = validate(vf.Index(i)); err != nil {
-				return
-			}
-		}
-	}
-
-	return
+	validation.SetValidateFunc(validate.Validate)
 }

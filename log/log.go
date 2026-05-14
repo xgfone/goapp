@@ -23,7 +23,6 @@ import (
 	"os"
 
 	"github.com/xgfone/go-toolkit/app"
-	"github.com/xgfone/goapp/internal"
 )
 
 func init() {
@@ -33,7 +32,7 @@ func init() {
 }
 
 func replaceAttrForAppName(c context.Context, r slog.Record) slog.Record {
-	r.AddAttrs(slog.String("app", app.GetName()))
+	r.AddAttrs(slog.String("app", app.Name()))
 	return r
 }
 
@@ -52,9 +51,9 @@ func SetDefault(handler slog.Handler, attrs ...slog.Attr) {
 // If file is empty or equal to "stderr", output the log to os.Stderr.
 // If file is equal to "stdout", output the log to os.Stdout.
 // Or, output the log to the given file.
-func Init(level, file string, logfilenum int) {
-	if err := SetLevel(level); err != nil {
-		internal.Fatal("fail to set the log level", "level", level, "err", err)
+func Init(level, file string, logfilenum int) (err error) {
+	if err = SetLevel(level); err != nil {
+		return
 	}
 
 	switch file {
@@ -68,23 +67,25 @@ func Init(level, file string, logfilenum int) {
 		Writer.Set(os.Stderr)
 
 	default:
-		setfilewriter(file, logfilenum)
+		err = setfilewriter(file, logfilenum)
 	}
+
+	return
 }
 
-func setfilewriter(file string, logfilenum int) {
+func setfilewriter(file string, logfilenum int) (err error) {
 	if logfilenum <= 0 {
 		logfilenum = 100
 	}
 
 	_file, err := NewFileWriter(file, "100M", logfilenum)
 	if err != nil {
-		internal.Fatal("fail to new the file log writer", "file", file, "err", err)
+		return
 	}
 
-	internal.OnExitPost(func() {
+	app.StageExited.On(func(context.Context, *app.App) error {
 		Writer.Set(os.Stderr)
-		_file.Close()
+		return _file.Close()
 	})
 
 	switch old := Writer.Swap(_file); old {
@@ -94,4 +95,6 @@ func setfilewriter(file string, logfilenum int) {
 			c.Close()
 		}
 	}
+
+	return
 }

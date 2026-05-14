@@ -15,46 +15,63 @@
 package goapp
 
 import (
+	"context"
 	"expvar"
 	"log/slog"
 	"os"
 	"path/filepath"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-toolkit/app"
 )
 
-// PWD is the current working directory.
-var PWD string
-
-func trysetpwd() {
-	if PWD == "" {
-		PWD = os.Getenv("WorkingDirectory")
+func getdefaultpwd() string {
+	if pwd := os.Getenv("WorkingDirectory"); pwd != "" {
+		return pwd
 	}
 
-	if PWD == "" {
-		configfile := gconf.GetString(gconf.ConfigFileOpt.Name)
-		if configfile != "" {
-			PWD = filepath.Dir(configfile)
-		} else {
-			PWD = filepath.Dir(os.Args[0])
+	configfile := gconf.GetString(gconf.ConfigFileOpt.Name)
+	if configfile != "" {
+		return filepath.Dir(configfile)
+	}
+
+	return filepath.Dir(os.Args[0])
+}
+
+func init() {
+	pwd := getdefaultpwd()
+	if pwd == "." {
+		return
+	}
+
+	_pwd, err := filepath.Abs(pwd)
+	if err != nil {
+		slog.Error("fail to get the absolute path", "pwd", pwd, "err", err)
+		return
+	}
+
+	if curpwd, err := os.Getwd(); err != nil {
+		slog.Error("fail to get the current working directory", "err", err)
+	} else if curpwd != _pwd {
+		if err := os.Chdir(_pwd); err != nil {
+			slog.Error("fail to change the current working directory", "pwd", _pwd, "err", err)
+			return
 		}
 	}
 
-	if PWD == "." {
-		slog.Debug("log the current working directory", "pwd", PWD)
-		return
-	}
+	expvar.Publish("pwd", expvar.Func(func() any {
+		pwd, _ := os.Getwd()
+		return pwd
+	}))
+}
 
-	PWD, err := filepath.Abs(PWD)
-	if err != nil {
-		slog.Error("fail to get the absolute path", "pwd", PWD, "err", err)
-		return
-	}
-
-	if err := os.Chdir(PWD); err != nil {
-		slog.Error("fail to change the current working directory", "pwd", PWD, "err", err)
-	} else {
-		slog.Debug("change the current working directory", "pwd", PWD)
-		expvar.NewString("pwd").Set(PWD)
-	}
+func init() {
+	app.StageReady.On(func(_ context.Context, app *app.App) error {
+		if pwd, err := os.Getwd(); err != nil {
+			slog.Error("fail to get current working directory", "err", err)
+		} else {
+			slog.Debug("current working directory", "pwd", pwd)
+		}
+		return nil
+	})
 }

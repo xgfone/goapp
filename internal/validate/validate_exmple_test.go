@@ -12,22 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package goapp
+package validate
 
 import (
-	"context"
-	"net"
-	"net/http"
-
-	"github.com/xgfone/go-toolkit/httpx"
-	"github.com/xgfone/goapp/internal"
+	"fmt"
 )
 
-func init() {
-	httpx.SetServeFunc(serve)
-}
+func ExampleValidate() {
+	type S struct {
+		F1 int64  `validate:"min(100)"` // General Type
+		F2 *int64 `validate:"max(200)"` // Pointer Type
+		F3 []struct {
+			F4 int64 `validate:"min(1)"`
+			F5 int64
+		}
+	}
 
-func serve(ln net.Listener, server *http.Server) {
-	internal.OnExit(func() { _ = server.Shutdown(context.Background()) })
-	_ = server.Serve(ln)
+	var v S
+	fmt.Println(Validate(v))
+	fmt.Println(Validate(&v))
+
+	v.F1 = 123
+	v.F2 = new(int64)
+	*v.F2 = 123
+	v.F3 = []struct {
+		F4 int64 `validate:"min(1)"`
+		F5 int64
+	}{
+		{F4: 1},
+		{F4: 2},
+	}
+	fmt.Println(Validate(v))
+	fmt.Println(Validate(&v))
+
+	// Output:
+	// F1: the integer is less than 100
+	// F1: the integer is less than 100
+	// <nil>
+	// <nil>
 }

@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package internal
+package goapp
 
 import (
-	"log/slog"
+	"expvar"
+	"time"
 
-	"github.com/xgfone/go-toolkit/runtimex"
+	"github.com/xgfone/go-toolkit/timex"
 )
 
-func Fatal(msg string, args ...any) {
-	slog.Error(msg, args...)
-	runtimex.Exit(1)
+func init() {
+	expvar.NewString("starttime").Set(timex.Now().Format(time.RFC3339Nano))
 }

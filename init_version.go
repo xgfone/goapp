@@ -15,6 +15,7 @@
 package goapp
 
 import (
+	"context"
 	"expvar"
 	"log/slog"
 
@@ -23,15 +24,15 @@ import (
 )
 
 func init() {
-	version := app.GetVersion()
-	if version == "" {
-		version = gover.Text()
-		app.SetVersion(version)
+	if version := gover.Text(); version != "" && app.Version() == "0.0.0" {
+		app.DefaultApp.SetVersion(version)
 	}
-
-	expvar.Publish("version", expvar.Func(func() any { return version }))
 }
 
-func initversion() {
-	slog.Info("print version", "version", app.GetVersion())
+func init() {
+	expvar.Publish("version", expvar.Func(func() any { return app.Version() }))
+	app.StageReady.On(func(_ context.Context, app *app.App) error {
+		slog.Info("print version", "version", app.Version())
+		return nil
+	})
 }

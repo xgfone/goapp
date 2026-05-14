@@ -15,9 +15,11 @@
 package goapp
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/xgfone/gconf/v6"
+	"github.com/xgfone/go-toolkit/app"
 	"github.com/xgfone/goapp/log"
 )
 
@@ -37,9 +39,15 @@ func updateLogLevel(old, new any) {
 	}
 }
 
-func initlog() {
-	logfile := gconf.GetString(logfile0.Name)
-	loglevel := gconf.GetString(loglevel.Name)
-	logfilenum := gconf.GetInt(logfilenum.Name)
-	log.Init(loglevel, logfile, logfilenum)
+func init() {
+	gconf.RegisterOpts(logfile0, loglevel, logfilenum)
+}
+
+func init() {
+	app.StageInit.On(func(context.Context, *app.App) error {
+		logfile := gconf.GetString(logfile0.Name)
+		loglevel := gconf.GetString(loglevel.Name)
+		logfilenum := gconf.GetInt(logfilenum.Name)
+		return log.Init(loglevel, logfile, logfilenum)
+	})
 }

@@ -12,23 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package internal
+package goapp
 
 import (
-	"os"
-	"os/signal"
+	"context"
+	"log/slog"
+
+	"github.com/xgfone/go-toolkit/app"
 )
 
-var exitsignals = []os.Signal{os.Interrupt}
-
-// SignalForExit watches the exit signals and calls the Exit function
-// when any exit signal occurs.
-func SignalForExit() {
-	ch := make(chan os.Signal, 1)
-	defer signal.Stop(ch)
-
-	signal.Notify(ch, exitsignals...)
-	<-ch
-
-	RunExit()
+func Run() {
+	err := app.Run(context.Background())
+	if err != nil {
+		slog.Error("fail to run app", "err", err)
+	}
 }
