@@ -17,7 +17,6 @@ package goapp
 import (
 	"context"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/xgfone/go-toolkit/app"
@@ -32,6 +31,7 @@ func Run() {
 }
 
 func init() {
+	exit := runtimex.GetExitFunc()
 	runtimex.SetExitFunc(func(code int) {
 		app.DefaultApp.Stop()
 
@@ -40,6 +40,6 @@ func init() {
 
 		_ = app.DefaultApp.WaitContext(ctx)
 
-		os.Exit(code)
+		exit(code)
 	})
 }
