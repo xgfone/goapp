@@ -2,7 +2,7 @@ module github.com/xgfone/goapp
 
 require (
 	github.com/xgfone/gconf/v6 v6.7.1
-	github.com/xgfone/go-toolkit v0.23.0
+	github.com/xgfone/go-toolkit v0.24.0
 	github.com/xgfone/go-validation v0.5.1
 	github.com/xgfone/gover v0.5.0
 )

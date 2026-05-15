@@ -17,13 +17,29 @@ package goapp
 import (
 	"context"
 	"log/slog"
+	"os"
+	"time"
 
 	"github.com/xgfone/go-toolkit/app"
+	"github.com/xgfone/go-toolkit/runtimex"
 )
 
 func Run() {
-	err := app.Run(context.Background())
+	err := app.Run(runtimex.ExitContext())
 	if err != nil {
 		slog.Error("fail to run app", "err", err)
 	}
+}
+
+func init() {
+	runtimex.SetExitFunc(func(code int) {
+		app.DefaultApp.Stop()
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		_ = app.DefaultApp.WaitContext(ctx)
+
+		os.Exit(code)
+	})
 }
