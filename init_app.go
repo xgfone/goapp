@@ -39,6 +39,7 @@ func init() {
 		defer cancel()
 
 		_ = app.DefaultApp.WaitContext(ctx)
+		time.Sleep(time.Millisecond * 50)
 
 		exit(code)
 	})
