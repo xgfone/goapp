@@ -15,10 +15,19 @@
 package goapp
 
 import (
+	"reflect"
+
+	"github.com/xgfone/go-toolkit/structx"
 	"github.com/xgfone/go-toolkit/validation"
-	"github.com/xgfone/goapp/internal/validate"
+	rulevalidation "github.com/xgfone/go-validation"
 )
 
 func init() {
-	validation.SetValidateFunc(validate.Validate)
+	validation.SetValidateFunc(func(structValue any) error {
+		return structx.ValidateAny(structValue, validateField)
+	})
+}
+
+func validateField(fieldValue reflect.Value, rule string) error {
+	return rulevalidation.Validate(fieldValue.Interface(), rule)
 }
