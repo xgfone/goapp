@@ -20,14 +20,7 @@ import (
 	"log/slog"
 
 	"github.com/xgfone/go-toolkit/app"
-	"github.com/xgfone/gover"
 )
-
-func init() {
-	if version := gover.Text(); version != "" && app.Version() == "0.0.0" {
-		app.DefaultApp.SetVersion(version)
-	}
-}
 
 func init() {
 	expvar.Publish("version", expvar.Func(func() any { return app.Version() }))

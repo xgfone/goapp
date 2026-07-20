@@ -16,6 +16,9 @@ package goapp
 
 import (
 	"context"
+	"runtime"
+	"strings"
+	"time"
 
 	"github.com/xgfone/gconf/v6"
 	"github.com/xgfone/go-toolkit/app"
@@ -25,10 +28,30 @@ func init() {
 	app.DefaultApp.SetConfigLoader(loadConfig)
 }
 
-func loadConfig(ctx context.Context, app *app.App) (err error) {
-	if version := app.Version(); version != "" {
-		gconf.SetVersion(version)
+func tryWriteString(buf *strings.Builder, key, value string) {
+	if value != "" {
+		_ = buf.WriteByte(' ')
+		_, _ = buf.WriteString(key)
+		_ = buf.WriteByte('=')
+		_, _ = buf.WriteString(value)
 	}
+}
+
+func loadConfig(ctx context.Context, app *app.App) (err error) {
+	var builtat string
+	if t := app.BuildTime(); !t.IsZero() {
+		builtat = app.BuildTime().Format(time.RFC3339)
+	}
+
+	var buf strings.Builder
+	buf.Grow(140)
+	buf.WriteString(app.Name())
+	tryWriteString(&buf, "version", app.Version())
+	tryWriteString(&buf, "commit", app.Commit())
+	tryWriteString(&buf, "builtat", builtat)
+	tryWriteString(&buf, "goversion", runtime.Version())
+	tryWriteString(&buf, "platform", runtime.GOOS+"/"+runtime.GOARCH)
+	gconf.SetVersion(buf.String())
 
 	// Register and Parse the options with flag
 	err = gconf.AddAndParseOptFlag(gconf.Conf)

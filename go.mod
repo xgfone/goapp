@@ -2,9 +2,8 @@ module github.com/xgfone/goapp
 
 require (
 	github.com/xgfone/gconf/v6 v6.7.1
-	github.com/xgfone/go-toolkit v0.27.0
+	github.com/xgfone/go-toolkit v0.29.2
 	github.com/xgfone/go-validation v0.5.1
-	github.com/xgfone/gover v0.5.0
 )
 
 require (
@@ -12,4 +11,4 @@ require (
 	github.com/xgfone/predicate v1.3.3 // indirect
 )
 
-go 1.23
+go 1.24
