@@ -1,25 +1,25 @@
 # Golang Env Variables
-GOSUMDB=sum.golang.google.cn
 GOPROXY=https://goproxy.cn,direct
+GOSUMDB=sum.golang.google.cn
+GONOSUMDB=
+GOPRIVATE=
 
-# Version Information
-COMMIT=$(shell git rev-parse HEAD 2>/dev/null)
-VERSION=$(shell git describe --tags --match "v*" 2>/dev/null)
-BUILD_DATE=$(shell date +"%s")
+NATIVE_GOOS:=$(shell go env GOHOSTOS)
+NATIVE_GOARCH:=$(shell go env GOHOSTARCH)
 
-BUILD_FLAGS_DATE=-X github.com/xgfone/gover.BuildTime=$(BUILD_DATE)
-BUILD_FLAGS_COMMIT=-X github.com/xgfone/gover.Commit=$(COMMIT)
-BUILD_FLAGS_VERSION=-X github.com/xgfone/gover.Version=$(VERSION)
-BUILD_FLAGS_X=$(BUILD_FLAGS_DATE) $(BUILD_FLAGS_COMMIT) $(BUILD_FLAGS_VERSION)
+APP:=$(shell go list ./cmd/...)
 
-.PHONY: all install build download
+.PHONY: all build install download generate
 all: build
 
-install: download
-	go install -ldflags "-w $(BUILD_FLAGS_X)"
+install: download generate
+	go install $(APP)
 
-build: download
-	go build -ldflags "-w $(BUILD_FLAGS_X)"
+build: download generate
+	go build -o bin/ $(APP)
+
+generate:
+	GOOS=$(NATIVE_GOOS) GOARCH=$(NATIVE_GOARCH) go generate ./cmd/...
 
 download:
 	go mod download
