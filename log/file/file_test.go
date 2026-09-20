@@ -31,13 +31,13 @@ func TestSizedRotatingFile(t *testing.T) {
 	var logfiles map[string]int64
 	defer func() {
 		for name := range logfiles {
-			os.Remove(name)
+			_ = os.Remove(name)
 		}
 	}()
 
 	const filename = "test_file_writer.log"
 	file := NewSizedRotatingFile(filename, int(size), 3)
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 
 	data := []byte("0123456789")
 	for i := 0; i < 10; i++ {

@@ -181,7 +181,7 @@ func (f *SizedRotatingFile) open() (err error) {
 
 	info, err := file.Stat()
 	if err != nil {
-		file.Close()
+		_ = file.Close()
 		return
 	}
 
@@ -218,7 +218,7 @@ func (f *SizedRotatingFile) doRollover() (err error) {
 			dfn := fmt.Sprintf("%s.%d", f.filename, i+1)
 			if fileIsExist(sfn) {
 				if fileIsExist(dfn) {
-					os.Remove(dfn)
+					_ = os.Remove(dfn)
 				}
 				if err = os.Rename(sfn, dfn); err != nil {
 					return fmt.Errorf("failed to rename the rotating file '%s' to '%s': %s",
