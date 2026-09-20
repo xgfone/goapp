@@ -33,12 +33,12 @@ func Run() {
 func init() {
 	exit := runtimex.GetExitFunc()
 	runtimex.SetExitFunc(func(code int) {
-		app.DefaultApp.Stop()
+		app.Default().Stop()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 
-		_ = app.DefaultApp.WaitContext(ctx)
+		_ = app.Default().WaitContext(ctx)
 		time.Sleep(time.Millisecond * 50)
 
 		exit(code)

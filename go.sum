@@ -1,9 +1,9 @@
-github.com/xgfone/gconf/v6 v6.7.1 h1:ZAFlzMtErAdEs3sCnY25pZ3OfGbXNENA4w9oEPQjwGA=
-github.com/xgfone/gconf/v6 v6.7.1/go.mod h1:deTLEyfRbupETMYbUVGHFGJBvNomKN7/xJfGG7WuZrQ=
-github.com/xgfone/go-cast v0.10.0 h1:ugkGKoeps3u4Zb3/RLvTip94T0NRDetuw3GQKaFO/M0=
-github.com/xgfone/go-cast v0.10.0/go.mod h1:b+oRunHDgaYsEIELAEIgoWjcI1jawrttujVFgJzc1x0=
-github.com/xgfone/go-toolkit v0.29.2 h1:Zs1BDp6WC5Ee0jD5S/IsUwoT1vQdRGTj4Kr2SAJ3Ncw=
-github.com/xgfone/go-toolkit v0.29.2/go.mod h1:VlFzuj2OJP3NGLCk+civtWEZ4hrDBlep6k5G89YIZfc=
+github.com/xgfone/gconf/v6 v6.7.2 h1:Ux5I1d/ZPRnb14PajyBqIDbYVNsGrWEdgn1x0MkOBL4=
+github.com/xgfone/gconf/v6 v6.7.2/go.mod h1:xe8FZbsMrmAi5M0i+Ht4V2tYueAImtbLXVykMcHhJ1k=
+github.com/xgfone/go-cast v0.11.0 h1:/4eQIr58Tz/3RTjbRcLCPFlpE6r28HLYsV54VWXxSi8=
+github.com/xgfone/go-cast v0.11.0/go.mod h1:+F/Ak19U/MOY6lMvgo4IZfvVJSsACbZPo3TjpyUKWLo=
+github.com/xgfone/go-toolkit v1.0.0-beta.2 h1:MyAmh2zr3Lt6PifNEv5K+7ls2Wsz1354bvdy5taoeYg=
+github.com/xgfone/go-toolkit v1.0.0-beta.2/go.mod h1:E/vfWEEk8GNCVKrrnd6qlMGn+4GfAVKm6m9png6lewo=
 github.com/xgfone/go-validation v0.5.1 h1:nZ9901y0h8wAfmxK9kOuRbnGYFy19WR6/iXTVVjeBfo=
 github.com/xgfone/go-validation v0.5.1/go.mod h1:uKIYujPenkzcq/+shP6eCU+RA7EZpTmWok0TGGcsE/Q=
 github.com/xgfone/predicate v1.3.3 h1:eAlnN34a1Yw5u3aT427YmAj0ucpLfprx1Nnq+gKwLZ8=

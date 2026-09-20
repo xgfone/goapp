@@ -92,7 +92,7 @@ func setfilewriter(file string, logfilenum int) (err error) {
 	case os.Stderr, os.Stdout:
 	default:
 		if c, ok := old.(io.Closer); ok {
-			c.Close()
+			_ = c.Close()
 		}
 	}
 

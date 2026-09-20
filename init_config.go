@@ -25,7 +25,7 @@ import (
 )
 
 func init() {
-	app.DefaultApp.SetConfigLoader(loadConfig)
+	app.Default().SetConfigLoader(loadConfig)
 }
 
 func tryWriteString(buf *strings.Builder, key, value string) {

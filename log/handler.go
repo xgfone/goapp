@@ -43,7 +43,7 @@ func replaceSourceAttr(groups []string, a slog.Attr) slog.Attr {
 	switch {
 	case a.Key == slog.SourceKey:
 		if src, ok := a.Value.Any().(*slog.Source); ok {
-			a.Value = slog.StringValue(fmt.Sprintf("%s:%d", runtimex.TrimPkgFile(src.File), src.Line))
+			a.Value = slog.StringValue(fmt.Sprintf("%s:%d", runtimex.TrimSourcePath(src.File), src.Line))
 		}
 
 	case a.Key == slog.LevelKey:
