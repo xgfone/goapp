@@ -16,6 +16,7 @@ package goapp
 
 import (
 	"context"
+	"log/slog"
 	"runtime"
 	"strings"
 	"time"
@@ -73,11 +74,33 @@ func loadConfig(ctx context.Context, app *app.App) (err error) {
 
 	// Load the configs from file
 	if cfile, _ := gconf.Get(gconf.ConfigFileOpt.Name).(string); cfile != "" {
-		err = gconf.LoadAndWatchSource(gconf.NewFileSource(cfile))
+		source := gconf.NewFileSource(cfile)
+		err = gconf.LoadSource(source)
 		if err != nil {
 			return
 		}
+		watchConfigFile(app, gconf.Conf, source)
 	}
 
 	return
+}
+
+func watchConfigFile(a *app.App, config *gconf.Config, source gconf.Source) {
+	a.OnNamed(app.StageReady, "config-file", func(_ context.Context, a *app.App) error {
+		a.GoNamed("config-file", func(ctx context.Context) error {
+			source.Watch(ctx.Done(), func(data gconf.DataSet, err error) bool {
+				if err != nil {
+					slog.Error("fail to watch the source", "source", source.String(), "err", err)
+					return false
+				}
+				if err = config.LoadDataSet(data, true); err != nil {
+					slog.Error("fail to load the source", "source", source.String(), "err", err)
+					return false
+				}
+				return true
+			})
+			return nil
+		})
+		return nil
+	})
 }
