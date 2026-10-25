@@ -66,7 +66,7 @@ func init() {
 }
 
 func init() {
-	app.StageReady.On(func(_ context.Context, app *app.App) error {
+	app.StageReady.On("", func(context.Context) error {
 		if pwd, err := os.Getwd(); err != nil {
 			slog.Error("fail to get current working directory", "err", err)
 		} else {

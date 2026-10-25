@@ -1,4 +1,4 @@
-// Copyright 2023 xgfone
+// Copyright 2023~2026 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,19 @@ import (
 
 type wrapper struct{ io.Writer }
 
-// Switcher is a writer proxy, which can switch the writer to another
-// in running.
+// Switcher proxies writes to an atomically replaceable writer.
+//
+// Atomic access protects only the writer reference. It does not serialize
+// underlying Write and Close calls or wait for writes using a previous writer.
+// Callers must coordinate writer lifetimes and any required I/O synchronization.
+//
+// With a single slog.JSONHandler or slog.TextHandler and its derived handlers,
+// writes are serialized by that handler. Initialize logging before concurrent
+// use, and close its writer only after all log users have stopped. Concurrent
+// replacement followed by closing the old writer requires separate synchronization.
+//
+// Initialize a Switcher with NewSwitcher or Set before reading or using it.
+// A Switcher must not be copied after its first use.
 type Switcher struct{ w atomic.Value }
 
 // NewSwitcher returns a new Switcher with w.
@@ -37,7 +48,10 @@ func (w *Switcher) Write(b []byte) (int, error) {
 	return w.Get().Write(b)
 }
 
-// Close implements the interface io.Closer.
+// Close closes the currently selected writer if it implements io.Closer.
+//
+// It does not wait for writes or prevent future writes; callers must first
+// stop all users of that writer.
 func (w *Switcher) Close() error {
 	if c, ok := w.Get().(io.Closer); ok {
 		return c.Close()
@@ -45,7 +59,8 @@ func (w *Switcher) Close() error {
 	return nil
 }
 
-// Set sets the writer to new.
+// Set atomically selects new. It neither closes the previous writer nor waits
+// for operations using it.
 func (w *Switcher) Set(new io.Writer) {
 	if new == nil {
 		panic("Switcher.Set: io.Writer is nil")
@@ -63,7 +78,10 @@ func (w *Switcher) Unwrap() io.Writer {
 	return w.w.Load().(wrapper).Writer
 }
 
-// Swap swaps the old writer with the new writer.
+// Swap atomically selects new and returns the previous writer.
+//
+// It does not wait for operations using the returned writer.
+// The caller must ensure those operations finish before closing it.
 func (w *Switcher) Swap(new io.Writer) (old io.Writer) {
 	if new == nil {
 		panic("Switcher.Swap: io.Writer is nil")

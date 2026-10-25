@@ -24,7 +24,7 @@ import (
 
 func init() {
 	expvar.Publish("version", expvar.Func(func() any { return app.Version() }))
-	app.StageReady.On(func(_ context.Context, app *app.App) error {
+	app.StageReady.On("", func(context.Context) error {
 		slog.Info("print version", "version", app.Version())
 		return nil
 	})

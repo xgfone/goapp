@@ -26,7 +26,9 @@ import (
 )
 
 func init() {
-	app.Default().SetConfigLoader(loadConfig)
+	app.Default().SetConfigLoader(func(ctx context.Context) error {
+		return loadConfig(ctx, app.Default())
+	})
 }
 
 func tryWriteString(buf *strings.Builder, key, value string) {
@@ -86,8 +88,8 @@ func loadConfig(ctx context.Context, app *app.App) (err error) {
 }
 
 func watchConfigFile(a *app.App, config *gconf.Config, source gconf.Source) {
-	a.OnNamed(app.StageReady, "config-file", func(_ context.Context, a *app.App) error {
-		a.GoNamed("config-file", func(ctx context.Context) error {
+	a.On(app.StageReady, "", func(context.Context) error {
+		a.Go("", func(ctx context.Context) error {
 			source.Watch(ctx.Done(), func(data gconf.DataSet, err error) bool {
 				if err != nil {
 					slog.Error("fail to watch the source", "source", source.String(), "err", err)

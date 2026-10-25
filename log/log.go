@@ -1,4 +1,4 @@
-// Copyright 2020~2022 xgfone
+// Copyright 2020~2026 xgfone
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 )
 
 func init() {
+	app.Default().Finalize("logger", closeWriter)
 	handler := NewOptionHandler(NewJSONHandler(Writer, Level))
 	handler.ReplaceFunc = replaceAttrForAppName
 	SetDefault(handler)
@@ -61,10 +62,10 @@ func Init(level, file string, logfilenum int) (err error) {
 		return
 
 	case "stdout":
-		Writer.Set(os.Stdout)
+		err = replaceWriter(os.Stdout)
 
 	case "stderr":
-		Writer.Set(os.Stderr)
+		err = replaceWriter(os.Stderr)
 
 	default:
 		err = setfilewriter(file, logfilenum)
@@ -83,16 +84,21 @@ func setfilewriter(file string, logfilenum int) (err error) {
 		return
 	}
 
-	app.StageExited.On(func(context.Context, *app.App) error {
-		Writer.Set(os.Stderr)
-		return _file.Close()
-	})
+	return replaceWriter(_file)
+}
 
-	switch old := Writer.Swap(_file); old {
+// closeWriter runs after resource cleanup and all exit notifications.
+func closeWriter(context.Context) error {
+	return replaceWriter(os.Stderr)
+}
+
+func replaceWriter(next io.Writer) (err error) {
+	old := Writer.Swap(next)
+	switch old {
 	case os.Stderr, os.Stdout:
 	default:
-		if c, ok := old.(io.Closer); ok {
-			_ = c.Close()
+		if closer, ok := old.(io.Closer); ok {
+			return closer.Close()
 		}
 	}
 

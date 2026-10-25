@@ -44,7 +44,7 @@ func init() {
 }
 
 func init() {
-	app.StageInit.On(func(context.Context, *app.App) error {
+	app.StageInit.On("init-log", func(context.Context) error {
 		logfile := gconf.GetString(logfile0.Name)
 		loglevel := gconf.GetString(loglevel.Name)
 		logfilenum := gconf.GetInt(logfilenum.Name)
